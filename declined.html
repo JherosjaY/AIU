@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              @media screen and (max-width: 480px) {
+                .container { width: 100% !important; padding: 20px !important; text-align: center !important; }
+                .header-title { font-size: 24px !important; text-align: center !important; }
+                .footer { text-align: center !important; }
+              }
+            </style>
+          </head>
+          <body style="margin: 0; padding: 0; background-color: #020617; font-family: 'Inter', sans-serif;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center" style="padding: 40px 0;">
+                  <table class="container" border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #0a0f1c; border-radius: 32px; border: 1px solid rgba(255,255,255,0.05); overflow: hidden;">
+                    <!-- Header -->
+                    <tr>
+                      <td style="padding: 60px 40px 40px 40px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); text-align: center;">
+                        <p style="margin: 0; color: #ef4444; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 4px;">Aura Integrated University</p>
+                        <h1 class="header-title" style="margin: 15px 0 0 0; color: white; font-size: 28px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -1px; line-height: 1;">Admission Decision.</h1>
+                      </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                      <td class="content" style="padding: 50px 40px; color: #94a3b8; font-size: 16px; line-height: 1.6;">
+                        <p style="color: white; font-size: 18px; font-weight: 700; margin-top: 0;">Dear ${enrollment.firstName},</p>
+                        <p>Thank you for your interest in the <strong>${enrollment.course}</strong> program at Aura Integrated University.</p>
+                        <p>After a thorough evaluation of your academic dossier and submitted documentation, we regret to inform you that we are <strong>unable to authorize</strong> your admission for the current academic cycle.</p>
+                        <div style="margin: 30px 0; padding: 25px; border-left: 2px solid #ef4444; background-color: rgba(239,68,68,0.02);">
+                          <p style="margin: 0; color: #94a3b8; font-size: 13px; font-style: italic;">"Admission decisions are based on a competitive analysis of academic alignment and institutional capacity. This decision is final for the 2026-2027 cycle."</p>
+                        </div>
+                        <p style="font-size: 14px;">We appreciate your academic endeavors and encourage you to explore other educational opportunities. Your records will be archived in accordance with our data privacy protocols.</p>
+                      </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                      <td class="footer" style="padding: 40px; background-color: rgba(0,0,0,0.3); text-align: center;">
+                        <p style="margin: 0; color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 2px;">Office of the Registrar &copy; 2026</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+        </html>

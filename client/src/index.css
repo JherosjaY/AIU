@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background-color: #0a0f1c; /* Institutional Dark Default */
+  color: #f1f5f9;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+  background-color: #0a0f1c;
+  color: #f1f5f9;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* ─── GLOBAL DARK SCROLLBAR (Landing/Default) ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0f1c;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.2);
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.5);
+}
+
+/* ─── LIGHT THEME CONTEXT ─── */
+.light-theme {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+  min-height: 100vh;
+}
+
+/* Scoped Scrollbar for Light Theme */
+.light-theme ::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+}
+.light-theme ::-webkit-scrollbar-thumb {
+  background: #cbd5e1 !important;
+  border: 2px solid #f1f5f9 !important;
+}
+.light-theme ::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6 !important;
+}
+
+/* ════════ BROWSER AUTOFILL & INPUTS ════════ */
+/* Base (Dark) */
+input, select, textarea {
+  filter: none !important;
+  color: inherit !important;
+}
+
+/* Light Context Inputs */
+.light-theme input,
+.light-theme select,
+.light-theme textarea {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #1d4ed8 !important;
+}
+
+.light-theme input:-webkit-autofill {
+  -webkit-text-fill-color: #111827 !important;
+  -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+}
+
+.light-theme ::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+/* ════════ ANIMATIONS ════════ */
+@keyframes pulse-scale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.animate-pulse-bounce {
+  animation: pulse-scale 2s infinite ease-in-out;
+}
+
+
