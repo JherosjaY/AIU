@@ -25,16 +25,12 @@ const Login = () => {
   // Smart Role Detection System
   useEffect(() => {
     const rawId = authId.trim().toUpperCase()
-    if (rawId.match(/^[0-9]{2}-[0-9]{4}-[0-9]{3}$/) || rawId.endsWith('@AURA.EDU.PH')) {
-      if (rawId === 'ADMIN@AURA.EDU.PH' || rawId === 'ADMIN') {
-        setDetectedRole('Administrator')
-      } else {
-        setDetectedRole('Student')
-      }
+    if (rawId === 'ADMIN' || rawId === 'ADMIN@AURA.EDU.PH' || rawId.match(/^ADM-[0-9]{3}$/)) {
+      setDetectedRole('Administrator')
+    } else if (rawId.match(/^[0-9]{2}-[0-9]{4}-[0-9]{3}$/) || rawId.endsWith('@AURA.EDU.PH')) {
+      setDetectedRole('Student')
     } else if (rawId.match(/^F-[0-9]{4}$/)) {
       setDetectedRole('Faculty')
-    } else if (rawId.match(/^ADM-[0-9]{3}$/)) {
-      setDetectedRole('Administrator')
     } else {
       setDetectedRole(null)
     }
