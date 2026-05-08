@@ -567,19 +567,19 @@ export default function AdminDashboard() {
       {/* Slide-over Detail Panel */}
       <AnimatePresence>
         {selectedStudent && (
-          <motion.aside
+          <motion.div 
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 w-[30rem] bg-white border-l border-gray-200 shadow-2xl z-50 flex flex-col"
+            className="fixed right-0 top-0 bottom-0 w-full md:w-[450px] bg-white shadow-2xl z-[150] overflow-y-auto p-6 md:p-12 border-l border-gray-100 flex flex-col"
           >
-            <div className="p-8 flex items-center justify-between border-b border-gray-100">
+            <div className="flex items-center justify-between mb-8">
               <button onClick={() => setSelectedStudent(null)} className="p-3 bg-gray-50 rounded-xl hover:bg-gray-100 text-gray-400 transition-all"><XCircle size={18} /></button>
               <h4 className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.4em]">Student Information</h4>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+            <div className="flex-1 space-y-10 custom-scrollbar">
               <AnimatePresence>
                 {errorMessage && (
                   <motion.div 
@@ -599,15 +599,15 @@ export default function AdminDashboard() {
                 )}
               </AnimatePresence>
 
-              <div className="flex items-center gap-6">
-                <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-blue-600 to-blue-800 p-[1px] shadow-lg shadow-blue-600/10">
-                  <div className="w-full h-full rounded-[1.5rem] bg-white flex items-center justify-center text-2xl font-black italic text-blue-700">
-                    {selectedStudent.firstName[0]}
-                  </div>
+              <div className="flex flex-col md:flex-row md:items-center gap-6 mb-12">
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-[2rem] border-2 border-blue-600 flex items-center justify-center text-3xl md:text-4xl font-black text-blue-700 shadow-xl shadow-blue-600/10 shrink-0">
+                  {selectedStudent.firstName[0]}
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold italic tracking-tighter uppercase leading-none text-gray-900">{selectedStudent.firstName} <br /> {selectedStudent.lastName}</h2>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-2">Record ID: <span className="text-blue-600">AURA-{String(selectedStudent.id).padStart(4, '0')}</span></p>
+                <div className="text-left">
+                  <h3 className="text-2xl md:text-3xl font-black italic tracking-tighter text-gray-900 leading-none mb-2">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
+                  <p className="text-[10px] md:text-[11px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-2">
+                    <span className="text-gray-400">Record ID:</span> AURA-{String(selectedStudent.id).padStart(4, '0')}
+                  </p>
                 </div>
               </div>
 
@@ -617,7 +617,7 @@ export default function AdminDashboard() {
                   <h5 className="text-[10px] font-bold text-blue-700 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center gap-2">
                     <ShieldCheck size={14} /> Institutional Profile
                   </h5>
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <DetailItem label="Full Name" value={`${selectedStudent.firstName} ${selectedStudent.middleName || ''} ${selectedStudent.lastName}`} icon={<Users size={12} />} />
                     <DetailItem label="Citizenship" value={selectedStudent.citizenship} icon={<ShieldCheck size={12} />} />
                     <DetailItem label="Course Choice" value={selectedStudent.course} icon={<GraduationCap size={12} />} />
@@ -632,8 +632,8 @@ export default function AdminDashboard() {
                   <h5 className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center gap-2">
                     <MapPin size={14} /> Location Records
                   </h5>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="col-span-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="col-span-1 md:col-span-2">
                          <DetailItem label="Primary Contact" value={selectedStudent.phone} icon={<Phone size={12} />} />
                     </div>
                     <DetailItem label="Home City" value={selectedStudent.homeCity} icon={<FileText size={12} />} />
@@ -649,7 +649,7 @@ export default function AdminDashboard() {
                     <Users size={14} /> Family & Emergency Dossier
                   </h5>
                   <div className="grid grid-cols-1 gap-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                        <div className="p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-blue-100 space-y-3 text-left">
                             <DetailItem label="Father's Name" value={selectedStudent.fatherName} icon={<Users size={12} />} />
                             <DetailItem label="Occupation / Contact" value={`${selectedStudent.fatherOccupation} • ${selectedStudent.fatherContact}`} icon={<Phone size={12} />} />
@@ -660,7 +660,7 @@ export default function AdminDashboard() {
                        </div>
                     </div>
                     <div className="p-5 bg-blue-50/50 shadow-sm rounded-2xl border border-blue-100 space-y-3 text-left">
-                       <div className="flex items-center justify-between">
+                       <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-4">
                            <DetailItem label="Emergency Contact" value={selectedStudent.emergencyName} icon={<ShieldAlert size={12} />} />
                            <div className="px-3 py-1 bg-blue-600 text-white text-[8px] font-bold uppercase tracking-widest rounded-full shadow-lg shadow-blue-600/20">Authorized Contact</div>
                        </div>
@@ -675,7 +675,7 @@ export default function AdminDashboard() {
                     <GraduationCap size={14} /> Schooling History
                   </h5>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <DetailItem label="Primary" value={`${selectedStudent.primarySchool} (${selectedStudent.primaryYear})`} icon={<FileText size={12} />} />
                         <DetailItem label="Secondary" value={`${selectedStudent.secondarySchool} (${selectedStudent.secondaryYear})`} icon={<FileText size={12} />} />
                     </div>
@@ -875,7 +875,7 @@ export default function AdminDashboard() {
                 <Trash2 size={22} />
               </button>
             </div>
-          </motion.aside>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -931,7 +931,7 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-x-12 gap-y-8">
                   <button 
                     onClick={() => setShowRejectModal(false)}
                     disabled={isProcessing}
