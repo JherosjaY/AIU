@@ -68,7 +68,13 @@ const AuraConsultant = () => {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 md:bottom-10 md:right-10 z-[200]">
+        <div 
+            className="fixed z-[200]"
+            style={{
+                bottom: `calc(${isMobile ? '1.5rem' : '2.5rem'} + env(safe-area-inset-bottom, 0px))`,
+                right: `calc(${isMobile ? '1.5rem' : '2.5rem'} + env(safe-area-inset-right, 0px))`
+            }}
+        >
             {/* FAB Button */}
             <motion.div
                 initial={isMobile ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.5, y: 50 }}
