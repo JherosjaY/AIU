@@ -83,7 +83,7 @@ const getBaseTemplate = (title, subtitle, bannerHtml, contentHtml, footerText = 
  * 📨 TEMPLATE: Application Received (Status: Pending)
  */
 const getApplicationReceivedTemplate = (firstName, courseName) => {
-  const banner = `<h1 class="header-title" style="margin: 0; color: #1e293b; font-size: 38px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -2px; line-height: 1;">DOSSIER<br/><span style="color: #1e40af;">RECEIVED.</span></h1>`;
+  const banner = `<h1 class="header-title" style="margin: 0; color: #1e293b; font-size: 38px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -2px; line-height: 1;">REGISTRATION<br/><span style="color: #1e40af;">RECEIVED.</span></h1>`;
   const content = `
     <p style="color: #111827; font-size: 18px; font-weight: 800; margin-top: 0; font-style: italic; text-transform: uppercase;">Dear ${firstName.toUpperCase()},</p>
     <p>Your institutional application for the <strong>${courseName}</strong> program has been successfully secured in our registry.</p>
