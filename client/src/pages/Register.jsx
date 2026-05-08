@@ -29,7 +29,7 @@ function Register() {
   const [activeStep, setActiveStep] = useState(0)
   const [isEditing, setIsEditing] = useState(false)
   const [tempData, setTempData] = useState({})
-  
+
   // Aura Sidebar State
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [messages, setMessages] = useState([
@@ -119,14 +119,14 @@ function Register() {
       reader.onload = (event) => {
         const img = new window.Image();
         img.onload = () => {
-           const canvas = document.createElement("canvas");
-           const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
-           let width = img.width; let height = img.height;
-           if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
-           else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-           canvas.width = width; canvas.height = height;
-           const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, width, height);
-           resolve(canvas.toDataURL("image/jpeg", 0.8)); 
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1200; const MAX_HEIGHT = 1200;
+          let width = img.width; let height = img.height;
+          if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } }
+          else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext("2d"); ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.8));
         };
         img.src = event.target.result;
       }
@@ -139,7 +139,7 @@ function Register() {
     if (!files.length) return;
 
     Promise.all(files.map(file => processImage(file))).then(base64Array => {
-       setFormData(prev => ({ ...prev, [targetField]: JSON.stringify(base64Array) }));
+      setFormData(prev => ({ ...prev, [targetField]: JSON.stringify(base64Array) }));
     });
   }
 
@@ -167,9 +167,9 @@ function Register() {
     setMessages(newHistory)
     setCurrentInput('')
     setIsChatting(true)
-    
+
     setMessages(prev => [...prev, { role: 'aura', text: '...', isThinking: true }])
-    
+
     try {
       const apiHistory = newHistory.map(m => ({ role: m.role === 'aura' ? 'assistant' : 'user', content: m.text }))
       const res = await fetch(`${API_BASE_URL}/consult`, { // Using purely advisory endpoint
@@ -182,7 +182,7 @@ function Register() {
         return [...filtered, { role: 'aura', text: data.success ? data.reply : "I am currently undergoing maintenance. Please ask again later." }]
       })
     } catch (error) {
-       setMessages(prev => {
+      setMessages(prev => {
         const filtered = prev.filter(m => !m.isThinking)
         return [...filtered, { role: 'aura', text: "Connection cut. Please check your network." }]
       })
@@ -193,11 +193,11 @@ function Register() {
 
   const isStepComplete = (index) => {
     if (view === 'review') return true;
-    switch(index) {
-      case 0: return ['course','firstName','lastName','middleName','birthday','gender','civilStatus','citizenship','homeProvince','homeCity','homeBarangay','postalCode','birthProvince','birthCity','birthBarangay'].every(f => formData[f] && formData[f].toString().trim() !== '');
-      case 1: return ['phone','email'].every(f => formData[f] && formData[f].toString().trim() !== '');
-      case 2: return ['fatherName','motherName','emergencyName','emergencyContact','emergencyRelation'].every(f => formData[f] && formData[f].toString().trim() !== '');
-      case 3: return ['primarySchool','secondarySchool','document','consent'].every(f => (f === 'consent' ? formData[f] : (formData[f] && formData[f].toString().trim() !== '')));
+    switch (index) {
+      case 0: return ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'].every(f => formData[f] && formData[f].toString().trim() !== '');
+      case 1: return ['phone', 'email'].every(f => formData[f] && formData[f].toString().trim() !== '');
+      case 2: return ['fatherName', 'motherName'].every(f => formData[f] && formData[f].toString().trim() !== '');
+      case 3: return ['primarySchool', 'secondarySchool', 'document', 'consent'].every(f => (f === 'consent' ? formData[f] : (formData[f] && formData[f].toString().trim() !== '')));
       default: return false;
     }
   }
@@ -259,16 +259,16 @@ function Register() {
     if (!docString) return '';
     if (docString.startsWith('[')) {
       try {
-         const arr = JSON.parse(docString);
-         return `${arr.length} Document(s) Uploaded`;
-      } catch(e) {}
+        const arr = JSON.parse(docString);
+        return `${arr.length} Document(s) Uploaded`;
+      } catch (e) { }
     }
     return docString;
   }
 
   return (
     <div className="light-theme flex flex-col h-screen bg-gray-50 overflow-hidden relative font-sans">
-      
+
       {/* ── Overlay Branding ── */}
       <div className={`absolute top-4 md:top-6 left-4 md:left-10 z-50 pointer-events-none transition-all duration-300 ${isChatOpen ? 'opacity-0 md:opacity-100' : 'opacity-100'}`}>
         <div className={`flex items-center gap-2 text-blue-800 font-black italic tracking-tighter text-sm md:text-lg ${isMobile ? 'bg-white' : 'bg-white/80 backdrop-blur-md'} px-4 md:px-5 py-2 md:py-2.5 rounded-xl md:rounded-2xl shadow-sm border border-gray-200/50`}>
@@ -278,8 +278,8 @@ function Register() {
       </div>
 
       <div className={`absolute top-4 md:top-6 right-4 md:right-10 transition-all duration-300 ${isChatOpen ? 'z-30 opacity-0 pointer-events-none' : 'z-[60] opacity-100'}`}>
-        <button 
-          onClick={() => navigate('/login')} 
+        <button
+          onClick={() => navigate('/login')}
           className={`text-[11px] md:text-[13px] font-bold transition-all duration-300 flex items-center gap-2 py-2 md:py-2.5 px-4 md:px-5 rounded-xl md:rounded-2xl shadow-sm ${isMobile ? 'bg-blue-50' : 'backdrop-blur-md border border-blue-100 bg-blue-50/80'} text-blue-800 hover:bg-blue-100 hover:shadow-md`}
         >
           <span className="hidden md:inline">Portal Login</span><span className="md:hidden">Login</span> <LogIn size={15} strokeWidth={2.5} />
@@ -290,11 +290,11 @@ function Register() {
       <div className="fixed bottom-6 right-6 md:bottom-8 md:right-10 z-[60]">
         <AnimatePresence>
           {!isChatOpen && (
-            <motion.button 
+            <motion.button
               initial={isMobile ? { scale: 1 } : { opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={isMobile ? { scale: 1 } : { opacity: 0, scale: 0.9, y: 20 }}
-              onClick={() => setIsChatOpen(true)} 
+              onClick={() => setIsChatOpen(true)}
               className={`w-14 h-14 md:w-auto md:h-auto md:text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 md:py-3.5 md:px-6 rounded-full md:rounded-3xl shadow-[0_15px_45px_rgba(29,78,216,0.35)] ${isMobile ? 'bg-blue-700' : 'backdrop-blur-md border border-blue-600/30 bg-blue-700'} text-white hover:bg-blue-600 hover:-translate-y-1`}
             >
               <Sparkles size={18} md:size={16} /> <span className="hidden md:inline">Ask Aura</span>
@@ -305,7 +305,7 @@ function Register() {
 
       {/* ── Main Layout ── */}
       <div className="flex-1 flex overflow-hidden relative mt-8 md:mt-4">
-        
+
         {/* Main Content Area (Form / Review) */}
         <div className="flex-1 overflow-y-auto w-full transition-all duration-300 pt-16 md:pt-14 pb-28 md:pb-0">
           <AnimatePresence mode="wait">
@@ -374,7 +374,7 @@ function Register() {
 
                       {/* STEP 1 */}
                       {activeStep === 1 && (<>
-                        <SectionHeader icon={<Mail size={18} />} title="Contact Details" />
+                        <SectionHeader icon={<Mail size={18} />} title="Your Contact Details" />
                         {[
                           { name: 'phone', label: 'Primary Contact Number', placeholder: 'e.g. 09123456789' },
                           { name: 'email', label: 'Email Address', placeholder: 'e.g. name@email.com' },
@@ -407,7 +407,7 @@ function Register() {
                           <div className="space-y-2">
                             <label className={labelCls}>Academic Verification (Required for Enrollment)</label>
                             <label className={`w-full flex items-center justify-center gap-4 py-4 rounded-2xl text-sm font-bold transition-all border-2 border-dashed cursor-pointer shadow-sm ${formData.reportCard ? 'bg-blue-50 border-blue-400 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-blue-50/30'}`}>
-                              <Upload size={20} className={formData.reportCard ? 'animate-pulse' : ''} /> 
+                              <Upload size={20} className={formData.reportCard ? 'animate-pulse' : ''} />
                               {formData.reportCard ? 'Transcript Secured ✓' : 'Upload Transcript / Report Card'}
                               <input type="file" multiple accept="image/*" onChange={(e) => handleFileUpload(e, 'reportCard')} className="hidden" />
                             </label>
@@ -439,9 +439,9 @@ function Register() {
                               </button>
                             ) : <div />}
                             <button
-                              disabled={(() => { const req = { 0: ['course','firstName','lastName','middleName','birthday','gender','civilStatus','citizenship','homeProvince','homeCity','homeBarangay','postalCode','birthProvince','birthCity','birthBarangay'], 1: ['phone','email'], 2: ['fatherName','motherName','emergencyName','emergencyContact'] }; return req[activeStep]?.some(f => !formData[f] || formData[f].toString().trim() === ''); })()}
+                              disabled={(() => { const req = { 0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 1: ['phone', 'email'], 2: ['fatherName', 'motherName'] }; return req[activeStep]?.some(f => !formData[f] || formData[f].toString().trim() === ''); })()}
                               onClick={() => setActiveStep(prev => prev + 1)}
-                              className={`px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${(() => { const req = { 0: ['course','firstName','lastName','middleName','birthday','gender','civilStatus','citizenship','homeProvince','homeCity','homeBarangay','postalCode','birthProvince','birthCity','birthBarangay'], 1: ['phone','email'], 2: ['fatherName','motherName','emergencyName','emergencyContact'] }; return req[activeStep]?.some(f => !formData[f] || formData[f].toString().trim() === ''); })() ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm'}`}
+                              className={`px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${(() => { const req = { 0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 1: ['phone', 'email'], 2: ['fatherName', 'motherName'] }; return req[activeStep]?.some(f => !formData[f] || formData[f].toString().trim() === ''); })() ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm'}`}
                             >
                               Continue <ChevronRight size={16} strokeWidth={2.5} />
                             </button>
@@ -451,7 +451,7 @@ function Register() {
                             <div className="p-6 rounded-xl bg-amber-50 border border-amber-200">
                               <label className="flex items-start gap-4 cursor-pointer">
                                 <div className="relative mt-0.5">
-                                  <input type="checkbox" name="consent" checked={formData.consent} onChange={(e) => setFormData(prev => ({...prev, consent: e.target.checked}))} className="peer w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500/50 transition-all cursor-pointer" />
+                                  <input type="checkbox" name="consent" checked={formData.consent} onChange={(e) => setFormData(prev => ({ ...prev, consent: e.target.checked }))} className="peer w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500/50 transition-all cursor-pointer" />
                                 </div>
                                 <div>
                                   <h5 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">Data Privacy Act of 2012 (R.A. 10173)</h5>
@@ -466,7 +466,7 @@ function Register() {
                               <button
                                 disabled={!formData.consent || ['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].trim() === '')}
                                 onClick={() => setView('review')}
-                                className={`flex-[2] py-3.5 rounded-xl font-semibold text-[11px] md:text-sm transition-all flex items-center justify-center gap-2 ${(formData.consent && !['primarySchool','primaryYear','secondarySchool','secondaryYear','document'].some(f => !formData[f] || formData[f].trim() === '')) ? 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
+                                className={`flex-[2] py-3.5 rounded-xl font-semibold text-[11px] md:text-sm transition-all flex items-center justify-center gap-2 ${(formData.consent && !['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].trim() === '')) ? 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
                               >
                                 Review <span className="hidden sm:inline">Application</span> <ChevronRight size={16} strokeWidth={2.5} />
                               </button>
@@ -537,57 +537,57 @@ function Register() {
         {/* ════════ COLLAPSIBLE CHAT SIDEBAR ════════ */}
         <AnimatePresence>
           {isChatOpen && (
-             <motion.div 
-               initial={isMobile ? { x: '100%' } : { x: '100%', opacity: 0 }}
-               animate={{ x: 0, opacity: 1 }}
-               exit={isMobile ? { x: '100%' } : { x: '100%', opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
-               transition={isMobile ? { type: 'just' } : { type: 'spring', damping: 28, stiffness: 220 }}
-               className="fixed md:static inset-0 md:inset-auto right-0 w-full md:w-96 border-l border-gray-200 bg-white flex flex-col shrink-0 shadow-2xl z-[150] h-full"
-             >
-                <div className="px-5 py-4 bg-white border-b border-gray-200 flex justify-between items-center shrink-0">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className="w-10 h-10 rounded-xl bg-blue-700 flex items-center justify-center font-bold text-white text-sm">A</div>
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900 text-sm">Aura Assistant</div>
-                      <div className="text-[11px] text-gray-400 font-medium tracking-wide uppercase">AI Consultant</div>
-                    </div>
+            <motion.div
+              initial={isMobile ? { x: '100%' } : { x: '100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={isMobile ? { x: '100%' } : { x: '100%', opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
+              transition={isMobile ? { type: 'just' } : { type: 'spring', damping: 28, stiffness: 220 }}
+              className="fixed md:static inset-0 md:inset-auto right-0 w-full md:w-96 border-l border-gray-200 bg-white flex flex-col shrink-0 shadow-2xl z-[150] h-full"
+            >
+              <div className="px-5 py-4 bg-white border-b border-gray-200 flex justify-between items-center shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-xl bg-blue-700 flex items-center justify-center font-bold text-white text-sm">A</div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
                   </div>
-                  <button onClick={() => setIsChatOpen(false)} className="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 p-2 rounded-lg transition-colors">
-                    <X size={16} />
-                  </button>
+                  <div>
+                    <div className="font-bold text-gray-900 text-sm">Aura Assistant</div>
+                    <div className="text-[11px] text-gray-400 font-medium tracking-wide uppercase">AI Consultant</div>
+                  </div>
                 </div>
-                
-                <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/50 custom-scrollbar">
-                  {messages.map((m, i) => (
-                    <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm ${m.role === 'user' ? 'bg-blue-700 text-white rounded-br-md' : 'bg-white text-gray-700 border border-gray-200 rounded-bl-md'}`}>
-                        {m.isThinking ? <span className="flex items-center gap-2 text-blue-600 font-medium text-xs"><RefreshCw size={12} className="animate-spin" /> Aura is typing...</span> : m.text}
-                      </div>
-                    </motion.div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
+                <button onClick={() => setIsChatOpen(false)} className="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
 
-                <form onSubmit={handleSendChat} className="p-4 bg-white border-t border-gray-200 shrink-0 flex gap-2">
-                   <input 
-                     type="text" 
-                     value={currentInput} 
-                     onChange={(e) => setCurrentInput(e.target.value)} 
-                     placeholder="Ask Aura a question..." 
-                     className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[13px] outline-none focus:border-blue-500 focus:bg-white transition-all placeholder:text-gray-400" 
-                   />
-                   <button 
-                     type="submit" 
-                     disabled={!currentInput.trim() || isChatting} 
-                     className="bg-blue-700 hover:bg-blue-600 disabled:bg-gray-100 disabled:text-gray-300 text-white w-12 rounded-xl flex items-center justify-center transition-all active:scale-95"
-                   >
-                     <Send size={18} strokeWidth={2.5} />
-                   </button>
-                </form>
-             </motion.div>
+              <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/50 custom-scrollbar">
+                {messages.map((m, i) => (
+                  <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm ${m.role === 'user' ? 'bg-blue-700 text-white rounded-br-md' : 'bg-white text-gray-700 border border-gray-200 rounded-bl-md'}`}>
+                      {m.isThinking ? <span className="flex items-center gap-2 text-blue-600 font-medium text-xs"><RefreshCw size={12} className="animate-spin" /> Aura is typing...</span> : m.text}
+                    </div>
+                  </motion.div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <form onSubmit={handleSendChat} className="p-4 bg-white border-t border-gray-200 shrink-0 flex gap-2">
+                <input
+                  type="text"
+                  value={currentInput}
+                  onChange={(e) => setCurrentInput(e.target.value)}
+                  placeholder="Ask Aura a question..."
+                  className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[13px] outline-none focus:border-blue-500 focus:bg-white transition-all placeholder:text-gray-400"
+                />
+                <button
+                  type="submit"
+                  disabled={!currentInput.trim() || isChatting}
+                  className="bg-blue-700 hover:bg-blue-600 disabled:bg-gray-100 disabled:text-gray-300 text-white w-12 rounded-xl flex items-center justify-center transition-all active:scale-95"
+                >
+                  <Send size={18} strokeWidth={2.5} />
+                </button>
+              </form>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
@@ -613,7 +613,7 @@ function Register() {
                     {[{ n: 'firstName', l: 'First Name' }, { n: 'lastName', l: 'Last Name' }, { n: 'middleName', l: 'Middle Name' }, { n: 'birthday', l: 'Birth Date' }].map(f => (
                       <div key={f.n} className="space-y-1.5"><label className={labelCls}>{f.l}</label><input name={f.n} value={tempData[f.n] || ''} onChange={handleTempInput} className={inputCls} /></div>
                     ))}
-                    {[{ n: 'civilStatus', l: 'Civil Status', options: ['Single','Married','Separated','Widowed'] }, { n: 'gender', l: 'Gender', options: ['Male','Female','Other'] }].map(f => (
+                    {[{ n: 'civilStatus', l: 'Civil Status', options: ['Single', 'Married', 'Separated', 'Widowed'] }, { n: 'gender', l: 'Gender', options: ['Male', 'Female', 'Other'] }].map(f => (
                       <div key={f.n} className="space-y-1.5"><label className={labelCls}>{f.l}</label><select name={f.n} value={tempData[f.n] || ''} onChange={handleTempInput} className={selectCls}><option value="">Select</option>{f.options.map(o => <option key={o} value={o}>{o}</option>)}</select></div>
                     ))}
                     <div className="md:col-span-2 space-y-1.5"><label className={labelCls}>Citizenship</label><input name="citizenship" value={tempData.citizenship || ''} onChange={handleTempInput} className={inputCls} /></div>
@@ -623,7 +623,7 @@ function Register() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><MapPin size={16} className="text-blue-700" /><h4 className="text-sm font-bold text-gray-900">Origin & Residence</h4></div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[{ n:'birthProvince',l:'Birth Province' },{ n:'birthCity',l:'Birth City' },{ n:'birthBarangay',l:'Birth Barangay' },{ n:'homeProvince',l:'Home Province' },{ n:'homeCity',l:'Home City' },{ n:'homeBarangay',l:'Home Barangay' },{ n:'postalCode',l:'Postal Code' },{ n:'phone',l:'Phone' },{ n:'email',l:'Email' }].map(f => (
+                    {[{ n: 'birthProvince', l: 'Birth Province' }, { n: 'birthCity', l: 'Birth City' }, { n: 'birthBarangay', l: 'Birth Barangay' }, { n: 'homeProvince', l: 'Home Province' }, { n: 'homeCity', l: 'Home City' }, { n: 'homeBarangay', l: 'Home Barangay' }, { n: 'postalCode', l: 'Postal Code' }, { n: 'phone', l: 'Phone' }, { n: 'email', l: 'Email' }].map(f => (
                       <div key={f.n} className="space-y-1.5"><label className={labelCls}>{f.l}</label><input name={f.n} value={tempData[f.n] || ''} onChange={handleTempInput} className={inputCls} /></div>
                     ))}
                   </div>
@@ -632,7 +632,7 @@ function Register() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><ShieldAlert size={16} className="text-blue-700" /><h4 className="text-sm font-bold text-gray-900">Family & Emergency</h4></div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[{ n:'fatherName',l:'Father' },{ n:'motherName',l:'Mother' },{ n:'emergencyName',l:'Emergency Contact' },{ n:'emergencyContact',l:'Emergency No.' }].map(f => (
+                    {[{ n: 'fatherName', l: 'Father' }, { n: 'motherName', l: 'Mother' }, { n: 'emergencyName', l: 'Emergency Contact' }, { n: 'emergencyContact', l: 'Emergency No.' }].map(f => (
                       <div key={f.n} className="space-y-1.5"><label className={labelCls}>{f.l}</label><input name={f.n} value={tempData[f.n] || ''} onChange={handleTempInput} className={inputCls} /></div>
                     ))}
                   </div>
@@ -641,7 +641,7 @@ function Register() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><GraduationCap size={16} className="text-blue-700" /><h4 className="text-sm font-bold text-gray-900">Academic & Requirements</h4></div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[{ n:'primarySchool',l:'Primary School' },{ n:'primaryYear',l:'Primary Year' },{ n:'secondarySchool',l:'Secondary School' },{ n:'secondaryYear',l:'Secondary Year' }].map(f => (
+                    {[{ n: 'primarySchool', l: 'Primary School' }, { n: 'primaryYear', l: 'Primary Year' }, { n: 'secondarySchool', l: 'Secondary School' }, { n: 'secondaryYear', l: 'Secondary Year' }].map(f => (
                       <div key={f.n} className="space-y-1.5"><label className={labelCls}>{f.l}</label><input name={f.n} value={tempData[f.n] || ''} onChange={handleTempInput} className={inputCls} /></div>
                     ))}
                     <div className="space-y-1.5">
