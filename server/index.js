@@ -135,6 +135,43 @@ app.post('/api/register', async (req, res) => {
       }
     });
 
+    // 🧠 AURA IDENTITY SHIELD (Nonsense Detection - Silent Flagging)
+    try {
+      const sanityPrompt = `
+        Analyze this student registration for Aura Integrated University. 
+        Identify if the identity is a clear joke, offensive, or gibberish (e.g., "fart", "asdfghjkl", "Batman").
+        
+        DATA:
+        Name: ${enrollment.firstName} ${enrollment.lastName}
+        Course: ${enrollment.course}
+        
+        OUTPUT JSON ONLY:
+        { "isTroll": boolean, "reason": "brief reason if any" }
+      `;
+
+      const sanityCheck = await groq.chat.completions.create({
+        messages: [{ role: "system", content: sanityPrompt }],
+        model: "llama-3.3-70b-versatile",
+        temperature: 0,
+        response_format: { type: "json_object" }
+      });
+
+      const sanityResult = JSON.parse(sanityCheck.choices[0].message.content);
+      
+      if (sanityResult.isTroll) {
+        await prisma.enrollment.update({
+          where: { id: enrollment.id },
+          data: { 
+            aiStatus: 'AT_RISK',
+            aiVerdict: `[IDENTITY ALERT] ${sanityResult.reason}`
+          }
+        });
+        console.warn(`[AURA SHIELD] Suspicious Identity Detected: ${enrollment.firstName} ${enrollment.lastName}`);
+      }
+    } catch (sanityError) {
+      console.error("Non-fatal Sanity Check Error:", sanityError);
+    }
+
     try {
       const emailHtml = getApplicationReceivedTemplate(req.body.firstName, req.body.course || 'Pending Authorization');
 

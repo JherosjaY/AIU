@@ -15,7 +15,7 @@ import AcademicCalendar from './pages/AcademicCalendar'
 import AdminDashboard from './pages/AdminDashboard'
 import StudentDashboard from './pages/StudentDashboard'
 import ResetPassword from './pages/ResetPassword'
-
+import NotFound from './pages/NotFound'
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
   
@@ -82,6 +82,8 @@ function App() {
               </ProtectedRoute>
             </div>
           } />
+          {/* Catch-all Route for 404 Not Found Page */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </AuthProvider>
