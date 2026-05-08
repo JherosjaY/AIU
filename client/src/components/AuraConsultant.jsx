@@ -3,14 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, X, RefreshCw, ChevronRight } from 'lucide-react';
 import API_BASE_URL from '../api';
 
+// Global in-memory variables to persist state across React Router navigation.
+// These will naturally reset on a hard browser refresh (Ctrl+Shift+R).
+let globalMessages = [
+    { role: 'assistant', content: "Kumusta! I am Aura, your AI Institutional Consultant. Unsay gusto nimo mahibal-an mahitungod sa AIU? (What would you like to know about AIU?)" }
+];
+let globalIsOpen = false;
+
 const AuraConsultant = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { role: 'assistant', content: "Kumusta! I am Aura, your AI Institutional Consultant. Unsay gusto nimo mahibal-an mahitungod sa AIU? (What would you like to know about AIU?)" }
-    ]);
+    const [isOpen, setIsOpen] = useState(globalIsOpen);
+    const [messages, setMessages] = useState(globalMessages);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
+
+    // Sync state changes back to global variables
+    useEffect(() => { globalIsOpen = isOpen; }, [isOpen]);
+    useEffect(() => { globalMessages = messages; }, [messages]);
 
     const [isMobile, setIsMobile] = useState(false);
 
