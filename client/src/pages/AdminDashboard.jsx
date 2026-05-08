@@ -230,7 +230,7 @@ export default function AdminDashboard() {
   })
 
   return (
-    <div className="light-theme min-h-screen bg-gray-50 text-gray-900 font-sans overflow-hidden flex flex-col md:flex-row">
+    <div className="light-theme min-h-screen bg-slate-50 text-gray-900 font-sans overflow-hidden flex flex-col md:flex-row">
       
       {/* ── Mobile Top Header ── */}
       <div className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 sticky top-0 z-[60]">
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
       </AnimatePresence>
 
       {/* Sidebar - FIXED POSITION */}
-      <aside className={`fixed left-0 top-0 bottom-0 w-80 bg-white border-r border-gray-200 flex flex-col p-8 z-[100] shadow-xl shadow-blue-900/5 transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed left-0 top-0 bottom-0 w-80 bg-slate-100 border-r border-gray-200 flex flex-col p-8 z-[100] shadow-xl shadow-blue-900/5 transition-transform duration-300 md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between md:block mb-8 md:mb-12 shrink-0 px-2 md:px-4">
           <div className="flex items-center gap-3 text-blue-700">
             <GraduationCap size={22} md:size={24} />
@@ -289,13 +289,13 @@ export default function AdminDashboard() {
             <button
               key={item.id}
               onClick={() => { setCurrentTab(item.id); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${
-                currentTab === item.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-gray-500 hover:bg-gray-50 hover:text-blue-600'
+              className={`w-full group flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${
+                currentTab === item.id ? 'bg-white text-blue-700 shadow-xl shadow-blue-900/10 ring-1 ring-black/5' : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-xl hover:shadow-black/5'
               }`}
             >
-              <div className={currentTab === item.id ? 'text-white' : 'text-gray-400'}>{item.icon}</div>
+              <div className={currentTab === item.id ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-900'}>{item.icon}</div>
               {item.label}
-              {currentTab === item.id && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />}
+              {currentTab === item.id && <div className="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full shadow-[0_0_8px_rgba(37,99,235,0.4)]" />}
             </button>
           ))}
 
@@ -309,11 +309,12 @@ export default function AdminDashboard() {
             <button
               key={item.id}
               onClick={() => { setFilter(item.id); setCurrentTab('RECORDS'); setIsSidebarOpen(false); setAiFilter('ALL'); }}
-              className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${
-                filter === item.id && currentTab === 'RECORDS' && aiFilter === 'ALL' ? 'bg-blue-50 text-blue-700' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+              className={`w-full group flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${
+                filter === item.id && currentTab === 'RECORDS' && aiFilter === 'ALL' ? 'bg-white text-blue-700 shadow-lg shadow-blue-900/10 ring-1 ring-black/5' : 'text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-xl hover:shadow-black/5'
               }`}
             >
-              {item.icon} {item.label}
+              <div className={filter === item.id && currentTab === 'RECORDS' && aiFilter === 'ALL' ? 'text-blue-600' : 'group-hover:text-gray-900'}>{item.icon}</div>
+              {item.label}
             </button>
           ))}
 
@@ -329,11 +330,12 @@ export default function AdminDashboard() {
             <button
               key={item.id}
               onClick={() => { setAiFilter(item.id); setFilter('ALL'); setCurrentTab('RECORDS'); setIsSidebarOpen(false); }}
-              className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${
-                aiFilter === item.id ? `bg-${item.color}-50 text-${item.color}-700` : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+              className={`w-full group flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all ${
+                aiFilter === item.id ? 'bg-white text-blue-700 shadow-lg shadow-blue-900/10 ring-1 ring-black/5' : 'text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-xl hover:shadow-black/5'
               }`}
             >
-               {item.icon} {item.label}
+               <div className={aiFilter === item.id ? 'text-blue-600' : 'group-hover:text-gray-900'}>{item.icon}</div>
+               {item.label}
             </button>
           ))}
         </nav>
@@ -375,7 +377,7 @@ export default function AdminDashboard() {
                 placeholder="SEARCH..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-gray-50 md:bg-gray-100 border border-gray-200 md:border-transparent rounded-xl py-3 px-10 md:px-12 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 font-bold text-[9px] md:text-[10px] tracking-widest transition-all"
+                className="w-full bg-slate-100 md:bg-white border border-gray-200 md:border-transparent rounded-xl py-3 px-10 md:px-12 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 font-bold text-[9px] md:text-[10px] tracking-widest transition-all"
               />
             </div>
             <button onClick={() => { fetchEnrollments(); fetchQuotas(); }} className="p-3 bg-gray-50 md:bg-gray-100 rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all border border-gray-200 md:border-transparent hover:border-blue-100">
@@ -388,7 +390,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-10 space-y-6 md:space-y-10 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 space-y-6 md:space-y-10 pb-40 custom-scrollbar">
           {currentTab === 'RECORDS' ? (
             <>
               {/* SYSTEM OVERVIEW STATS */}
@@ -398,23 +400,32 @@ export default function AdminDashboard() {
                    { label: 'Pending', value: enrollments.filter(e => e.status === 'PENDING').length, icon: <Clock size={16} md:size={20} />, color: 'amber' },
                    { label: 'Authorized', value: enrollments.filter(e => e.status === 'APPROVED').length, icon: <ShieldCheck size={16} md:size={20} />, color: 'emerald' },
                    { label: 'Vacancies', value: quotas.reduce((acc, q) => acc + (q.maxSlots - q.currentCount), 0), icon: <Zap size={16} md:size={20} />, color: 'indigo' },
-                 ].map((stat, i) => (
-                   <motion.div 
-                     key={i}
-                     initial={{ opacity: 0, y: 20 }}
-                     animate={{ opacity: 1, y: 0 }}
-                     transition={{ delay: i * 0.1 }}
-                     className="bg-white border border-gray-100 p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm flex flex-col md:flex-row items-center md:justify-between gap-4 md:gap-0 group hover:shadow-xl hover:shadow-blue-900/5 transition-all text-center md:text-left"
-                   >
-                     <div className="space-y-1 md:space-y-2 order-2 md:order-1">
-                        <p className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">{stat.label}</p>
-                        <h4 className="text-xl md:text-3xl font-black italic tracking-tighter text-gray-900 leading-none">{stat.value}</h4>
-                     </div>
-                     <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-${stat.color}-50 flex items-center justify-center text-${stat.color}-600 border border-${stat.color}-100 group-hover:bg-${stat.color}-600 group-hover:text-white transition-all order-1 md:order-2`}>
-                        {stat.icon}
-                     </div>
-                   </motion.div>
-                 ))}
+                 ].map((stat, i) => {
+                    const colorMap = {
+                      blue: 'bg-blue-50 text-blue-600 border-blue-100 group-hover:bg-blue-600',
+                      amber: 'bg-amber-50 text-amber-600 border-amber-100 group-hover:bg-amber-600',
+                      emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100 group-hover:bg-emerald-600',
+                      indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100 group-hover:bg-indigo-600'
+                    };
+
+                    return (
+                      <motion.div 
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                        className="bg-white border border-gray-100 p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-[0_15px_45px_rgba(30,64,175,0.06)] flex flex-col md:flex-row items-center md:justify-between gap-4 md:gap-0 group hover:shadow-2xl hover:shadow-blue-900/10 transition-all text-center md:text-left border-b-4 border-b-transparent hover:border-b-blue-600"
+                      >
+                        <div className="space-y-1 md:space-y-2 order-2 md:order-1">
+                           <p className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">{stat.label}</p>
+                           <h4 className="text-xl md:text-3xl font-black italic tracking-tighter text-gray-900 leading-none">{stat.value}</h4>
+                        </div>
+                        <div className={`w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center border group-hover:text-white transition-all order-1 md:order-2 ${colorMap[stat.color]}`}>
+                           {stat.icon}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
               </div>
 
               {isLoading ? (
@@ -435,8 +446,8 @@ export default function AdminDashboard() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       onClick={() => setSelectedStudent(student)}
-                      className={`group relative bg-white border transition-all rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 text-left hover:shadow-xl hover:shadow-blue-900/5 flex items-center gap-4 md:gap-10 cursor-pointer ${
-                        selectedStudent?.id === student.id ? 'border-blue-500 ring-4 ring-blue-50' : 'border-gray-200 shadow-sm'
+                      className={`group relative bg-white border transition-all rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 text-left hover:shadow-2xl hover:shadow-blue-900/10 flex items-center gap-4 md:gap-10 cursor-pointer ${
+                        selectedStudent?.id === student.id ? 'border-blue-500 ring-4 ring-blue-50' : 'border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]'
                       }`}
                     >
                       <div className={`w-12 h-12 md:w-20 md:h-20 rounded-2xl md:rounded-3xl shrink-0 flex items-center justify-center transition-all font-black text-lg md:text-2xl italic tracking-tighter ${
@@ -602,7 +613,7 @@ export default function AdminDashboard() {
 
               <div className="grid grid-cols-1 gap-6 pb-20">
                 {/* 1. Institutional Identification */}
-                <div className="space-y-4 bg-gray-50 border border-gray-100 p-8 rounded-[2.5rem]">
+                <div className="space-y-4 bg-blue-50/40 border border-blue-100 p-8 rounded-[2.5rem] shadow-sm">
                   <h5 className="text-[10px] font-bold text-blue-700 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center gap-2">
                     <ShieldCheck size={14} /> Institutional Profile
                   </h5>
@@ -617,7 +628,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* 2. Origin & Residence */}
-                <div className="space-y-4 bg-gray-50 border border-gray-100 p-8 rounded-[2.5rem]">
+                <div className="space-y-4 bg-blue-50/40 border border-blue-100 p-8 rounded-[2.5rem] shadow-sm">
                   <h5 className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center gap-2">
                     <MapPin size={14} /> Location Records
                   </h5>
@@ -633,17 +644,17 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* 3. Family Lineage & Safety */}
-                <div className="space-y-4 bg-gray-50 border border-gray-100 p-8 rounded-[2.5rem]">
+                <div className="space-y-4 bg-blue-50/40 border border-blue-100 p-8 rounded-[2.5rem] shadow-sm">
                   <h5 className="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center gap-2">
                     <Users size={14} /> Family & Emergency Dossier
                   </h5>
                   <div className="grid grid-cols-1 gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       <div className="p-4 bg-white rounded-2xl border border-gray-100 space-y-3 text-left">
+                       <div className="p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-blue-100 space-y-3 text-left">
                             <DetailItem label="Father's Name" value={selectedStudent.fatherName} icon={<Users size={12} />} />
                             <DetailItem label="Occupation / Contact" value={`${selectedStudent.fatherOccupation} • ${selectedStudent.fatherContact}`} icon={<Phone size={12} />} />
                        </div>
-                       <div className="p-4 bg-white rounded-2xl border border-gray-100 space-y-3 text-left">
+                       <div className="p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-blue-100 space-y-3 text-left">
                             <DetailItem label="Mother's Name" value={selectedStudent.motherName} icon={<Users size={12} />} />
                             <DetailItem label="Occupation / Contact" value={`${selectedStudent.motherOccupation} • ${selectedStudent.motherContact}`} icon={<Phone size={12} />} />
                        </div>
@@ -659,7 +670,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* 4. Academic Pedigree */}
-                <div className="space-y-4 bg-gray-50 border border-gray-100 p-8 rounded-[2.5rem]">
+                <div className="space-y-4 bg-blue-50/40 border border-blue-100 p-8 rounded-[2.5rem] shadow-sm">
                   <h5 className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center gap-2">
                     <GraduationCap size={14} /> Schooling History
                   </h5>
@@ -671,23 +682,68 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* 5. Uploaded Documents */}
-                {selectedStudent.document && selectedStudent.document.startsWith('[') && (
+                {/* 5. Academic Requirements (Transcript / Report Card) */}
+                {selectedStudent.reportCard && selectedStudent.reportCard.startsWith('[') && (
                   <div className="space-y-4 bg-gray-50 border border-gray-100 p-8 rounded-[2.5rem]">
-                    <h5 className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center gap-2">
-                      <FileText size={14} /> Attached Documents
+                    <h5 className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center justify-between">
+                      <span className="flex items-center gap-2"><FileText size={14} /> Academic Requirements</span>
+                      <span className="text-[8px] px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100 uppercase">Transcript/Report Card</span>
                     </h5>
                     <div className="grid grid-cols-2 gap-4">
                       {(() => {
                         try {
-                           return JSON.parse(selectedStudent.document).map((img, idx) => (
-                              <img key={idx} src={img} alt={`Doc ${idx}`} className="w-full h-auto rounded-xl border border-gray-200 shadow-sm object-cover" />
+                           const images = JSON.parse(selectedStudent.reportCard);
+                           return images.map((img, idx) => (
+                             <div key={idx} className="relative group cursor-zoom-in" onClick={() => window.open(img, '_blank')}>
+                               <img src={img} alt={`Academic-${idx}`} className="w-full h-32 rounded-xl border border-gray-200 shadow-sm object-cover transition-all group-hover:brightness-75 group-hover:border-blue-400" />
+                               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                 <Search className="text-white" size={20} />
+                               </div>
+                             </div>
                            ));
-                        } catch(e) { return null }
+                        } catch(e) { return <p className="text-[10px] italic text-gray-400">Failed to load academic records.</p> }
                       })()}
                     </div>
                   </div>
                 )}
+
+                {/* 6. Birth Identification Dossier */}
+                <div className="space-y-4 bg-gray-50 border border-gray-100 p-8 rounded-[2.5rem]">
+                  <h5 className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em] border-b border-gray-200 pb-3 italic flex items-center justify-between">
+                    <span className="flex items-center gap-2"><ShieldCheck size={14} /> Birth Identification</span>
+                    <span className="text-[8px] px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100 uppercase">Legal Documentation</span>
+                  </h5>
+                  
+                  {selectedStudent.document === 'Personal Delivery' ? (
+                    <div className="p-6 bg-white rounded-2xl border border-gray-100 flex flex-col items-center gap-3 text-center">
+                       <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                         <RefreshCw size={18} />
+                       </div>
+                       <div>
+                         <p className="text-[10px] font-bold text-gray-900 uppercase tracking-widest leading-none">Physical Delivery Protocol</p>
+                         <p className="text-[9px] font-medium text-gray-400 uppercase mt-2 tracking-tighter italic">Student will submit physical certification in-person.</p>
+                       </div>
+                    </div>
+                  ) : selectedStudent.document && selectedStudent.document.startsWith('[') ? (
+                    <div className="grid grid-cols-2 gap-4">
+                      {(() => {
+                        try {
+                           const images = JSON.parse(selectedStudent.document);
+                           return images.map((img, idx) => (
+                             <div key={idx} className="relative group cursor-zoom-in" onClick={() => window.open(img, '_blank')}>
+                               <img src={img} alt={`BirthDoc-${idx}`} className="w-full h-32 rounded-xl border border-gray-200 shadow-sm object-cover transition-all group-hover:brightness-75 group-hover:border-blue-400" />
+                               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                                 <Search className="text-white" size={20} />
+                               </div>
+                             </div>
+                           ));
+                        } catch(e) { return <p className="text-[10px] italic text-gray-400">Failed to load birth records.</p> }
+                      })()}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-gray-400 italic px-2">No digital certification attached.</p>
+                  )}
+                </div>
 
                 {/* 6. AURA DECISION SUPPORT */}
                 <div className="space-y-6 bg-white border-2 border-blue-50 p-8 rounded-[2.5rem] shadow-xl shadow-blue-900/5 relative overflow-hidden">

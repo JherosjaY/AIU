@@ -25,10 +25,12 @@ import {
     LogIn
 } from 'lucide-react'
 import AuraConsultant from '../components/AuraConsultant'
+import { AuthProvider, useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 
 function Landing() {
     const navigate = useNavigate()
+    const { user, logout } = useAuth()
     const [currentSlide, setCurrentSlide] = useState(0)
     const [scrolled, setScrolled] = useState(false)
     const [admissionsOpen, setAdmissionsOpen] = useState(false)
@@ -44,6 +46,12 @@ function Landing() {
     ]
 
     useEffect(() => {
+        // PROFESSIONAL SESSION MANAGEMENT:
+        // Automatically logout user if they navigate back to landing page
+        if (user) {
+            logout();
+        }
+
         const timer = setInterval(() => {
             setCurrentSlide((prev) => (prev + 1) % slides.length)
         }, 6000)
@@ -57,7 +65,7 @@ function Landing() {
             clearInterval(timer)
             window.removeEventListener('scroll', handleScroll)
         }
-    }, [])
+    }, [user, logout])
 
     return (
         <div className="min-h-screen w-full bg-[#f8fafc] font-sans relative overflow-x-hidden text-left">

@@ -46,7 +46,7 @@ html, body {
 
 /* ─── LIGHT THEME CONTEXT ─── */
 .light-theme {
-  background-color: #f9fafb !important;
+  background-color: #f1f5f9 !important; /* Softer gray to reduce glare */
   color: #111827 !important;
   min-height: 100vh;
 }

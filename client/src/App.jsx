@@ -32,15 +32,13 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 const PublicRoute = ({ children }) => {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   
-  useEffect(() => {
-    if (user && !loading) {
-      logout();
-    }
-  }, [user, loading, logout]);
-
   if (loading) return null;
+  
+  if (user) {
+    return <Navigate to={user.role === 'ADMIN' ? '/admin' : '/student-dashboard'} replace />;
+  }
   
   return children;
 };
