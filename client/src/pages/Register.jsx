@@ -19,9 +19,9 @@ const COURSE_MAP = {
   "BPA": "Bachelor of Public Administration"
 };
 
-const inputCls = "w-full bg-gray-50 border-gray-100 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-semibold text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-md"
-const selectCls = "w-full bg-gray-50 border-gray-100 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-semibold text-gray-900 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-md appearance-none cursor-pointer"
-const labelCls = "text-[10px] md:text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block"
+const inputCls = "w-full bg-white border-gray-200 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-semibold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none shadow-sm hover:shadow-md hover:border-gray-300"
+const selectCls = "w-full bg-white border-gray-200 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-semibold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none shadow-sm hover:shadow-md appearance-none cursor-pointer hover:border-gray-300"
+const labelCls = "text-[10px] md:text-[11px] font-black text-gray-600 uppercase tracking-widest mb-2 block"
 
 function Register() {
   const navigate = useNavigate()
