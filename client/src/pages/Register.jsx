@@ -33,7 +33,7 @@ function Register() {
   // Aura Sidebar State
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [messages, setMessages] = useState([
-    { role: 'aura', text: "Maayong adlaw! Ako si Aura. Unsa may matabang nako sa imong registration? In doubt ka unsay ibutang sa field?" }
+    { role: 'aura', text: "Maayong adlaw! I am Aura, your Institutional Inquiry Consultant. If you have questions about our programs or need help understanding the enrollment process, feel free to ask! (Please Note: I cannot record your data; ensure you type your details directly into the form fields.)" }
   ])
   const [currentInput, setCurrentInput] = useState('')
   const [isChatting, setIsChatting] = useState(false)

@@ -6,7 +6,7 @@ import API_BASE_URL from '../api';
 // Global in-memory variables to persist state across React Router navigation.
 // These will naturally reset on a hard browser refresh (Ctrl+Shift+R).
 let globalMessages = [
-    { role: 'assistant', content: "Kumusta! I am Aura, your AI Institutional Consultant. Unsay gusto nimo mahibal-an mahitungod sa AIU? (What would you like to know about AIU?)" }
+    { role: 'assistant', content: "Kumusta! I am Aura, your Institutional Inquiry Consultant. Ask me anything about AIU programs, campus life, or the enrollment process! (Note: I am here to guide you; please fill out any forms manually.)" }
 ];
 let globalIsOpen = false;
 
@@ -172,7 +172,7 @@ const AuraConsultant = () => {
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="Ask about AIU programs..."
+                                placeholder="Ask me about AIU programs or the enrollment process..."
                                 className="flex-1 bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:ring-4 focus:ring-blue-500/20 placeholder:text-slate-500 transition-all min-w-0"
                             />
                             <button 
