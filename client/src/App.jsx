@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Landing from './pages/Landing'
@@ -31,14 +32,15 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   
+  useEffect(() => {
+    if (user && !loading) {
+      logout();
+    }
+  }, [user, loading, logout]);
+
   if (loading) return null;
-  
-  if (user) {
-    // Redirect to their dashboard if already logged in
-    return <Navigate to={user.role === 'ADMIN' ? '/admin' : '/student-dashboard'} replace />;
-  }
   
   return children;
 };
