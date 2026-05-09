@@ -101,6 +101,26 @@ async function initializeQuotas() {
         }
       });
     }
+
+    // 🛡️ INSTITUTIONAL SEQUENCE RECALIBRATION
+    try {
+      const bloatedRecord = await prisma.courseQuota.findFirst({ where: { id: 26 } });
+      if (bloatedRecord) {
+        console.log('🏛️ Institutional Registry: Detected bloated ID 26. Recalibrating to ID 7...');
+        const sevenIsFree = await prisma.courseQuota.findFirst({ where: { id: 7 } });
+        if (!sevenIsFree) {
+            await prisma.$executeRawUnsafe(`UPDATE "CourseQuota" SET id = 7 WHERE id = 26`);
+            console.log('🏛️ Institutional Registry: ID 26 remapped to 7.');
+        }
+      }
+      const maxIdResult = await prisma.$queryRawUnsafe(`SELECT max(id) FROM "CourseQuota"`);
+      const maxId = maxIdResult[0].max || 0;
+      await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"CourseQuota"', 'id'), ${maxId})`);
+      console.log(`🏛️ Institutional Registry: Sequence synchronized to index ${maxId}.`);
+    } catch (seqError) {
+      console.error('🏛️ Registry Sequence Sync Error:', seqError);
+    }
+
     console.log("🏛️ Institutional Registry Sync: Core metadata updated.");
   } catch (error) {
     console.error("Critical Registry Initialization Failure:", error);
