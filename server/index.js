@@ -6,11 +6,12 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const Groq = require('groq-sdk');
 const sgMail = require('@sendgrid/mail');
 const Tesseract = require('tesseract.js');
-const { 
-  getApplicationReceivedTemplate, 
-  getAdmissionAuthorizedTemplate, 
-  getAdmissionDeclinedTemplate, 
-  getPasswordResetTemplate 
+const {
+  getApplicationReceivedTemplate,
+  getAdmissionAuthorizedTemplate,
+  getAdmissionDeclinedTemplate,
+  getPasswordResetTemplate,
+  getAuraReminderTemplate
 } = require('./utils/emailTemplates');
 
 const app = express();
@@ -39,24 +40,68 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// 🛡️ INSTITUTIONAL AUTO-SEED & CLEANUP: Ensure only 6 Core Programs exist
+// 🛡️ INSTITUTIONAL AUTO-SEED: Ensure Core Programs exist with Metadata
 async function initializeQuotas() {
-  const COURSES = ['BSIT', 'BSCRIM', 'BSENTREP', 'BSED', 'BSHM', 'BPA'];
-  try {
-    // 1. Remove mock/obsolete programs
-    await prisma.courseQuota.deleteMany({
-      where: { courseAbbr: { notIn: COURSES } }
-    });
+  const CORE_PROGRAMS = [
+    { 
+      abbr: 'BSIT', name: 'Information Technology', category: 'Technology', icon: 'Monitor', color: 'border-blue-600',
+      description: 'Master the architectural foundations of the digital world. Our IT program integrates AI-driven development with robust systems engineering and digital infrastructure.',
+      credits: 144, years: 4
+    },
+    { 
+      abbr: 'BSCRIM', name: 'Criminology & Justice', category: 'Justice', icon: 'Scale', color: 'border-indigo-600',
+      description: 'Preparation for elite careers in law enforcement and public safety. We cultivate disciplined leaders specialized in modern criminology and forensic science.',
+      credits: 160, years: 4
+    },
+    { 
+      abbr: 'BSENTREP', name: 'Entrepreneurship', category: 'Business', icon: 'Rocket', color: 'border-yellow-500',
+      description: 'Incubating the next generation of business disruptors. Our program focuses on startup ecosystem building, venture capital, and innovative leadership.',
+      credits: 138, years: 4
+    },
+    { 
+      abbr: 'BSED', name: 'Teacher Education', category: 'Education', icon: 'Pencil', color: 'border-green-600',
+      description: 'Developing pedagogical pioneers who are master communicators. Transform the future of learning through innovative teaching methodologies.',
+      credits: 152, years: 4
+    },
+    { 
+      abbr: 'BSHM', name: 'Hospitality Management', category: 'Hospitality', icon: 'Hotel', color: 'border-rose-600',
+      description: 'World-class training in luxury hotel and tourism operations. Master the art of global service excellence in the modern hospitality landscape.',
+      credits: 148, years: 4
+    },
+    { 
+      abbr: 'BPA', name: 'Public Administration', category: 'Government', icon: 'Landmark', color: 'border-purple-600',
+      description: 'Ethics-based leadership training for governance. We prepare public servants to lead with integrity in the complex world of policy and administration.',
+      credits: 140, years: 4
+    }
+  ];
 
-    // 2. Ensure core programs exist
-    for (const abbr of COURSES) {
+  try {
+    for (const p of CORE_PROGRAMS) {
       await prisma.courseQuota.upsert({
-        where: { courseAbbr: abbr },
-        update: {},
-        create: { courseAbbr: abbr, maxSlots: 50 }
+        where: { courseAbbr: p.abbr },
+        update: {
+          courseName: p.name,
+          category: p.category,
+          iconName: p.icon,
+          color: p.color,
+          description: p.description,
+          credits: p.credits,
+          years: p.years
+        },
+        create: { 
+          courseAbbr: p.abbr, 
+          courseName: p.name, 
+          maxSlots: 50,
+          category: p.category,
+          iconName: p.icon,
+          color: p.color,
+          description: p.description,
+          credits: p.credits,
+          years: p.years
+        }
       });
     }
-    console.log("🏛️ Institutional Registry Hardened: Mock programs purged. 6 Core Programs active.");
+    console.log("🏛️ Institutional Registry Sync: Core metadata updated.");
   } catch (error) {
     console.error("Critical Registry Initialization Failure:", error);
   }
@@ -157,11 +202,11 @@ app.post('/api/register', async (req, res) => {
       });
 
       const sanityResult = JSON.parse(sanityCheck.choices[0].message.content);
-      
+
       if (sanityResult.isTroll) {
         await prisma.enrollment.update({
           where: { id: enrollment.id },
-          data: { 
+          data: {
             aiStatus: 'AT_RISK',
             aiVerdict: `[IDENTITY ALERT] ${sanityResult.reason}`
           }
@@ -248,15 +293,15 @@ app.post('/api/chat', async (req, res) => {
 
     // 📸 MULTI-IMAGE OCR SYNC: Process up to 5 images simultaneously
     const imageList = Array.isArray(image) ? image : (image ? [image] : []);
-    
+
     if (imageList.length > 0) {
       try {
         console.log(`[AURA VISION] Synchronized processing initiated for ${imageList.length} documents...`);
-        
+
         // Parallel OCR processing for maximum efficiency
         const ocrResults = await Promise.all(imageList.map(async (img, idx) => {
           if (typeof img !== 'string') return `--- [DOCUMENT #${idx + 1} ERROR: Invalid Format] ---`;
-          
+
           console.log(`[OCR] Analyzing Institutional Document #${idx + 1}...`);
           try {
             const { data: { text } } = await Tesseract.recognize(img, 'eng');
@@ -403,7 +448,7 @@ app.post('/api/enrollments/:id/approve', async (req, res) => {
 
     const enrollment = await prisma.enrollment.update({
       where: { id: parseInt(id) },
-      data: { 
+      data: {
         status: 'APPROVED',
         instEmail: instEmail,
         password: tempPassword
@@ -516,7 +561,7 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
         "decision": "AUTHORIZE" | "DENY",
         "fitnessScore": number (0-100),
         "strengths": ["string", "string", "string"],
-        "justification": "Clear, professional 2-sentence explanation based specifically on their grades and performance.",
+        "justification": "Detailed and professional 3-sentence analysis explaining the decision based on specific academic metrics, character traits, or grade patterns found in the transcript.",
         "suggestedCourse": "One of: BSIT, BSCRIM, BSENTREP, BSED, BSHM, BPA (or null if current is perfect)"
       }
 
@@ -538,7 +583,7 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
 
     // PERSIST DECISION TO REGISTRY
     const aiStatus = aiResponse.decision === 'AUTHORIZE' ? (aiResponse.fitnessScore > 80 ? 'QUALIFIED' : 'READY') : 'AT_RISK';
-    
+
     await prisma.enrollment.update({
       where: { id: parseInt(id) },
       data: {
@@ -549,8 +594,8 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
       }
     });
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       decision: aiResponse.decision,
       fitnessScore: aiResponse.fitnessScore,
       strengths: aiResponse.strengths,
@@ -568,22 +613,22 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
 app.delete('/api/enrollments/:id', async (req, res) => {
   const { id } = req.params;
   const targetId = parseInt(id);
-  
+
   if (isNaN(targetId)) {
     return res.status(400).json({ success: false, message: "Invalid Dossier Identifier format." });
   }
 
   console.log(`[RECORDS] Deletion Request for ID: ${targetId}`);
-  
+
   try {
     const result = await prisma.enrollment.deleteMany({
       where: { id: targetId }
     });
-    
+
     if (result.count === 0) {
       return res.status(404).json({ success: false, message: "Record not found in registry." });
     }
-    
+
     res.json({ success: true, message: "Record permanently removed from Institutional Registry." });
   } catch (error) {
     console.error("Critical Deletion Error:", error);
@@ -594,7 +639,9 @@ app.delete('/api/enrollments/:id', async (req, res) => {
 // GET QUOTA STATISTICS
 app.get('/api/quotas', async (req, res) => {
   try {
-    const quotas = await prisma.courseQuota.findMany();
+    const quotas = await prisma.courseQuota.findMany({
+      orderBy: { id: 'asc' }
+    });
 
     // Also fetch current accepted counts for each course
     const stats = await Promise.all(quotas.map(async (q) => {
@@ -627,17 +674,66 @@ app.post('/api/quotas/sync', async (req, res) => {
   }
 });
 
-// UPDATE QUOTA
-app.post('/api/quotas/update', async (req, res) => {
-  const { abbr, maxSlots } = req.body;
+// CREATE NEW COURSE
+app.post('/api/courses', async (req, res) => {
+  const { abbr, name, description, category, credits, years, iconName, color, maxSlots, highlights } = req.body;
   try {
-    await prisma.courseQuota.update({
-      where: { courseAbbr: abbr },
-      data: { maxSlots: parseInt(maxSlots) }
+    const freshCourse = await prisma.courseQuota.create({
+      data: {
+        courseAbbr: abbr,
+        courseName: name,
+        description,
+        category,
+        credits: parseInt(credits) || 120,
+        years: parseInt(years) || 4,
+        iconName: iconName || 'GraduationCap',
+        color: color || 'border-blue-600',
+        highlights: highlights || 'Professional Training, Institutional Research, Global Standards',
+        maxSlots: parseInt(maxSlots) || 50
+      }
+    });
+    res.json({ success: true, data: freshCourse });
+  } catch (error) {
+    console.error("Failed to create course:", error);
+    res.status(500).json({ success: false, message: "Registry error: Duplicate or invalid data." });
+  }
+});
+
+// DELETE COURSE
+app.delete('/api/courses/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.courseQuota.delete({
+      where: { id: parseInt(id) }
     });
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: "Update failed" });
+    res.status(500).json({ error: "Institutional deletion failure" });
+  }
+});
+
+// UPDATE QUOTA & METADATA
+app.put('/api/courses/:id', async (req, res) => {
+  const { id } = req.params;
+  const { name, maxSlots, description, category, credits, years, iconName, color, highlights } = req.body;
+  try {
+    const updated = await prisma.courseQuota.update({
+      where: { id: parseInt(id) },
+      data: { 
+        courseName: name,
+        maxSlots: maxSlots ? parseInt(maxSlots) : undefined,
+        description,
+        category,
+        credits: credits ? parseInt(credits) : undefined,
+        years: years ? parseInt(years) : undefined,
+        iconName,
+        color,
+        highlights
+      }
+    });
+    res.json({ success: true, data: updated });
+  } catch (error) {
+    res.status(500).json({ error: "Registry update failed." });
   }
 });
 
@@ -744,7 +840,7 @@ app.post('/api/login', async (req, res) => {
       if (password === 'admin123' || password === '@Jherosjay0125!') {
         return res.json({ success: true, role: 'ADMIN', user: { authId: 'ADMIN' } });
       }
-      return res.status(401).json({ success: false, message: "Invalid Admin Token." });
+      return res.status(401).json({ success: false, message: "Invalid Admin Credentials." });
     }
 
     // 2. STUDENT DYNAMIC VERIFICATION (Supports Institutional Email and Personal Email)
@@ -766,10 +862,10 @@ app.post('/api/login', async (req, res) => {
       if (matchingStudent.status === 'REJECTED') {
         return res.status(401).json({ success: false, message: "ACCESS DENIED: Your application was not accepted." });
       }
-      
+
       // ── PASSWORD VERIFICATION ──
       let isAuthorized = false;
-      
+
       if (matchingStudent.password) {
         // Use custom password if set
         isAuthorized = (password === matchingStudent.password);
@@ -777,7 +873,7 @@ app.post('/api/login', async (req, res) => {
         // Fallback to legacy AURA@ protocol for new accounts
         isAuthorized = password.toUpperCase().startsWith('AURA@');
       }
-      
+
       if (isAuthorized) {
         return res.json({
           success: true,
@@ -801,6 +897,100 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🏛️ Institutional Server Operational at http://localhost:5000`);
+// ══════════════════════════════════════════════════════════
+//  AURA AUTOMATED REMINDER ENGINE (Background Worker)
+// ══════════════════════════════════════════════════════════
+async function runAuraReminders() {
+  console.log('--- AURA: Scanning for inactive high-potential applicants ---');
+  try {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+    // Find students who:
+    // 1. Are still PENDING (not authorized or declined)
+    // 2. Were marked as QUALIFIED or READY by AI (passed analysis)
+    // 3. Created 3+ days ago
+    // 4. Haven't received a reminder yet
+    const targetStudents = await prisma.enrollment.findMany({
+      where: {
+        status: 'PENDING',
+        aiStatus: { in: ['QUALIFIED', 'READY'] },
+        createdAt: { lt: threeDaysAgo },
+        lastReminderSent: null
+      }
+    });
+
+    if (targetStudents.length === 0) {
+      console.log('--- AURA: Registry audit complete. No pending reminders required. ---');
+      return;
+    }
+
+    for (const student of targetStudents) {
+      console.log(`--- AURA: Dispatching reminder to ${student.email} [${student.firstName}] ---`);
+
+      const msg = {
+        to: student.email,
+        from: process.env.SENDGRID_FROM_EMAIL,
+        subject: `Institutional Action Required: Final Documentation Notice for ${student.firstName.toUpperCase()}`,
+        html: getAuraReminderTemplate(student.firstName, student.course || 'Selected Program'),
+      };
+
+      try {
+        await sgMail.send(msg);
+
+        // Mark as sent to avoid double spamming
+        await prisma.enrollment.update({
+          where: { id: student.id },
+          data: { lastReminderSent: new Date() }
+        });
+      } catch (err) {
+        console.error(`--- AURA: Critical Email Failure for ${student.email}:`, err.message);
+      }
+    }
+    console.log(`--- AURA: Audit complete. Dispatched ${targetStudents.length} notifications. ---`);
+
+    // --- PHASE 2: AUTO-REJECTION FOR PERSISTENT INACTIVITY ---
+    // Move students to 'REJECTED' if they received a reminder and still 
+    // haven't updated for another 3 days (Total 6 days of inactivity).
+    const reminderGracePeriod = new Date();
+    reminderGracePeriod.setDate(reminderGracePeriod.getDate() - 3);
+
+    const staleStudents = await prisma.enrollment.findMany({
+      where: {
+        status: 'PENDING',
+        lastReminderSent: { lt: reminderGracePeriod }
+      }
+    });
+
+    if (staleStudents.length > 0) {
+      console.log(`--- AURA: Auto-Rejecting ${staleStudents.length} non-compliant applicants ---`);
+      for (const student of staleStudents) {
+        await prisma.enrollment.update({
+          where: { id: student.id },
+          data: {
+            status: 'REJECTED',
+            aiVerdict: 'AUTO-REJECTED: Institutional compliance deadline exceeded (3-day grace period expired after final notice).'
+          }
+        });
+      }
+    }
+
+  } catch (error) {
+    console.error('--- AURA: Background Audit Engine Failure:', error);
+  }
+}
+
+// Global Reminder Cycle: Runs every 24 hours
+// (Check immediately on startup, then every day)
+runAuraReminders();
+setInterval(runAuraReminders, 24 * 60 * 60 * 1000);
+
+app.listen(PORT, async () => {
+  console.log(`🏛️ Institutional Server Operational at http://localhost:${PORT}`);
+  console.log(`🛡️ Aura Security Profile: High-Fidelity API Enabled`);
+  
+  // Synchronize Institutional Registry
+  console.log(`🏛️ Institutional Registry Sync: Synchronizing core programs...`);
+  await initializeQuotas();
+  console.log(`🏛️ Institutional Registry Sync: Core metadata updated.`);
 });

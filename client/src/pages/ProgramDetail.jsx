@@ -11,8 +11,10 @@ import {
     Rocket,
     Pencil,
     Hotel,
-    Landmark
+    Landmark,
+    Monitor
 } from 'lucide-react';
+import API_BASE_URL from '../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuraConsultant from '../components/AuraConsultant';
 
@@ -20,6 +22,19 @@ const ProgramDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [scrolled, setScrolled] = useState(false);
+    const [program, setProgram] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const ICON_MAP = {
+        Monitor: <Monitor size={40} />,
+        Scale: <Scale size={40} />,
+        Rocket: <Rocket size={40} />,
+        Pencil: <Pencil size={40} />,
+        Hotel: <Hotel size={40} />,
+        Landmark: <Landmark size={40} />,
+        GraduationCap: <GraduationCap size={40} />,
+        Terminal: <Terminal size={40} />
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -29,82 +44,49 @@ const ProgramDetail = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // FULL ACADEMIC DATA REGISTRY
-    const programsData = {
-        'it': {
-            title: 'Information Technology',
-            icon: <Terminal size={40} />,
-            description: 'Master the architectural foundations of the digital world. Our IT program integrates AI-driven development with robust systems engineering and digital infrastructure.',
-            stats: [
-                { label: 'AI CORES', value: '32+' },
-                { label: 'TOTAL CREDITS', value: '144' },
-                { label: 'INDUSTRY PROJECTS', value: '12' }
-            ]
-        },
-        'criminology': {
-            title: 'Criminology & Justice',
-            icon: <Scale size={40} />,
-            description: 'Preparation for elite careers in law enforcement and public safety. We cultivate disciplined leaders specialized in modern criminology and forensic science.',
-            stats: [
-                { label: 'TACTICAL DRILLS', value: '150+' },
-                { label: 'TOTAL CREDITS', value: '138' },
-                { label: 'FIELD INTERNSHIPS', value: '02' }
-            ]
-        },
-        'entrepreneurship': {
-            title: 'Entrepreneurship',
-            icon: <Rocket size={40} />,
-            description: 'Incubating the next generation of business disruptors. Our program focuses on startup ecosystem building, venture capital, and innovative leadership.',
-            stats: [
-                { label: 'STARTUP COHORTS', value: '05' },
-                { label: 'TOTAL CREDITS', value: '132' },
-                { label: 'SEED FUNDING', value: '1M+' }
-            ]
-        },
-        'education': {
-            title: 'Teacher Education',
-            icon: <Pencil size={40} />,
-            description: 'Developing pedagogical pioneers who are master communicators. Transform the future of learning through innovative teaching methodologies.',
-            stats: [
-                { label: 'PARTNER SCHOOLS', value: '25+' },
-                { label: 'TOTAL CREDITS', value: '140' },
-                { label: 'PRACTICUM CARE', value: '1YR' }
-            ]
-        },
-        'hospitality': {
-            title: 'Hospitality Management',
-            icon: <Hotel size={40} />,
-            description: 'World-class training in luxury hotel and tourism operations. Master the art of global service excellence in the modern hospitality landscape.',
-            stats: [
-                { label: 'GLOBAL PARTNERS', value: '50+' },
-                { label: 'TOTAL CREDITS', value: '136' },
-                { label: 'SMART LABS', value: '04' }
-            ]
-        },
-        'public-admin': {
-            title: 'Public Administration',
-            icon: <Landmark size={40} />,
-            description: 'Ethics-based leadership training for governance. We prepare public servants to lead with integrity in the complex world of policy and administration.',
-            stats: [
-                { label: 'GOV AGENCIES', value: '20+' },
-                { label: 'TOTAL CREDITS', value: '130' },
-                { label: 'POLICY BRIEFS', value: '08' }
-            ]
-        }
-    };
+    useEffect(() => {
+        const fetchProgram = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/quotas`);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    // Find the program by matching acronym (case-insensitive) or slug
+                    const found = data.find(p => p.courseAbbr.toLowerCase() === id.toLowerCase() || (id.toLowerCase() === 'it' && p.courseAbbr === 'BSIT'));
+                    if (found) {
+                        setProgram({
+                            title: found.courseName || found.courseAbbr,
+                            icon: ICON_MAP[found.iconName] || <GraduationCap size={40} />,
+                            description: found.description || 'Advanced institutional training for the next generation of industry leaders.',
+                            highlights: (found.highlights || 'Global Standards, Research Excellence, Industry Integration').split(',').map(s => s.trim()),
+                            color: found.color || 'border-blue-600',
+                            stats: [
+                                { label: 'DURATION', value: `${found.years || 4} YEARS` },
+                                { label: 'TOTAL CREDITS', value: found.credits || 120 },
+                                { label: 'CAPACITY', value: found.maxSlots || 50 }
+                            ]
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Fetch Program Error:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchProgram();
+    }, [id]);
 
-    // Fallback logic for unknown programs + BSIT Alias
-    const effectiveId = id === 'bsit' ? 'it' : id;
-    const program = programsData[effectiveId] || {
-        title: 'Academic Program',
-        icon: <GraduationCap size={40} />,
-        description: 'Advanced institutional training for the next generation of industry leaders.',
-        stats: [
-            { label: 'DURATION', value: '4 YEARS' },
-            { label: 'CREDITS', value: '120+' },
-            { label: 'INTERNSHIP', value: '6 MONTHS' }
-        ]
-    };
+    if (isLoading) return <div className="min-h-screen bg-[#001f3f] flex items-center justify-center"><Zap size={40} className="text-yellow-400 animate-pulse" /></div>;
+
+    if (!program) {
+        return (
+            <div className="min-h-screen bg-[#001f3f] flex flex-col items-center justify-center p-10 text-center">
+                 <h1 className="text-6xl font-black text-white italic uppercase tracking-tighter mb-4">404</h1>
+                 <p className="text-blue-100 font-bold uppercase tracking-widest mb-10">Program Not Found in Registry</p>
+                 <button onClick={() => navigate('/programs')} className="px-10 py-4 bg-yellow-400 text-blue-900 rounded-full font-black uppercase tracking-widest shadow-xl shadow-yellow-900/10">Back to Academic Hub</button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#001f3f] text-white font-sans selection:bg-yellow-400 selection:text-blue-900 overflow-x-hidden text-center">
@@ -192,11 +174,41 @@ const ProgramDetail = () => {
                 {/* Stats & Details */}
                 <div className="grid md:grid-cols-3 gap-8">
                     {program.stats.map((stat, i) => (
-                        <div key={i} className="p-8 rounded-[3rem] bg-white/5 border border-white/10 text-center space-y-2 transition-all">
-                            <div className="text-4xl font-black text-white italic uppercase">{stat.value}</div>
+                        <div key={i} className="p-8 rounded-[3rem] bg-white/5 border border-white/10 text-center space-y-2 transition-all hover:bg-white/10 hover:border-yellow-400/30">
+                            <div className="text-4xl font-black text-white italic uppercase tracking-tighter">{stat.value}</div>
                             <div className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-300 italic">{stat.label}</div>
                         </div>
                     ))}
+                </div>
+
+                {/* Institutional Pillars Section */}
+                <div className="space-y-12">
+                   <div className="flex items-center gap-6">
+                      <div className="h-[2px] flex-1 bg-gradient-to-r from-transparent to-white/10"></div>
+                      <h2 className="text-2xl font-black italic uppercase tracking-widest text-blue-300 opacity-50">Institutional Pillars</h2>
+                      <div className="h-[2px] flex-1 bg-gradient-to-l from-transparent to-white/10"></div>
+                   </div>
+
+                   <div className="grid md:grid-cols-3 gap-6">
+                      {program.highlights.map((pillar, idx) => (
+                        <motion.div 
+                          key={idx}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.1 }}
+                          viewport={{ once: true }}
+                          className="group p-1 bg-gradient-to-br from-white/10 to-transparent rounded-[2.5rem] shadow-2xl"
+                        >
+                           <div className="bg-[#001f3f] p-8 rounded-[2.4rem] h-full flex flex-col items-center justify-center text-center space-y-4 border border-white/5 group-hover:border-yellow-400/20 transition-all">
+                              <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-yellow-400">
+                                 <Zap size={20} />
+                              </div>
+                              <h4 className="text-lg font-black italic uppercase tracking-tight text-white leading-tight">{pillar}</h4>
+                              <p className="text-[10px] font-bold text-blue-300/40 uppercase tracking-widest">Aura Core Competency</p>
+                           </div>
+                        </motion.div>
+                      ))}
+                   </div>
                 </div>
             </main>
 

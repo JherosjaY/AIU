@@ -159,9 +159,30 @@ const getPasswordResetTemplate = (firstName, resetLink) => {
   return getBaseTemplate("Reset", "Security Authorization Center", banner, content, "Institutional Security &copy; 2026");
 };
 
+/**
+ * 📨 TEMPLATE: Aura Reminder (Status: Incomplete/Pending after 3 days)
+ */
+const getAuraReminderTemplate = (firstName, courseName) => {
+  const banner = `<h1 class="header-title" style="margin: 0; color: #1e293b; font-size: 38px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -2px; line-height: 1;">ACTION<br/><span style="color: #1e40af;">REQUIRED.</span></h1>`;
+  const content = `
+    <p style="color: #111827; font-size: 18px; font-weight: 800; margin-top: 0; font-style: italic; text-transform: uppercase;">Attention, ${firstName.toUpperCase()}!</p>
+    <p>Our institutional audit indicates that your enrollment for the <strong>${courseName}</strong> program is currently <strong>STALLED</strong> due to missing documentation or unverified physical records.</p>
+    
+    <div style="margin: 30px auto; padding: 25px; background-color: #fffbeb; border-radius: 24px; border: 1px solid #fef3c7; max-width: 400px; color: #92400e;">
+      <p style="margin: 0; font-style: italic; font-weight: 900; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.4;">"Institutional Alert: 3 days of inactivity detected. Your high-potential status requires urgent document liquidation to secure your slot."</p>
+    </div>
+
+    <p style="font-size: 14px; font-weight: 700; color: #1e293b; margin-top: 25px;">KINDLY COORDINATE WITH THE REGISTRAR OR UPLOAD THE NECESSARY DOCUMENTS TO AVOID APPLICATION EXPIRATION.</p>
+    <p style="font-size: 12px; color: #94a3b8; font-weight: 500;">Failure to comply within the next academic cycle may result in your slot being reallocated to other qualified applicants.</p>
+  `;
+  return getBaseTemplate("Reminder", "Final Documentation Notice", banner, content);
+};
+
+
 module.exports = {
   getApplicationReceivedTemplate,
   getAdmissionAuthorizedTemplate,
   getAdmissionDeclinedTemplate,
-  getPasswordResetTemplate
+  getPasswordResetTemplate,
+  getAuraReminderTemplate
 };

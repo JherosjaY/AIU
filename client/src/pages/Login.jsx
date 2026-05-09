@@ -139,7 +139,7 @@ const Login = () => {
                     required
                   />
                 </div>
-                {detectedRole && (
+                {detectedRole && detectedRole !== 'Administrator' && (
                   <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-1.5 mt-2 ml-1">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{detectedRole} Account Verified</span>

@@ -70,7 +70,7 @@ function Register() {
   useEffect(() => {
     const fetchQuotas = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/quotas');
+        const res = await fetch(`${API_BASE_URL}/quotas`);
         const data = await res.json();
         setCourseQuotas(data);
       } catch (err) {
@@ -152,8 +152,14 @@ function Register() {
       })
       const data = await response.json()
       if (data.success) { 
-        alert('✔️ REGISTRATION COMPLETE: Your application has been received. Please login to continue.');
-        navigate('/login');
+        navigate('/success', { 
+          state: { 
+            firstName: formData.firstName, 
+            lastName: formData.lastName, 
+            course: formData.course 
+          },
+          replace: true
+        })
       }
       else { alert('❌ Error: ' + data.message) }
     } catch (error) {
@@ -353,7 +359,7 @@ function Register() {
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
                 <div className="space-y-2">
                     <div className="text-center mb-4 md:mb-6">
-                      <h2 className="text-3xl md:text-5xl font-black text-blue-700 italic tracking-tighter uppercase mb-2 md:mb-3 drop-shadow-sm">Start Your Journey</h2>
+                      <h2 className="text-3xl md:text-5xl font-black text-[#1e3a8a] italic tracking-tighter uppercase mb-2 md:mb-3 drop-shadow-sm">Start Your <span className="text-blue-700">Journey</span></h2>
                       <p className="text-[10px] md:text-xs text-white font-bold uppercase tracking-[0.3em] drop-shadow-sm">Complete your registration to access the student portal and begin enrollment.</p>
                     </div>
                     
@@ -375,7 +381,7 @@ function Register() {
                                     const isFull = q.currentCount >= q.maxSlots;
                                     return (
                                       <option key={q.courseAbbr} value={q.courseAbbr} disabled={isFull}>
-                                        {q.courseAbbr} - {COURSE_MAP[q.courseAbbr]} {isFull ? '(Class Full)' : ''}
+                                        {q.courseAbbr} - {q.courseName || COURSE_MAP[q.courseAbbr] || q.courseAbbr} {isFull ? '(Class Full)' : ''}
                                       </option>
                                     )
                                   })

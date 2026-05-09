@@ -27,6 +27,7 @@ import {
 import AuraConsultant from '../components/AuraConsultant'
 import { AuthProvider, useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
+import API_BASE_URL from '../api'
 
 function Landing() {
     const navigate = useNavigate()
@@ -38,6 +39,42 @@ function Landing() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileAdmissionsOpen, setMobileAdmissionsOpen] = useState(false)
     const [mobileAboutOpen, setMobileAboutOpen] = useState(false)
+    const [programs, setPrograms] = useState([])
+    const [isLoadingPrograms, setIsLoadingPrograms] = useState(true)
+
+    const ICON_MAP = {
+        Monitor: <Monitor size={32} />,
+        Scale: <Scale size={32} />,
+        Rocket: <Rocket size={32} />,
+        Pencil: <Pencil size={32} />,
+        Hotel: <Hotel size={32} />,
+        Landmark: <Landmark size={32} />,
+        GraduationCap: <GraduationCap size={32} />,
+        BookOpen: <BookOpen size={32} />
+    };
+
+    useEffect(() => {
+        const fetchPrograms = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/quotas`);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setPrograms(data.map(p => ({
+                        id: p.courseAbbr.toLowerCase(),
+                        title: p.courseName || p.courseAbbr,
+                        desc: p.description || 'Institutional academic program.',
+                        iconName: p.iconName
+                    })).slice(0, 6)); 
+                }
+            } catch (error) {
+                console.error("Fetch Programs Error:", error);
+            } finally {
+                setIsLoadingPrograms(false);
+            }
+        };
+        fetchPrograms();
+    }, []);
+
 
     const slides = [
         '/campus.png',
@@ -319,12 +356,19 @@ function Landing() {
                         }}
                         className="flex overflow-x-auto pb-10 gap-6 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-2 max-w-6xl mx-auto md:overflow-visible md:snap-none px-6 md:px-0 -mx-6 md:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     >
-                        <EnhancedNotebookCard id="it" icon={<Monitor size={32} />} title="Information Technology" desc="Focused on AI research, software engineering, and digital infrastructure." />
-                        <EnhancedNotebookCard id="criminology" icon={<Scale size={32} />} title="Criminology & Justice" desc="Preparation for elite careers in law enforcement and public safety." />
-                        <EnhancedNotebookCard id="entrepreneurship" icon={<Rocket size={32} />} title="Entrepreneurship" desc="Incubating the next generation of business leaders." />
-                        <EnhancedNotebookCard id="education" icon={<Pencil size={32} />} title="Teacher Education" desc="Developing educators who are master communicators." />
-                        <EnhancedNotebookCard id="hospitality" icon={<Hotel size={32} />} title="Hospitality Management" desc="World-class training in hotel and tourism operations." />
-                        <EnhancedNotebookCard id="public-admin" icon={<Landmark size={32} />} title="Public Administration" desc="Ethics-based leadership training for governance." />
+                        {isLoadingPrograms ? (
+                           <div className="col-span-full py-10 text-center text-blue-300 font-bold uppercase tracking-widest animate-pulse">Synchronizing Academic Registry...</div>
+                        ) : (
+                          programs.map(p => (
+                            <EnhancedNotebookCard 
+                                key={p.id} 
+                                id={p.id} 
+                                icon={ICON_MAP[p.iconName] || <GraduationCap size={32} />} 
+                                title={p.title} 
+                                desc={p.desc} 
+                            />
+                          ))
+                        )}
                     </motion.div>
                 </div>
             </section>

@@ -13,8 +13,10 @@ import {
     BookOpen,
     Zap,
     Sparkles,
-    Users
+    Users,
+    GraduationCap
 } from 'lucide-react';
+import API_BASE_URL from '../api';
 import { motion, AnimatePresence } from 'framer-motion';
 import AuraConsultant from '../components/AuraConsultant';
 
@@ -34,68 +36,44 @@ const Programs = () => {
 
     const programCategories = ['All', 'Technology', 'Justice', 'Business', 'Education', 'Hospitality', 'Government'];
 
-    const programs = [
-        {
-            id: 'bsit',
-            title: 'Information Technology',
-            shortDesc: 'Focused on AI research, software engineering, and digital infrastructure.',
-            icon: <Monitor size={32} />,
-            category: 'Technology',
-            acronym: 'BSIT',
-            color: 'border-blue-600',
-            stats: { years: '4', credits: '144' }
-        },
-        {
-            id: 'criminology',
-            title: 'Criminology & Justice',
-            shortDesc: 'Preparation for elite careers in law enforcement and public safety.',
-            icon: <Scale size={32} />,
-            category: 'Justice',
-            acronym: 'BSCRIM',
-            color: 'border-indigo-600',
-            stats: { years: '4', credits: '160' }
-        },
-        {
-            id: 'entrepreneurship',
-            title: 'Entrepreneurship',
-            shortDesc: 'Incubating the next generation of business leaders and digital founders.',
-            icon: <Rocket size={32} />,
-            category: 'Business',
-            acronym: 'BSENTREP',
-            color: 'border-yellow-500',
-            stats: { years: '4', credits: '138' }
-        },
-        {
-            id: 'education',
-            title: 'Teacher Education',
-            shortDesc: 'Developing educators who are master communicators in the digital age.',
-            icon: <Pencil size={32} />,
-            category: 'Education',
-            acronym: 'BSED BEED',
-            color: 'border-green-600',
-            stats: { years: '4', credits: '152' }
-        },
-        {
-            id: 'hospitality',
-            title: 'Hospitality Management',
-            shortDesc: 'World-class training in hotel, tourism, and global leisure operations.',
-            icon: <Hotel size={32} />,
-            category: 'Hospitality',
-            acronym: 'BSHM',
-            color: 'border-rose-600',
-            stats: { years: '4', credits: '148' }
-        },
-        {
-            id: 'public-admin',
-            title: 'Public Administration',
-            shortDesc: 'Ethics-based leadership training for modern governance and policy.',
-            icon: <Landmark size={32} />,
-            category: 'Government',
-            acronym: 'BPA',
-            color: 'border-purple-600',
-            stats: { years: '4', credits: '140' }
-        }
-    ];
+    const [programs, setPrograms] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const ICON_MAP = {
+        Monitor: <Monitor size={32} />,
+        Scale: <Scale size={32} />,
+        Rocket: <Rocket size={32} />,
+        Pencil: <Pencil size={32} />,
+        Hotel: <Hotel size={32} />,
+        Landmark: <Landmark size={32} />,
+        GraduationCap: <GraduationCap size={32} />
+    };
+
+    useEffect(() => {
+        const fetchPrograms = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/quotas`);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    setPrograms(data.map(p => ({
+                        id: p.courseAbbr.toLowerCase(),
+                        title: p.courseName || p.courseAbbr,
+                        shortDesc: p.description || 'Institutional academic program.',
+                        icon: ICON_MAP[p.iconName] || <GraduationCap size={32} />,
+                        category: p.category || 'General',
+                        acronym: p.courseAbbr,
+                        color: p.color || 'border-blue-600',
+                        stats: { years: p.years || '4', credits: p.credits || '120' }
+                    })));
+                }
+            } catch (error) {
+                console.error("Fetch Programs Error:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchPrograms();
+    }, []);
 
     const filteredPrograms = programs.filter(p => 
         (activeTab === 'All' || p.category === activeTab) &&

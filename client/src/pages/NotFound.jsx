@@ -14,8 +14,8 @@ const NotFound = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[2px] bg-white/5 blur-sm rotate-45 pointer-events-none"></div>
 
       {/* ─── MINIMAL NAVBAR OVERRIDE ─── */}
-      <nav className="fixed top-0 left-0 w-full p-6 z-50 flex justify-between items-center pointer-events-none">
-        <Link to="/" className="flex items-center gap-3 group pointer-events-auto">
+      <nav className="fixed top-0 left-0 w-full p-6 z-50 flex justify-between items-center">
+        <Link to="/" className="flex items-center gap-3 group">
           <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-xl md:rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
              <span className="text-white font-black text-xl md:text-2xl font-serif">A</span>
           </div>
@@ -30,15 +30,17 @@ const NotFound = () => {
       {/* ─── MAIN 404 CONTENT ─── */}
       <main className="flex-1 flex flex-col items-center justify-center relative z-10 text-center max-w-4xl mx-auto w-full">
         
-        {/* Floating Icon */}
+        {/* Institutional Branding Icon */}
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: [0, -15, 0], opacity: 1 }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className="mb-8 relative"
         >
-          <div className="absolute inset-0 bg-yellow-400/20 blur-2xl rounded-full"></div>
-          <Compass size={80} strokeWidth={1} className="text-yellow-400 relative z-10" />
+          <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full scale-150"></div>
+          <div className="w-24 h-24 md:w-28 md:h-28 bg-blue-600 rounded-[2rem] flex items-center justify-center shadow-2xl relative z-10 border-2 border-blue-400/30">
+             <span className="text-white font-black text-4xl md:text-5xl font-serif">A</span>
+          </div>
         </motion.div>
 
         {/* 404 Text */}

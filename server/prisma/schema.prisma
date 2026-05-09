@@ -48,17 +48,33 @@ model Enrollment {
   password         String?
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
+  // 📝 INSTITUTIONAL REQUIREMENTS CHECKLIST (For Manual Verification)
+  reqBirthCert     Boolean  @default(false)
+  reqReportCard    Boolean  @default(false)
+  reqGoodMoral     Boolean  @default(false)
+  adminNotes       String?
+  
+  updatedAt        DateTime @updatedAt
   
   // 🧠 AURA AI ANALYTICS (Persistent Decision Support)
   aiStatus         String?   // "QUALIFIED", "AT_RISK", "INCOMPLETE", "READY"
   aiScore          Int?
   aiVerdict        String?   // JUSTIFICATION SUMMARY
   aiSuggestedPivot String?
+  lastReminderSent DateTime?
 }
 
 model CourseQuota {
-  id         Int      @id @default(autoincrement())
-  courseAbbr String   @unique
-  maxSlots   Int      @default(50)
-  updatedAt  DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  courseAbbr   String   @unique
+  courseName   String?
+  description  String?
+  category     String?  @default("General")
+  credits      Int?     @default(120)
+  years        Int?     @default(4)
+  iconName     String?  @default("GraduationCap")
+  color        String?  @default("border-blue-600")
+  highlights   String?  @default("Professional Training, Institutional Research, Global Standards")
+  maxSlots     Int      @default(50)
+  updatedAt    DateTime @updatedAt
 }
