@@ -58,6 +58,7 @@ function AboutHistory() {
 
 
             {/* Smooth Glassmorphic Header - Natural Blurring Zone */}
+            {/* Smooth Glassmorphic Header - Natural Blurring Zone */}
             <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 px-4 md:px-8 bg-transparent ${scrolled ? 'backdrop-blur-2xl py-4' : 'py-4 md:py-8'} hidden md:block`}>
                 <div className="max-w-7xl mx-auto flex justify-between items-center text-left">
                     <button 

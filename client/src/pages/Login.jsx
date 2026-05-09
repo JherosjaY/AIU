@@ -8,7 +8,9 @@ import {
   ArrowLeft,
   Info,
   BookOpen,
-  X
+  X,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
@@ -21,6 +23,8 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [detectedRole, setDetectedRole] = useState(null)
   const [showHelp, setShowHelp] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   // Smart Role Detection System
   useEffect(() => {
@@ -38,7 +42,10 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    const rawId = authId.trim().toUpperCase()
+    if (!authId || !password) return
+
+    setLoading(true)
+    setError('')
 
     try {
       const response = await fetch(`${API_BASE_URL}/login`, {
@@ -57,11 +64,13 @@ const Login = () => {
           navigate('/student-dashboard');
         }
       } else {
-        alert(`❌ AUTHENTICATION ERROR: ${data.message || 'Verification Failed'}`);
+        setError(data.message || 'Authentication Failed');
       }
     } catch (error) {
       console.error('Login Error:', error);
-      alert("❌ SERVER ERROR: Could not reach the authentication portal. Please check your connection.");
+      setError("Server Error. Please try again later.");
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -81,25 +90,38 @@ const Login = () => {
 
 
 
-      {/* ── Main Content (Centered) ── */}
-      <div className="relative z-10 flex-1 flex items-center justify-center p-4 md:p-6 mt-20 md:mt-16 mb-10 md:mb-16">
+      {/* ── DESKTOP BRANDING HEADER ── */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] px-6 py-8 hidden md:block">
+        <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="w-12 h-12 bg-[#1e40af] rounded-2xl flex items-center justify-center shadow-2xl border border-white/10 group font-black text-white">
+            <BookOpen className="text-yellow-400" size={24} strokeWidth={2.5} />
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="text-xl font-black tracking-tighter leading-none text-blue-700 uppercase italic drop-shadow-sm">Aura Integrated University</span>
+            <span className="text-[7px] font-black uppercase tracking-[0.4em] text-white drop-shadow-md">Official Regional Portal</span>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── Main Content (Fixed One-Screen View) ── */}
+      <div className="relative z-10 flex-1 flex items-center justify-center p-6 md:p-6 mt-8 md:mt-0 mb-4 md:mb-0">
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           className="max-w-[440px] w-full"
         >
-          {/* High Prestige Header */}
-          <div className="text-center mb-6 md:mb-10">
+          {/* High Prestige Header (Tighter for Mobile) */}
+          <div className="text-center mb-8 md:mb-12 cursor-default">
             <h1 className="text-3xl md:text-4xl font-black text-[#1e3a8a] tracking-tighter italic uppercase leading-none drop-shadow-md">
               Welcome <span className="text-blue-700">Back!</span>
             </h1>
-            <p className="text-[8px] md:text-[10px] font-black text-white mt-3 uppercase tracking-[0.4em] leading-relaxed drop-shadow-lg">
+            <p className="text-[9px] md:text-[10px] font-black text-white mt-4 md:mt-3 uppercase tracking-[0.4em] leading-relaxed drop-shadow-lg opacity-90">
               Sign in to access your student portal
             </p>
           </div>
 
-          {/* Auth Card (Purified White) */}
-          <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 shadow-[0_40px_100px_rgba(0,0,0,0.12)] border border-white/50 relative overflow-hidden">
+          {/* Auth Card (Purified White with Mobile Spacing) */}
+          <div className="bg-white rounded-[2.5rem] p-8 md:p-10 shadow-[0_45px_110px_rgba(0,0,0,0.14)] border border-white/50 relative overflow-hidden mb-8 md:mb-0">
             <form className="space-y-6" onSubmit={handleLogin}>
               {/* ID Field */}
               <div className="space-y-2">
@@ -114,9 +136,10 @@ const Login = () => {
                     onChange={(e) => setAuthId(e.target.value.toUpperCase())}
                     placeholder="USER ID"
                     className="w-full bg-gray-50 border border-black/10 focus:border-black/30 rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all text-sm font-black !text-slate-900 uppercase placeholder:text-gray-300 tracking-widest"
+                    required
                   />
                 </div>
-                {detectedRole && detectedRole === 'Student' && (
+                {detectedRole && (
                   <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-1.5 mt-2 ml-1">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">{detectedRole} Account Verified</span>
@@ -137,39 +160,57 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     className="w-full bg-gray-50 border border-black/10 focus:border-black/30 rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all text-sm font-black !text-slate-900 tracking-widest placeholder:text-gray-300"
+                    required
                   />
                 </div>
               </div>
 
-              {/* Utility Row */}
-              <div className="flex items-center justify-end">
+              {/* Action Row */}
+              <div className="flex items-center justify-end pr-1">
                 <button
                   type="button"
                   onClick={() => navigate('/forgot-password')}
-                  className="text-[10px] font-bold text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest"
+                  className="text-[9px] font-black text-blue-700 uppercase tracking-widest hover:text-blue-800 transition-all underline"
                 >
                   Forgot Password?
                 </button>
               </div>
 
+              {/* Error Message */}
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="flex items-center gap-2 p-4 bg-red-50 border border-red-100 rounded-2xl"
+                  >
+                    <AlertCircle size={16} className="text-red-500 shrink-0" />
+                    <span className="text-[10px] font-bold text-red-700 uppercase tracking-widest leading-none">{error}</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* Submit Button */}
               <button
-                disabled={!detectedRole || !password}
-                className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all
-                  ${(!detectedRole || !password)
-                    ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                    : 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-xl shadow-blue-900/10'}`}
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-blue-700 text-white font-black text-xs uppercase tracking-widest hover:bg-blue-600 active:scale-[0.98] transition-all shadow-xl shadow-blue-900/10 disabled:opacity-50"
               >
-                Sign In <ChevronRight size={18} strokeWidth={2.5} />
+                {loading ? (
+                  <RefreshCw className="animate-spin" size={18} />
+                ) : (
+                  <>Sign In <ChevronRight size={18} strokeWidth={2.5} /></>
+                )}
               </button>
             </form>
 
             {/* Registration Redirect */}
             <div className="mt-8 pt-8 border-t border-gray-100 text-center">
-              <span className="text-[10px] font-bold text-gray-400 block mb-2 uppercase tracking-[0.2em]">New Student?</span>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">New Student?</p>
               <button
                 onClick={() => navigate('/register')}
-                className="text-sm font-black text-blue-700 hover:text-blue-900 transition-all uppercase italic tracking-tighter"
+                className="text-sm font-black italic text-blue-700 hover:text-blue-800 transition-all uppercase"
               >
                 Enroll Now →
               </button>
@@ -180,7 +221,7 @@ const Login = () => {
 
       {/* Fixed Overlay Footer - Only on Desktop */}
       <div className="hidden md:block fixed bottom-0 left-0 right-0 z-50 shrink-0 py-8 text-center bg-gradient-to-t from-black/20 to-transparent">
-        <p className="text-[10px] text-white font-bold uppercase tracking-[0.5em] drop-shadow-md">
+        <p className="text-[10px] text-white font-bold uppercase tracking-[0.5em] shadow-sm opacity-80">
           &copy; 2026 Aura Integrated University. All rights reserved.
         </p>
       </div>
@@ -241,10 +282,6 @@ const Login = () => {
                   </div>
                 </div>
 
-                <p className="text-[10px] text-gray-400 text-center leading-relaxed font-bold uppercase tracking-widest">
-                  Refer to your institutional authorization email <br /> for your specific credentials.
-                </p>
-
                 <button
                   onClick={() => setShowHelp(false)}
                   className="w-full py-4 bg-blue-700 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 shadow-xl transition-all"
@@ -260,4 +297,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Login;

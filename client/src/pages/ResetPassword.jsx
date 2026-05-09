@@ -85,6 +85,8 @@ const ResetPassword = () => {
 
 
 
+
+
             <div className="relative z-10 flex-1 flex items-center justify-center p-4 md:p-6 mt-20 md:mt-16 mb-10 md:mb-16">
                 <motion.div 
                     initial={{ opacity: 0, scale: 0.98 }}

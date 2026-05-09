@@ -56,8 +56,10 @@ const ForgotPassword = () => {
 
 
 
-      {/* ── Main Content (Centered) ── */}
-      <div className="relative z-10 flex-1 flex items-center justify-center p-4 md:p-6 mt-28 md:mt-16 mb-10 md:mb-16">
+
+
+      {/* ── Main Content (Centered One-Screen View) ── */}
+      <div className="relative z-10 flex-1 flex items-center justify-center p-4 md:p-6 mt-8 md:mt-0 mb-4 md:mb-0">
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}

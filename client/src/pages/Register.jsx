@@ -19,9 +19,9 @@ const COURSE_MAP = {
   "BPA": "Bachelor of Public Administration"
 };
 
-const inputCls = "w-full bg-white border-gray-200 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-semibold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none shadow-sm hover:shadow-md hover:border-gray-300"
-const selectCls = "w-full bg-white border-gray-200 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-semibold text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none shadow-sm hover:shadow-md appearance-none cursor-pointer hover:border-gray-300"
-const labelCls = "text-[10px] md:text-[11px] font-black text-gray-600 uppercase tracking-widest mb-2 block"
+const inputCls = "w-full bg-white border-gray-300 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-bold text-gray-900 placeholder:text-gray-600 focus:border-blue-700 focus:ring-4 focus:ring-blue-700/10 transition-all outline-none shadow-sm hover:shadow-md hover:border-gray-400"
+const selectCls = "w-full bg-white border-gray-300 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-bold focus:border-blue-700 focus:ring-4 focus:ring-blue-700/10 transition-all outline-none shadow-sm hover:shadow-md appearance-none cursor-pointer hover:border-gray-400 pr-12 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23374151%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:18px_18px] bg-[right_1.25rem_center] bg-no-repeat transition-all"
+const labelCls = "text-[10px] md:text-[11px] font-black text-gray-800 uppercase tracking-[0.2em] mb-2 block"
 
 function Register() {
   const navigate = useNavigate()
@@ -43,7 +43,7 @@ function Register() {
   const [courseQuotas, setCourseQuotas] = useState([])
   const [isMobile, setIsMobile] = useState(false)
 
-  // 🌍 ENVIRONMENT DETECTION: Optimize for mobile performance
+  // 🌍 ENVIRONMENT DETECTION
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -62,7 +62,7 @@ function Register() {
     emergencyName: '', emergencyContact: '', emergencyRelation: '',
     primarySchool: '', primaryYear: '',
     secondarySchool: '', secondaryYear: '',
-    document: '', reportCard: '',
+    reportCard: '',
     consent: false
   })
 
@@ -151,7 +151,10 @@ function Register() {
         body: JSON.stringify(formData),
       })
       const data = await response.json()
-      if (data.success) { navigate('/success', { state: { email: formData.email } }) }
+      if (data.success) { 
+        alert('✔️ REGISTRATION COMPLETE: Your application has been received. Please login to continue.');
+        navigate('/login');
+      }
       else { alert('❌ Error: ' + data.message) }
     } catch (error) {
       console.error('Submission Error:', error)
@@ -172,7 +175,7 @@ function Register() {
 
     try {
       const apiHistory = newHistory.map(m => ({ role: m.role === 'aura' ? 'assistant' : 'user', content: m.text }))
-      const res = await fetch(`${API_BASE_URL}/consult`, { // Using purely advisory endpoint
+      const res = await fetch(`${API_BASE_URL}/consult`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMsg.text, history: apiHistory })
       })
@@ -210,7 +213,7 @@ function Register() {
   ];
 
   const renderStepper = () => (
-    <div className="flex items-start justify-center max-w-lg mx-auto mb-10">
+    <div className="flex items-start justify-center max-w-lg mx-auto">
       {stepLabels.map((step, i) => {
         const complete = isStepComplete(i);
         const active = (view === 'form' && activeStep === i) || (view === 'review' && i === 3);
@@ -235,9 +238,9 @@ function Register() {
     <div key={f.name} className={`space-y-1.5 ${f.halfWidth ? '' : f.fullWidth ? 'md:col-span-2' : ''}`}>
       <label className={labelCls}>{f.label}</label>
       {f.type === 'select' ? (
-        <select name={f.name} value={formData[f.name]} onChange={handleManualInput} className={selectCls}>
+        <select name={f.name} value={formData[f.name]} onChange={handleManualInput} className={`${selectCls} ${formData[f.name] ? 'text-gray-900 font-bold' : 'text-gray-800 font-medium'}`}>
           <option value="">Select {f.label.toLowerCase()}...</option>
-          {f.options.map(o => <option key={o} value={o}>{o}</option>)}
+          {f.options.map(o => <option key={o} value={o} className="text-gray-900 font-bold">{o}</option>)}
         </select>
       ) : (
         <input name={f.name} value={formData[f.name]} onChange={handleManualInput} placeholder={f.placeholder || `Enter ${f.label.toLowerCase()}`} className={inputCls} />
@@ -267,9 +270,48 @@ function Register() {
   }
 
   return (
-    <div className="light-theme flex flex-col h-screen bg-gray-50 overflow-hidden relative font-sans">
+    <div className="relative flex flex-col h-screen overflow-hidden font-sans">
+      
+      {/* ── BACKGROUND LAYER ── */}
+      <div className="absolute inset-0 z-0">
+        <img src="/campus.png" alt="Campus Background" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-white/45 backdrop-blur-[1px]" />
+      </div>
 
-
+      {/* ── LOCAL STYLES ── */}
+      <style>{`
+        .custom-register-scroll::-webkit-scrollbar {
+          width: 5px;
+        }
+        .custom-register-scroll::-webkit-scrollbar-track {
+          background: transparent;
+          margin-top: 10px;
+          margin-bottom: 10px;
+        }
+        .custom-register-scroll::-webkit-scrollbar-thumb {
+          background: #4b5563; /* Dark Grey */
+          border-radius: 20px;
+        }
+        .custom-register-scroll::-webkit-scrollbar-thumb:hover {
+          background: #374151;
+        }
+        /* FORCE INPUT & SELECT TEXT VISIBILITY */
+        input, select {
+          color: #000000 !important;
+        }
+        input::placeholder {
+          color: #4b5563 !important; /* Visible Grey Placeholder */
+          opacity: 1 !important;
+        }
+        /* FORCE SELECT OPTIONS VISIBILITY */
+        select option {
+          color: #000000 !important;
+          background-color: #ffffff !important;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
 
       {/* ── Bottom Right: Aura AI Toggler ── */}
       <div className="fixed bottom-6 right-6 md:bottom-8 md:right-10 z-[60]">
@@ -289,140 +331,157 @@ function Register() {
       </div>
 
       {/* ── Main Layout ── */}
-      <div className="flex-1 flex overflow-hidden relative mt-8 md:mt-4">
+      <div className="flex-1 flex overflow-hidden relative items-center justify-center p-4">
 
-        {/* Main Content Area (Form / Review) */}
-        <div className="flex-1 overflow-y-auto w-full transition-all duration-300 pt-16 md:pt-14 pb-28 md:pb-0">
+        {/* Main Content Area */}
+        <div className="max-w-3xl w-full transition-all duration-300 z-10">
           <AnimatePresence mode="wait">
 
             {/* ════════ MANUAL FORM ════════ */}
             {view === 'form' && (
-              <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-4 md:p-10 w-full">
-                <div className="max-w-3xl mx-auto space-y-2">
-                  <div className="text-center mb-6 md:mb-10">
-                    <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight mb-2 md:mb-3">Start Your Journey</h2>
-                    <p className="text-xs md:text-sm text-gray-500">Complete your registration to access the student portal and begin enrollment.</p>
-                  </div>
-                  {renderStepper()}
-                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-
-                      {/* STEP 0 */}
-                      {activeStep === 0 && (<>
-                        <SectionHeader icon={<GraduationCap size={18} />} title="Basic Identification" />
-                        <div className="md:col-span-2 space-y-1.5">
-                          <label className={labelCls}>Academic Program</label>
-                          <select name="course" value={formData.course} onChange={handleManualInput} className={selectCls}>
-                            <option value="">Select program...</option>
-                            {courseQuotas.length > 0 ? (
-                              courseQuotas.map(q => {
-                                const isFull = q.currentCount >= q.maxSlots;
-                                return (
-                                  <option key={q.courseAbbr} value={q.courseAbbr} disabled={isFull}>
-                                    {q.courseAbbr} - {COURSE_MAP[q.courseAbbr]} {isFull ? '(Class Full)' : ''}
-                                  </option>
-                                )
-                              })
-                            ) : (
-                              Object.entries(COURSE_MAP).map(([abbr, full]) => <option key={abbr} value={abbr}>{abbr} - {full}</option>)
-                            )}
-                          </select>
-                        </div>
-                        {[
-                          { name: 'firstName', label: 'First Name' },
-                          { name: 'lastName', label: 'Last Name' },
-                          { name: 'middleName', label: 'Middle Name' },
-                          { name: 'birthday', label: 'Date of Birth', placeholder: 'MM/DD/YYYY' },
-                          { name: 'civilStatus', label: 'Civil Status', type: 'select', options: ['Single', 'Married', 'Separated', 'Widowed'] },
-                          { name: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Other'] },
-                          { name: 'citizenship', label: 'Citizenship' },
-                        ].map(renderField)}
-
-                        <SectionHeader icon={<ShieldAlert size={18} />} title="Emergency Contact" />
-                        {[
-                          { name: 'emergencyName', label: 'Contact Person', fullWidth: true },
-                          { name: 'emergencyContact', label: 'Contact Number', halfWidth: true },
-                          { name: 'emergencyRelation', label: 'Relationship', halfWidth: true },
-                        ].map(renderField)}
-
-                        <SectionHeader icon={<MapPin size={18} />} title="Birthplace & Residence" />
-                        {[
-                          { name: 'birthProvince', label: 'Birth Province' },
-                          { name: 'birthCity', label: 'Birth City' },
-                          { name: 'birthBarangay', label: 'Birth Barangay' },
-                          { name: 'homeProvince', label: 'Home Province' },
-                          { name: 'homeCity', label: 'Home City' },
-                          { name: 'homeBarangay', label: 'Home Barangay' },
-                          { name: 'postalCode', label: 'Postal Code' },
-                        ].map(renderField)}
-                      </>)}
-
-                      {/* STEP 1 */}
-                      {activeStep === 1 && (<>
-                        <SectionHeader icon={<Mail size={18} />} title="Your Contact Details" />
-                        {[
-                          { name: 'phone', label: 'Primary Contact Number', placeholder: 'e.g. 09123456789' },
-                          { name: 'email', label: 'Email Address', placeholder: 'e.g. name@email.com' },
-                        ].map(renderField)}
-                      </>)}
-
-                      {/* STEP 2 */}
-                      {activeStep === 2 && (<>
-                        <SectionHeader icon={<UserCircle size={18} />} title="Family Details" />
-                        {[
-                          { name: 'fatherName', label: "Father's Full Name" },
-                          { name: 'fatherOccupation', label: "Father's Occupation" },
-                          { name: 'fatherContact', label: "Father's Contact" },
-                          { name: 'motherName', label: "Mother's Full Name" },
-                          { name: 'motherOccupation', label: "Mother's Occupation" },
-                          { name: 'motherContact', label: "Mother's Contact" },
-                        ].map(renderField)}
-                      </>)}
-
-                      {/* STEP 3 */}
-                      {activeStep === 3 && (<>
-                        <SectionHeader icon={<GraduationCap size={18} />} title="Educational History" />
-                        {[
-                          { name: 'primarySchool', label: 'Last Primary School' },
-                          { name: 'primaryYear', label: 'Year Graduated' },
-                          { name: 'secondarySchool', label: 'Last Secondary School' },
-                          { name: 'secondaryYear', label: 'Year Graduated' },
-                        ].map(renderField)}
-                        <div className="md:col-span-2 space-y-6 pt-4">
-                          <div className="space-y-2">
-                            <label className={labelCls}>Academic Verification (Required for Enrollment)</label>
-                            <label className={`w-full flex items-center justify-center gap-4 py-4 rounded-2xl text-sm font-bold transition-all border-2 border-dashed cursor-pointer shadow-sm ${formData.reportCard ? 'bg-blue-50 border-blue-400 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-blue-50/30'}`}>
-                              <Upload size={20} className={formData.reportCard ? 'animate-pulse' : ''} />
-                              {formData.reportCard ? 'Transcript Secured ✓' : 'Upload Transcript / Report Card'}
-                              <input type="file" multiple accept="image/*" onChange={(e) => handleFileUpload(e, 'reportCard')} className="hidden" />
-                            </label>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center mt-2 italic text-balance">Ensure your grades are clearly visible for institutional verification.</p>
-                          </div>
-
-                          <div className="space-y-2 pt-2">
-                            <label className={labelCls}>Birth Identification Protocol</label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <label className={`flex items-center justify-center gap-3 py-3.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${formData.document && formData.document !== 'Personal Delivery' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'}`}>
-                                <Upload size={16} /> {formData.document && formData.document !== 'Personal Delivery' ? 'Record Uploaded ✓' : 'Certification of Birth'}
-                                <input type="file" multiple accept="image/*,.pdf" onChange={(e) => handleFileUpload(e, 'document')} className="hidden" />
-                              </label>
-                              <button type="button" onClick={() => setFormData(prev => ({ ...prev, document: 'Personal Delivery' }))} className={`flex items-center justify-center gap-3 py-3.5 rounded-xl text-xs font-bold transition-all border ${formData.document === 'Personal Delivery' ? 'bg-blue-700/5 border-blue-300 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'}`}>
-                                <RefreshCw size={16} /> Physical Delivery
-                              </button>
+              <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
+                <div className="space-y-2">
+                    <div className="text-center mb-4 md:mb-6">
+                      <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-2 md:mb-3 drop-shadow-md">Start Your Journey</h2>
+                      <p className="text-[10px] md:text-sm text-white/80 font-medium drop-shadow-sm">Complete your registration to access the student portal and begin enrollment.</p>
+                    </div>
+                    
+                    <div className="bg-white rounded-[2rem] border border-gray-200 shadow-xl overflow-hidden flex flex-col max-h-[75vh] md:max-h-[620px]">
+                      <div className="px-6 md:px-10 pt-8 pb-4 bg-white border-b border-gray-50 shrink-0 z-20">
+                        {renderStepper()}
+                      </div>
+                      
+                      <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6 custom-register-scroll">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                          {activeStep === 0 && (<>
+                            <SectionHeader icon={<GraduationCap size={18} />} title="Basic Identification" />
+                            <div className="md:col-span-2 space-y-1.5">
+                              <label className={labelCls}>Academic Program</label>
+                              <select name="course" value={formData.course} onChange={handleManualInput} className={`${selectCls} ${formData.course ? 'text-gray-900 font-bold' : 'text-gray-800 font-medium'}`}>
+                                <option value="">Select program...</option>
+                                {courseQuotas.length > 0 ? (
+                                  courseQuotas.map(q => {
+                                    const isFull = q.currentCount >= q.maxSlots;
+                                    return (
+                                      <option key={q.courseAbbr} value={q.courseAbbr} disabled={isFull}>
+                                        {q.courseAbbr} - {COURSE_MAP[q.courseAbbr]} {isFull ? '(Class Full)' : ''}
+                                      </option>
+                                    )
+                                  })
+                                ) : (
+                                  Object.entries(COURSE_MAP).map(([abbr, full]) => <option key={abbr} value={abbr}>{abbr} - {full}</option>)
+                                )}
+                              </select>
                             </div>
-                          </div>
-                        </div>
-                      </>)}
+                            {[
+                              { name: 'firstName', label: 'First Name' },
+                              { name: 'lastName', label: 'Last Name' },
+                              { name: 'middleName', label: 'Middle Name' },
+                              { name: 'birthday', label: 'Date of Birth', placeholder: 'MM/DD/YYYY' },
+                              { name: 'civilStatus', label: 'Civil Status', type: 'select', options: ['Single', 'Married', 'Separated', 'Widowed'] },
+                              { name: 'gender', label: 'Gender', type: 'select', options: ['Male', 'Female', 'Other'] },
+                              { name: 'citizenship', label: 'Citizenship' },
+                            ].map(renderField)}
 
-                      {/* NAVIGATION */}
-                      <div className="md:col-span-2 pt-6 mt-4 border-t border-gray-100">
+                            <SectionHeader icon={<ShieldAlert size={18} />} title="Emergency Contact" />
+                            {[
+                              { name: 'emergencyName', label: 'Contact Person', fullWidth: true },
+                              { name: 'emergencyContact', label: 'Contact Number', halfWidth: true },
+                              { name: 'emergencyRelation', label: 'Relationship', halfWidth: true },
+                            ].map(renderField)}
+
+                            <SectionHeader icon={<MapPin size={18} />} title="Birthplace & Residence" />
+                            {[
+                              { name: 'birthProvince', label: 'Birth Province' },
+                              { name: 'birthCity', label: 'Birth City' },
+                              { name: 'birthBarangay', label: 'Birth Barangay' },
+                              { name: 'homeProvince', label: 'Home Province' },
+                              { name: 'homeCity', label: 'Home City' },
+                              { name: 'homeBarangay', label: 'Home Barangay' },
+                              { name: 'postalCode', label: 'Postal Code' },
+                            ].map(renderField)}
+                          </>)}
+
+                          {activeStep === 1 && (<>
+                            <SectionHeader icon={<Mail size={18} />} title="Your Contact Details" />
+                            {[
+                              { name: 'phone', label: 'Primary Contact Number', placeholder: 'e.g. 09123456789' },
+                              { name: 'email', label: 'Email Address', placeholder: 'e.g. name@email.com' },
+                            ].map(renderField)}
+                          </>)}
+
+                          {activeStep === 2 && (<>
+                            <SectionHeader icon={<UserCircle size={18} />} title="Family Details" />
+                            {[
+                              { name: 'fatherName', label: "Father's Full Name" },
+                              { name: 'fatherOccupation', label: "Father's Occupation" },
+                              { name: 'fatherContact', label: "Father's Contact" },
+                              { name: 'motherName', label: "Mother's Full Name" },
+                              { name: 'motherOccupation', label: "Mother's Occupation" },
+                              { name: 'motherContact', label: "Mother's Contact" },
+                            ].map(renderField)}
+                          </>)}
+
+                          {activeStep === 3 && (<>
+                            <SectionHeader icon={<GraduationCap size={18} />} title="Educational History" />
+                            {[
+                              { name: 'primarySchool', label: 'Last Primary School' },
+                              { name: 'primaryYear', label: 'Year Graduated' },
+                              { name: 'secondarySchool', label: 'Last Secondary School' },
+                              { name: 'secondaryYear', label: 'Year Graduated' },
+                            ].map(renderField)}
+                            <div className="md:col-span-2 space-y-6 pt-4">
+                              <div className="space-y-2">
+                                <label className={labelCls}>Academic Verification (Required for Enrollment)</label>
+                                <label className={`w-full flex items-center justify-center gap-4 py-4 rounded-2xl text-sm font-bold transition-all border-2 border-dashed cursor-pointer shadow-sm ${formData.reportCard ? 'bg-blue-50 border-blue-400 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-blue-50/30'}`}>
+                                  <Upload size={20} className={formData.reportCard ? 'animate-pulse' : ''} />
+                                  {formData.reportCard ? 'Transcript Secured ✓' : 'Upload Transcript / Report Card'}
+                                  <input type="file" multiple accept="image/*" onChange={(e) => handleFileUpload(e, 'reportCard')} className="hidden" />
+                                </label>
+                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center mt-2 italic text-balance">Ensure your grades are clearly visible for institutional verification.</p>
+                              </div>
+                              <div className="space-y-2 pt-2">
+                                <label className={labelCls}>Birth Identification Protocol</label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                  <label className={`flex items-center justify-center gap-3 py-3.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${formData.document && formData.document !== 'Personal Delivery' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'}`}>
+                                    <Upload size={16} /> {formData.document && formData.document !== 'Personal Delivery' ? 'Record Uploaded ✓' : 'Certification of Birth'}
+                                    <input type="file" multiple accept="image/*,.pdf" onChange={(e) => handleFileUpload(e, 'document')} className="hidden" />
+                                  </label>
+                                  <button type="button" onClick={() => setFormData(prev => ({ ...prev, document: 'Personal Delivery' }))} className={`flex items-center justify-center gap-3 py-3.5 rounded-xl text-xs font-bold transition-all border ${formData.document === 'Personal Delivery' ? 'bg-blue-700/5 border-blue-300 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'}`}>
+                                    <RefreshCw size={16} /> Physical Delivery
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* DATA PRIVACY CONSENT (RA 10173) - Moved inside Scrollable grid */}
+                            <div className="md:col-span-2 p-6 rounded-2xl bg-amber-50/70 border border-amber-200/50 mt-4">
+                              <label className="flex items-start gap-4 cursor-pointer">
+                                <div className="relative mt-0.5">
+                                  <input type="checkbox" name="consent" checked={formData.consent} onChange={(e) => setFormData(prev => ({ ...prev, consent: e.target.checked }))} className="peer w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500/50 transition-all cursor-pointer" />
+                                </div>
+                                <div>
+                                  <h5 className="text-[10px] font-black text-amber-800 uppercase tracking-widest mb-1">Data Privacy Act of 2012 (R.A. 10173)</h5>
+                                  <p className="text-[11px] text-amber-900/70 leading-relaxed font-medium italic">I hereby give my explicit consent to the collection, processing, and disclosure of my personal data for the purpose of enrollment and other academic services.</p>
+                                </div>
+                              </label>
+                            </div>
+                          </>)}
+                        </div>
+                      </div>
+
+                      <div className="px-6 md:px-10 py-5 bg-gray-50/50 border-t border-gray-100 shrink-0">
                         {activeStep < 3 ? (
                           <div className="flex items-center justify-between gap-4">
                             {activeStep > 0 ? (
                               <button onClick={() => setActiveStep(prev => prev - 1)} className="px-6 py-3 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-gray-200 transition-all flex items-center gap-2">
-                                <ArrowLeft size={16} /> Back
+                                <ArrowLeft size={16} /> <span className="hidden sm:inline">Back</span><span className="sm:hidden">Back</span>
                               </button>
-                            ) : <div />}
+                            ) : (
+                              <button onClick={() => navigate('/login')} className="px-6 py-3 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-gray-200 transition-all flex items-center gap-2">
+                                <ArrowLeft size={16} /> <span className="hidden sm:inline">Exit</span><span className="sm:hidden">Exit</span>
+                              </button>
+                            )}
                             <button
                               disabled={(() => { const req = { 0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 1: ['phone', 'email'], 2: ['fatherName', 'motherName'] }; return req[activeStep]?.some(f => !formData[f] || formData[f].toString().trim() === ''); })()}
                               onClick={() => setActiveStep(prev => prev + 1)}
@@ -432,86 +491,80 @@ function Register() {
                             </button>
                           </div>
                         ) : (
-                          <div className="space-y-6">
-                            <div className="p-6 rounded-xl bg-amber-50 border border-amber-200">
-                              <label className="flex items-start gap-4 cursor-pointer">
-                                <div className="relative mt-0.5">
-                                  <input type="checkbox" name="consent" checked={formData.consent} onChange={(e) => setFormData(prev => ({ ...prev, consent: e.target.checked }))} className="peer w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500/50 transition-all cursor-pointer" />
-                                </div>
-                                <div>
-                                  <h5 className="text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">Data Privacy Act of 2012 (R.A. 10173)</h5>
-                                  <p className="text-xs text-amber-700 leading-relaxed">I hereby give my explicit consent to the collection, processing, and disclosure of my personal data for the purpose of enrollment and other academic services.</p>
-                                </div>
-                              </label>
-                            </div>
-                            <div className="flex flex-row gap-3">
-                              <button onClick={() => setActiveStep(prev => prev - 1)} className="flex-1 px-4 py-3.5 rounded-xl bg-gray-100 text-gray-600 text-[11px] md:text-sm font-semibold hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
-                                <ArrowLeft size={16} /> <span className="hidden sm:inline">Back</span><span className="sm:hidden">Back</span>
-                              </button>
-                              <button
-                                disabled={!formData.consent || ['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].trim() === '')}
-                                onClick={() => setView('review')}
-                                className={`flex-[2] py-3.5 rounded-xl font-semibold text-[11px] md:text-sm transition-all flex items-center justify-center gap-2 ${(formData.consent && !['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].trim() === '')) ? 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
-                              >
-                                Review <span className="hidden sm:inline">Application</span> <ChevronRight size={16} strokeWidth={2.5} />
-                              </button>
-                            </div>
+                          <div className="flex flex-row gap-3">
+                            <button onClick={() => setActiveStep(prev => prev - 1)} className="flex-1 px-4 py-3.5 rounded-xl bg-gray-100 text-gray-600 text-[11px] md:text-sm font-semibold hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                              <ArrowLeft size={16} /> <span className="hidden sm:inline">Back</span><span className="sm:hidden">Back</span>
+                            </button>
+                            <button
+                              disabled={!formData.consent || ['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].trim() === '')}
+                              onClick={() => setView('review')}
+                              className={`flex-[2] py-3.5 rounded-xl font-semibold text-[11px] md:text-sm transition-all flex items-center justify-center gap-2 ${(formData.consent && !['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].trim() === '')) ? 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
+                            >
+                              Review <span className="hidden sm:inline">Application</span> <ChevronRight size={16} strokeWidth={2.5} />
+                            </button>
                           </div>
                         )}
                       </div>
                     </div>
-                  </div>
                 </div>
               </motion.div>
             )}
 
             {/* ════════ REVIEW ════════ */}
             {view === 'review' && (
-              <motion.div key="review" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-6 md:p-10 w-full">
-                <div className="max-w-3xl mx-auto space-y-8">
-                  {renderStepper()}
-                  <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900">Admission Summary</h2>
-                    <p className="text-sm text-gray-500 mt-1">Academic Year 2026-2027</p>
-                  </div>
-                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
-                      {[
-                        { label: 'Selected Program', value: formData.course ? `${formData.course} - ${COURSE_MAP[formData.course] || ''}` : '', full: true },
-                        { label: 'Full Name', value: `${formData.firstName} ${formData.middleName || ''} ${formData.lastName}`, full: true },
-                        { label: 'Birth Date', value: formData.birthday },
-                        { label: 'Birthplace', value: formData.birthBarangay ? `${formData.birthBarangay}, ${formData.birthCity}, ${formData.birthProvince}` : '' },
-                        { label: 'Citizenship', value: formData.citizenship },
-                        { label: 'Gender / Status', value: `${formData.gender || ''} / ${formData.civilStatus || ''}` },
-                        { label: 'Phone', value: formData.phone },
-                        { label: 'Email', value: formData.email },
-                        { label: 'Home Address', value: formData.homeBarangay ? `${formData.homeBarangay}, ${formData.homeCity}, ${formData.homeProvince}` : '', full: true },
-                        { label: 'Father', value: formData.fatherName ? `${formData.fatherName} (${formData.fatherOccupation || ''})` : '' },
-                        { label: 'Mother', value: formData.motherName ? `${formData.motherName} (${formData.motherOccupation || ''})` : '' },
-                        { label: 'Emergency Contact', value: formData.emergencyName ? `${formData.emergencyName} (${formData.emergencyRelation || ''})` : '' },
-                        { label: 'Emergency No.', value: formData.emergencyContact },
-                        { label: 'Secondary School', value: formData.secondarySchool ? `${formData.secondarySchool} (${formData.secondaryYear || ''})` : '' },
-                        { label: 'Primary School', value: formData.primarySchool ? `${formData.primarySchool} (${formData.primaryYear || ''})` : '' },
-                        { label: 'Requirement', value: formatDocumentInfo(formData.document), full: true },
-                        { label: 'Data Privacy Consent', value: formData.consent ? 'Consented ✓' : 'Pending' },
-                      ].map((f, i) => (
-                        <div key={i} className={`${f.full ? 'md:col-span-2' : ''}`}>
-                          <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{f.label}</label>
-                          <div className={`text-sm font-medium py-2 border-b border-gray-100 ${f.value ? 'text-gray-900' : 'text-gray-300 italic'}`}>
-                            {f.value || 'Not provided'}
-                          </div>
-                        </div>
-                      ))}
+              <motion.div key="review" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
+                <div className="space-y-2">
+                  <div className="bg-white rounded-[2rem] border border-gray-200 shadow-xl overflow-hidden flex flex-col max-h-[75vh] md:max-h-[620px]">
+                    <div className="px-6 md:px-10 pt-8 pb-4 bg-white border-b border-gray-50 shrink-0 z-20">
+                      {renderStepper()}
                     </div>
-                  </div>
-                  <div className="flex flex-row gap-3 pt-4">
-                    <button onClick={() => { setTempData({ ...formData }); setIsEditing(true); }} className="flex-1 bg-white border border-gray-300 text-gray-600 py-3.5 rounded-xl font-semibold text-[11px] md:text-sm hover:bg-gray-50 flex items-center justify-center gap-2 transition-all">
-                      <Edit3 size={16} /> <span className="hidden sm:inline">Modify Data</span><span className="sm:hidden">Edit</span>
-                    </button>
-                    <button onClick={handleSubmit} disabled={isSubmitting} className={`flex-[2] bg-blue-700 hover:bg-blue-600 text-white py-3.5 rounded-xl font-semibold text-[11px] md:text-sm flex items-center justify-center gap-2 shadow-sm transition-all ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'active:scale-[0.98]'}`}>
-                      {isSubmitting ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
-                      {isSubmitting ? 'Wait...' : 'Submit'}
-                    </button>
+                    
+                    <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6 custom-register-scroll">
+                      <div className="text-center mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900 uppercase italic tracking-tighter">Admission Summary</h2>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Academic Year 2026-2027</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+                        {[
+                          { label: 'Selected Program', value: formData.course ? `${formData.course} - ${COURSE_MAP[formData.course] || ''}` : '', full: true },
+                          { label: 'Full Name', value: `${formData.firstName} ${formData.middleName || ''} ${formData.lastName}`, full: true },
+                          { label: 'Birth Date', value: formData.birthday },
+                          { label: 'Birthplace', value: formData.birthBarangay ? `${formData.birthBarangay}, ${formData.birthCity}, ${formData.birthProvince}` : '' },
+                          { label: 'Citizenship', value: formData.citizenship },
+                          { label: 'Gender / Status', value: `${formData.gender || ''} / ${formData.civilStatus || ''}` },
+                          { label: 'Phone', value: formData.phone },
+                          { label: 'Email', value: formData.email },
+                          { label: 'Home Address', value: formData.homeBarangay ? `${formData.homeBarangay}, ${formData.homeCity}, ${formData.homeProvince}` : '', full: true },
+                          { label: 'Father', value: formData.fatherName ? `${formData.fatherName} (${formData.fatherOccupation || ''})` : '' },
+                          { label: 'Mother', value: formData.motherName ? `${formData.motherName} (${formData.motherOccupation || ''})` : '' },
+                          { label: 'Emergency Contact', value: formData.emergencyName ? `${formData.emergencyName} (${formData.emergencyRelation || ''})` : '' },
+                          { label: 'Emergency No.', value: formData.emergencyContact },
+                          { label: 'Secondary School', value: formData.secondarySchool ? `${formData.secondarySchool} (${formData.secondaryYear || ''})` : '' },
+                          { label: 'Primary School', value: formData.primarySchool ? `${formData.primarySchool} (${formData.primaryYear || ''})` : '' },
+                          { label: 'Requirement', value: formatDocumentInfo(formData.document), full: true },
+                          { label: 'Data Privacy Consent', value: formData.consent ? 'Consented ✓' : 'Pending' },
+                        ].map((f, i) => (
+                          <div key={i} className={`${f.full ? 'md:col-span-2' : ''}`}>
+                            <label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{f.label}</label>
+                            <div className={`text-sm font-medium py-2 border-b border-gray-100 ${f.value ? 'text-gray-900' : 'text-gray-300 italic'}`}>
+                              {f.value || 'Not provided'}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="px-6 md:px-10 py-5 bg-gray-50/50 border-t border-gray-100 shrink-0">
+                      <div className="flex flex-row gap-3">
+                        <button onClick={() => { setTempData({ ...formData }); setIsEditing(true); }} className="flex-1 bg-white border border-gray-300 text-gray-600 py-3.5 rounded-xl font-semibold text-[11px] md:text-sm hover:bg-gray-50 flex items-center justify-center gap-2 transition-all">
+                          <Edit3 size={16} /> <span className="hidden sm:inline">Modify Data</span><span className="sm:hidden">Edit</span>
+                        </button>
+                        <button onClick={handleSubmit} disabled={isSubmitting} className={`flex-[2] bg-blue-700 hover:bg-blue-600 text-white py-3.5 rounded-xl font-semibold text-[11px] md:text-sm flex items-center justify-center gap-2 shadow-sm transition-all ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'active:scale-[0.98]'}`}>
+                          {isSubmitting ? <RefreshCw size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
+                          {isSubmitting ? 'Wait...' : 'Submit'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -545,7 +598,7 @@ function Register() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/50 custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50/50 custom-register-scroll">
                 {messages.map((m, i) => (
                   <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm ${m.role === 'user' ? 'bg-blue-700 text-white rounded-br-md' : 'bg-white text-gray-700 border border-gray-200 rounded-bl-md'}`}>
@@ -590,7 +643,7 @@ function Register() {
                 <button onClick={() => setIsEditing(false)} className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"><X size={20} /></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8">
+              <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 custom-register-scroll">
                 {/* Identity */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-gray-100"><User size={16} className="text-blue-700" /><h4 className="text-sm font-bold text-gray-900">Personal Identity</h4></div>
@@ -631,9 +684,9 @@ function Register() {
                     ))}
                     <div className="space-y-1.5">
                       <label className={labelCls}>Course</label>
-                      <select name="course" value={(() => { const val = (tempData.course || '').toLowerCase(); const match = Object.entries(COURSE_MAP).find(([code, full]) => code.toLowerCase() === val || full.toLowerCase() === val); return match ? match[1] : ''; })()} onChange={handleTempInput} className={selectCls}>
+                      <select name="course" value={(() => { const val = (tempData.course || '').toLowerCase(); const match = Object.entries(COURSE_MAP).find(([code, full]) => code.toLowerCase() === val || full.toLowerCase() === val); return match ? (match[0]) : ''; })()} onChange={handleTempInput} className={`${selectCls} ${tempData.course ? 'text-gray-900 font-bold' : 'text-gray-800 font-medium'}`}>
                         <option value="">Select</option>
-                        {Object.entries(COURSE_MAP).map(([code, full]) => <option key={code} value={full}>{full} ({code})</option>)}
+                        {Object.entries(COURSE_MAP).map(([code, full]) => <option key={code} value={code} className="text-gray-900">{full} ({code})</option>)}
                       </select>
                     </div>
                   </div>
