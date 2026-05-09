@@ -46,16 +46,19 @@ const ProgramDetail = () => {
 
     useEffect(() => {
         const fetchProgram = async () => {
+            // 🏛️ SWR LAYER: Load specific program from cache immediately
+            const cached = localStorage.getItem(`aura_prog_${id}`);
+            if (cached) setProgram(JSON.parse(cached));
+
             try {
                 const res = await fetch(`${API_BASE_URL}/quotas`);
                 const data = await res.json();
                 if (Array.isArray(data)) {
-                    // Find the program by matching acronym (case-insensitive) or slug
                     const found = data.find(p => p.courseAbbr.toLowerCase() === id.toLowerCase() || (id.toLowerCase() === 'it' && p.courseAbbr === 'BSIT'));
                     if (found) {
-                        setProgram({
+                        const formatted = {
                             title: found.courseName || found.courseAbbr,
-                            icon: ICON_MAP[found.iconName] || <GraduationCap size={40} />,
+                            iconName: found.iconName,
                             description: found.description || 'Advanced institutional training for the next generation of industry leaders.',
                             highlights: (found.highlights || 'Global Standards, Research Excellence, Industry Integration').split(',').map(s => s.trim()),
                             color: found.color || 'border-blue-600',
@@ -64,7 +67,9 @@ const ProgramDetail = () => {
                                 { label: 'TOTAL CREDITS', value: found.credits || 120 },
                                 { label: 'CAPACITY', value: found.maxSlots || 50 }
                             ]
-                        });
+                        };
+                        setProgram(formatted);
+                        localStorage.setItem(`aura_prog_${id}`, JSON.stringify(formatted));
                     }
                 }
             } catch (error) {
@@ -164,7 +169,7 @@ const ProgramDetail = () => {
                             <div className="absolute inset-0 bg-blue-600 blur-[100px] opacity-20 transition-opacity"></div>
                             <div className="w-64 h-64 md:w-80 md:h-80 rounded-[3rem] md:rounded-[4rem] bg-white/5 border border-white/10 flex items-center justify-center text-yellow-400 shadow-3xl transform rotate-3 transition-transform duration-500 backdrop-blur-3xl">
                                 <div className="transform -rotate-3 transition-transform duration-500 scale-[2] md:scale-[2.5]">
-                                    {program.icon}
+                                    {ICON_MAP[program.iconName] || <GraduationCap size={40} />}
                                 </div>
                             </div>
                         </div>

@@ -659,9 +659,18 @@ app.delete('/api/enrollments/:id', async (req, res) => {
 // GET QUOTA STATISTICS
 app.get('/api/quotas', async (req, res) => {
   try {
-    const quotas = await prisma.courseQuota.findMany({
+    let quotas = await prisma.courseQuota.findMany({
       orderBy: { id: 'asc' }
     });
+
+    // 🛡️ AUTO-RECOVERY: If registry is empty, re-initialize core programs
+    if (quotas.length === 0) {
+      console.log('🏛️ Institutional Registry: Registry empty. Triggering emergency recovery sync...');
+      await initializeQuotas();
+      quotas = await prisma.courseQuota.findMany({
+        orderBy: { id: 'asc' }
+      });
+    }
 
     // Also fetch current accepted counts for each course
     const stats = await Promise.all(quotas.map(async (q) => {

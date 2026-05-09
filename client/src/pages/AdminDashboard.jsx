@@ -69,13 +69,10 @@ export default function AdminDashboard() {
   })
 
   const handleGlobalRefresh = async () => {
-    setIsRefreshing(true)
     try {
-      // High-speed concurrent fetching
       await Promise.all([fetchEnrollments(), fetchQuotas()]);
     } finally {
-      // Artificial delay for smooth animation if backend is TOO fast
-      setTimeout(() => setIsRefreshing(false), 800);
+      setIsRefreshing(false);
     }
   }
 
@@ -99,16 +96,21 @@ export default function AdminDashboard() {
   }, [isSidebarOpen])
 
   const fetchQuotas = async () => {
+    // 🏛️ SWR LAYER: Load cached registry immediately
+    const cached = localStorage.getItem('aura_quotas');
+    if (cached) setQuotas(JSON.parse(cached));
+
     try {
       const res = await fetch(`${API_BASE_URL}/quotas`)
       const data = await res.json()
       if (res.ok && Array.isArray(data)) {
-        setQuotas(data)
-      } else {
-        console.error('Fetch Quotas Error:', data)
+        setQuotas(data);
+        localStorage.setItem('aura_quotas', JSON.stringify(data));
       }
     } catch (error) {
       console.error('Fetch Quotas Error:', error)
+    } finally {
+      if (isLoading) setIsLoading(false);
     }
   }
 
@@ -135,24 +137,41 @@ export default function AdminDashboard() {
   }
 
   const fetchEnrollments = async () => {
+    // 🏛️ SWR LAYER: Load cached dossier immediately
+    const cached = localStorage.getItem('aura_enrollments');
+    if (cached) setEnrollments(JSON.parse(cached));
+
     try {
       const res = await fetch(`${API_BASE_URL}/enrollments`)
       const data = await res.json()
       if (res.ok && Array.isArray(data)) {
-        setEnrollments(data)
-      } else {
-        console.error('Fetch Enrollments Error:', data)
+        setEnrollments(data);
+        localStorage.setItem('aura_enrollments', JSON.stringify(data));
       }
-      setIsLoading(false)
     } catch (error) {
-      console.error('Fetch Error:', error)
-      setIsLoading(false)
+      console.error('Fetch Enrollments Error:', error)
+    } finally {
+      if (isLoading) setIsLoading(false);
     }
   }
 
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
+    
+    // 🏛️ OPTIMISTIC UI: Add to local state immediately
+    const optimisticId = Date.now();
+    const optimisticCourse = {
+      ...courseForm,
+      id: optimisticId,
+      courseAbbr: courseForm.abbr,
+      courseName: courseForm.name,
+      currentCount: 0,
+      isOptimistic: true // marker for visual feedback if needed
+    };
+    setQuotas([...quotas, optimisticCourse]);
+    setShowCourseModal(false);
+
     try {
       const res = await fetch(`${API_BASE_URL}/courses`, {
         method: 'POST',
@@ -160,12 +179,15 @@ export default function AdminDashboard() {
         body: JSON.stringify(courseForm)
       });
       if (res.ok) {
-        setShowCourseModal(false);
         fetchQuotas();
         resetCourseForm();
+      } else {
+        // Rollback on error
+        fetchQuotas(); 
       }
     } catch (error) {
       console.error("Create Course Error:", error);
+      fetchQuotas();
     } finally {
       setIsProcessing(false);
     }
@@ -174,6 +196,16 @@ export default function AdminDashboard() {
   const handleUpdateCourse = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
+
+    // 🏛️ OPTIMISTIC UI: Update local state immediately
+    const updatedQuotas = quotas.map(q => 
+      q.id === editingCourse.id 
+        ? { ...q, ...courseForm, courseAbbr: courseForm.abbr, courseName: courseForm.name } 
+        : q
+    );
+    setQuotas(updatedQuotas);
+    setShowCourseModal(false);
+
     try {
       const res = await fetch(`${API_BASE_URL}/courses/${editingCourse.id}`, {
         method: 'PUT',
@@ -181,13 +213,16 @@ export default function AdminDashboard() {
         body: JSON.stringify(courseForm)
       });
       if (res.ok) {
-        setShowCourseModal(false);
         setEditingCourse(null);
         fetchQuotas();
         resetCourseForm();
+      } else {
+        // Rollback on error
+        fetchQuotas();
       }
     } catch (error) {
       console.error("Update Course Error:", error);
+      fetchQuotas();
     } finally {
       setIsProcessing(false);
     }

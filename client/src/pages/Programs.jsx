@@ -51,11 +51,15 @@ const Programs = () => {
 
     useEffect(() => {
         const fetchPrograms = async () => {
+            // 🏛️ SWR LAYER: Load cached programs immediately
+            const cached = localStorage.getItem('aura_programs_hub');
+            if (cached) setPrograms(JSON.parse(cached));
+
             try {
                 const res = await fetch(`${API_BASE_URL}/quotas`);
                 const data = await res.json();
-                if (Array.isArray(data)) {
-                    setPrograms(data.map(p => ({
+                if (res.ok && Array.isArray(data)) {
+                    const formatted = data.map(p => ({
                         id: p.courseAbbr.toLowerCase(),
                         title: p.courseName || p.courseAbbr,
                         shortDesc: p.description || 'Institutional academic program.',
@@ -64,7 +68,9 @@ const Programs = () => {
                         acronym: p.courseAbbr,
                         color: p.color || 'border-blue-600',
                         stats: { years: p.years || '4', credits: p.credits || '120' }
-                    })));
+                    }));
+                    setPrograms(formatted);
+                    localStorage.setItem('aura_programs_hub', JSON.stringify(formatted));
                 }
             } catch (error) {
                 console.error("Fetch Programs Error:", error);

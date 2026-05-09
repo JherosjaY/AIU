@@ -55,16 +55,22 @@ function Landing() {
 
     useEffect(() => {
         const fetchPrograms = async () => {
+            // 🏛️ SWR LAYER: Load cached programs immediately
+            const cached = localStorage.getItem('aura_landing_programs');
+            if (cached) setPrograms(JSON.parse(cached));
+
             try {
                 const res = await fetch(`${API_BASE_URL}/quotas`);
                 const data = await res.json();
-                if (Array.isArray(data)) {
-                    setPrograms(data.map(p => ({
+                if (res.ok && Array.isArray(data)) {
+                    const formatted = data.map(p => ({
                         id: p.courseAbbr.toLowerCase(),
                         title: p.courseName || p.courseAbbr,
                         desc: p.description || 'Institutional academic program.',
                         iconName: p.iconName
-                    })).slice(0, 6)); 
+                    })).slice(0, 6);
+                    setPrograms(formatted);
+                    localStorage.setItem('aura_landing_programs', JSON.stringify(formatted));
                 }
             } catch (error) {
                 console.error("Fetch Programs Error:", error);
