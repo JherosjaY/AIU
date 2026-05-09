@@ -135,7 +135,7 @@ const Login = () => {
                     value={authId}
                     onChange={(e) => setAuthId(e.target.value.toUpperCase())}
                     placeholder="USER ID"
-                    className="w-full bg-gray-50 border border-black/10 focus:border-black/30 rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all text-sm font-black !text-slate-900 uppercase placeholder:text-gray-300 tracking-widest"
+                    className="w-full bg-gray-50 border border-black/10 focus:border-blue-700 rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-black !text-black caret-blue-700 uppercase placeholder:text-gray-300 tracking-widest"
                     required
                   />
                 </div>
@@ -159,7 +159,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-gray-50 border border-black/10 focus:border-black/30 rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all text-sm font-black !text-slate-900 tracking-widest placeholder:text-gray-300"
+                    className="w-full bg-gray-50 border border-black/10 focus:border-blue-700 rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-black !text-black caret-blue-700 tracking-widest placeholder:text-gray-300"
                     required
                   />
                 </div>
@@ -293,6 +293,18 @@ const Login = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* ── LOCAL STYLES ── */}
+      <style>{`
+        input {
+          color: #000000 !important;
+          caret-color: #1d4ed8 !important; /* blue-700 */
+        }
+        input::placeholder {
+          color: #94a3b8 !important; /* Visible Slate-400 */
+          opacity: 1 !important;
+        }
+      `}</style>
+
     </div>
   )
 }

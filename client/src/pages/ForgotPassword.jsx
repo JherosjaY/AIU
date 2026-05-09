@@ -131,7 +131,7 @@ const ForgotPassword = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value.toUpperCase())}
                           placeholder="NAME@GMAIL.COM"
-                          className="w-full bg-gray-50 border border-black/10 focus:border-black/30 rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all text-sm font-black !text-slate-900 uppercase placeholder:text-gray-300 tracking-widest"
+                          className="w-full bg-gray-50 border border-black/10 focus:border-blue-700 rounded-2xl py-4 pl-14 pr-6 outline-none focus:bg-white focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-black !text-black caret-blue-700 uppercase placeholder:text-gray-300 tracking-widest"
                           required
                         />
                       </div>
@@ -155,11 +155,8 @@ const ForgotPassword = () => {
                     {/* Submit Button */}
                     <button 
                       type="submit"
-                      disabled={!email.trim() || status === 'loading'}
-                      className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all
-                        ${(!email.trim() || status === 'loading') 
-                          ? 'bg-gray-100 text-gray-300 cursor-not-allowed' 
-                          : 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-xl shadow-blue-900/10'}`}
+                      disabled={status === 'loading'}
+                      className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-blue-700 text-white font-black text-xs uppercase tracking-widest hover:bg-blue-600 active:scale-[0.98] transition-all shadow-xl shadow-blue-900/10 disabled:opacity-50"
                     >
                       {status === 'loading' ? (
                         <><RefreshCw size={18} className="animate-spin" /> Verifying...</>
@@ -258,6 +255,17 @@ const ForgotPassword = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* ── LOCAL STYLES ── */}
+      <style>{`
+        input {
+          color: #000000 !important;
+          caret-color: #1d4ed8 !important; /* blue-700 */
+        }
+        input::placeholder {
+          color: #94a3b8 !important; /* Visible Slate-400 */
+          opacity: 1 !important;
+        }
+      `}</style>
     </div>
   )
 }

@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, User, Mail, Phone, Calendar, MapPin, CheckCircle2, ChevronRight,
   MessageSquare, FileText, Save, RefreshCw, Upload, UserCircle, BadgeCheck,
   Type, Map, Compass, Building, GraduationCap, X, Sparkles,
   ShieldCheck, Zap, Briefcase, ShieldAlert, Users,
-  Search, Trash2, Edit3, AlertCircle, Send, LogIn
+  Search, Trash2, Edit3, AlertCircle, Send, LogIn, BookOpen
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import API_BASE_URL from '../api'
@@ -19,9 +19,9 @@ const COURSE_MAP = {
   "BPA": "Bachelor of Public Administration"
 };
 
-const inputCls = "w-full bg-white border-gray-300 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-bold text-gray-900 placeholder:text-gray-600 focus:border-blue-700 focus:ring-4 focus:ring-blue-700/10 transition-all outline-none shadow-sm hover:shadow-md hover:border-gray-400"
-const selectCls = "w-full bg-white border-gray-300 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-bold focus:border-blue-700 focus:ring-4 focus:ring-blue-700/10 transition-all outline-none shadow-sm hover:shadow-md appearance-none cursor-pointer hover:border-gray-400 pr-12 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23374151%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:18px_18px] bg-[right_1.25rem_center] bg-no-repeat transition-all"
-const labelCls = "text-[10px] md:text-[11px] font-black text-gray-800 uppercase tracking-[0.2em] mb-2 block"
+const inputCls = "w-full bg-white border-gray-300 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-bold !text-black caret-blue-700 placeholder:!text-gray-500 focus:border-blue-700 focus:ring-4 focus:ring-blue-700/10 transition-all outline-none shadow-sm hover:shadow-md hover:border-gray-400"
+const selectCls = "w-full bg-white border-gray-300 border-2 rounded-xl md:rounded-2xl px-5 py-3.5 md:py-4 text-sm md:text-base font-bold !text-black caret-blue-700 focus:border-blue-700 focus:ring-4 focus:ring-blue-700/10 transition-all outline-none shadow-sm hover:shadow-md appearance-none cursor-pointer hover:border-gray-400 pr-12 bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:18px_18px] bg-[right_1.25rem_center] bg-no-repeat transition-all"
+const labelCls = "text-[10px] md:text-[11px] font-black !text-black uppercase tracking-[0.2em] mb-2 block"
 
 function Register() {
   const navigate = useNavigate()
@@ -195,14 +195,23 @@ function Register() {
   }
 
   const isStepComplete = (index) => {
-    if (view === 'review') return true;
-    switch (index) {
-      case 0: return ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'].every(f => formData[f] && formData[f].toString().trim() !== '');
-      case 1: return ['phone', 'email'].every(f => formData[f] && formData[f].toString().trim() !== '');
-      case 2: return ['fatherName', 'motherName'].every(f => formData[f] && formData[f].toString().trim() !== '');
-      case 3: return ['primarySchool', 'secondarySchool', 'document', 'consent'].every(f => (f === 'consent' ? formData[f] : (formData[f] && formData[f].toString().trim() !== '')));
-      default: return false;
-    }
+    const val = (index) => {
+      if (view === 'review') return true;
+      const r = { 
+        0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
+        1: ['phone', 'email'], 
+        2: ['fatherName', 'motherName'],
+        3: ['primarySchool', 'secondarySchool', 'document', 'consent']
+      };
+      const fields = r[index] || [];
+      return fields.every(f => {
+        const v = formData[f];
+        if (f === 'consent') return !!v;
+        if (v === undefined || v === null) return false;
+        return v.toString().trim() !== '';
+      });
+    };
+    return val(index);
   }
 
   const stepLabels = [
@@ -236,14 +245,14 @@ function Register() {
 
   const renderField = (f) => (
     <div key={f.name} className={`space-y-1.5 ${f.halfWidth ? '' : f.fullWidth ? 'md:col-span-2' : ''}`}>
-      <label className={labelCls}>{f.label}</label>
+      <label className={labelCls}>{f.label || f.name}</label>
       {f.type === 'select' ? (
-        <select name={f.name} value={formData[f.name]} onChange={handleManualInput} className={`${selectCls} ${formData[f.name] ? 'text-gray-900 font-bold' : 'text-gray-800 font-medium'}`}>
-          <option value="">Select {f.label.toLowerCase()}...</option>
-          {f.options.map(o => <option key={o} value={o} className="text-gray-900 font-bold">{o}</option>)}
+        <select name={f.name} value={formData[f.name] || ''} onChange={handleManualInput} className={selectCls}>
+          <option value="">Select {(f.label || '').toLowerCase()}...</option>
+          {f.options && f.options.map(o => <option key={o} value={o} className="!text-black">{o}</option>)}
         </select>
       ) : (
-        <input name={f.name} value={formData[f.name]} onChange={handleManualInput} placeholder={f.placeholder || `Enter ${f.label.toLowerCase()}`} className={inputCls} />
+        <input name={f.name} value={formData[f.name] || ''} onChange={handleManualInput} placeholder={f.placeholder || `Enter ${(f.label || '').toLowerCase()}`} className={inputCls} />
       )}
     </div>
   );
@@ -298,6 +307,7 @@ function Register() {
         /* FORCE INPUT & SELECT TEXT VISIBILITY */
         input, select {
           color: #000000 !important;
+          caret-color: #1d4ed8 !important; /* blue-700 */
         }
         input::placeholder {
           color: #4b5563 !important; /* Visible Grey Placeholder */
@@ -330,6 +340,7 @@ function Register() {
         </AnimatePresence>
       </div>
 
+
       {/* ── Main Layout ── */}
       <div className="flex-1 flex overflow-hidden relative items-center justify-center p-4">
 
@@ -342,8 +353,8 @@ function Register() {
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
                 <div className="space-y-2">
                     <div className="text-center mb-4 md:mb-6">
-                      <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight mb-2 md:mb-3 drop-shadow-md">Start Your Journey</h2>
-                      <p className="text-[10px] md:text-sm text-white/80 font-medium drop-shadow-sm">Complete your registration to access the student portal and begin enrollment.</p>
+                      <h2 className="text-3xl md:text-5xl font-black text-blue-700 italic tracking-tighter uppercase mb-2 md:mb-3 drop-shadow-sm">Start Your Journey</h2>
+                      <p className="text-[10px] md:text-xs text-white font-bold uppercase tracking-[0.3em] drop-shadow-sm">Complete your registration to access the student portal and begin enrollment.</p>
                     </div>
                     
                     <div className="bg-white rounded-[2rem] border border-gray-200 shadow-xl overflow-hidden flex flex-col max-h-[75vh] md:max-h-[620px]">
@@ -357,7 +368,7 @@ function Register() {
                             <SectionHeader icon={<GraduationCap size={18} />} title="Basic Identification" />
                             <div className="md:col-span-2 space-y-1.5">
                               <label className={labelCls}>Academic Program</label>
-                              <select name="course" value={formData.course} onChange={handleManualInput} className={`${selectCls} ${formData.course ? 'text-gray-900 font-bold' : 'text-gray-800 font-medium'}`}>
+                              <select name="course" value={formData.course} onChange={handleManualInput} className={selectCls}>
                                 <option value="">Select program...</option>
                                 {courseQuotas.length > 0 ? (
                                   courseQuotas.map(q => {
@@ -482,13 +493,25 @@ function Register() {
                                 <ArrowLeft size={16} /> <span className="hidden sm:inline">Exit</span><span className="sm:hidden">Exit</span>
                               </button>
                             )}
-                            <button
-                              disabled={(() => { const req = { 0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 1: ['phone', 'email'], 2: ['fatherName', 'motherName'] }; return req[activeStep]?.some(f => !formData[f] || formData[f].toString().trim() === ''); })()}
-                              onClick={() => setActiveStep(prev => prev + 1)}
-                              className={`px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${(() => { const req = { 0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 1: ['phone', 'email'], 2: ['fatherName', 'motherName'] }; return req[activeStep]?.some(f => !formData[f] || formData[f].toString().trim() === ''); })() ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm'}`}
-                            >
-                              Continue <ChevronRight size={16} strokeWidth={2.5} />
-                            </button>
+                            {(() => {
+                              const req = { 
+                                0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
+                                1: ['phone', 'email'], 
+                                2: ['fatherName', 'motherName'] 
+                              }; 
+                              const currentFields = req[activeStep] || [];
+                              const isStepInvalid = currentFields.some(f => !formData[f] || formData[f].toString().trim() === '');
+                              
+                              return (
+                                <button
+                                  disabled={isStepInvalid}
+                                  onClick={() => setActiveStep(prev => prev + 1)}
+                                  className={`px-8 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${isStepInvalid ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm'}`}
+                                >
+                                  Continue <ChevronRight size={16} strokeWidth={2.5} />
+                                </button>
+                              );
+                            })()}
                           </div>
                         ) : (
                           <div className="flex flex-row gap-3">
@@ -496,9 +519,9 @@ function Register() {
                               <ArrowLeft size={16} /> <span className="hidden sm:inline">Back</span><span className="sm:hidden">Back</span>
                             </button>
                             <button
-                              disabled={!formData.consent || ['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].trim() === '')}
+                              disabled={!formData.consent || ['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].toString().trim() === '')}
                               onClick={() => setView('review')}
-                              className={`flex-[2] py-3.5 rounded-xl font-semibold text-[11px] md:text-sm transition-all flex items-center justify-center gap-2 ${(formData.consent && !['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].trim() === '')) ? 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
+                              className={`flex-[2] py-3.5 rounded-xl font-semibold text-[11px] md:text-sm transition-all flex items-center justify-center gap-2 ${(formData.consent && !['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].toString().trim() === '')) ? 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
                             >
                               Review <span className="hidden sm:inline">Application</span> <ChevronRight size={16} strokeWidth={2.5} />
                             </button>
@@ -521,8 +544,8 @@ function Register() {
                     
                     <div className="flex-1 overflow-y-auto px-6 md:px-10 py-6 custom-register-scroll">
                       <div className="text-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900 uppercase italic tracking-tighter">Admission Summary</h2>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Academic Year 2026-2027</p>
+                        <h2 className="text-2xl font-black text-blue-700 italic tracking-tighter uppercase drop-shadow-sm">Admission Summary</h2>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em] mt-1">Academic Year 2026-2027</p>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                         {[
@@ -684,9 +707,9 @@ function Register() {
                     ))}
                     <div className="space-y-1.5">
                       <label className={labelCls}>Course</label>
-                      <select name="course" value={(() => { const val = (tempData.course || '').toLowerCase(); const match = Object.entries(COURSE_MAP).find(([code, full]) => code.toLowerCase() === val || full.toLowerCase() === val); return match ? (match[0]) : ''; })()} onChange={handleTempInput} className={`${selectCls} ${tempData.course ? 'text-gray-900 font-bold' : 'text-gray-800 font-medium'}`}>
+                      <select name="course" value={tempData.course || ''} onChange={handleTempInput} className={selectCls}>
                         <option value="">Select</option>
-                        {Object.entries(COURSE_MAP).map(([code, full]) => <option key={code} value={code} className="text-gray-900">{full} ({code})</option>)}
+                        {Object.entries(COURSE_MAP).map(([code, full]) => <option key={code} value={code}>{full} ({code})</option>)}
                       </select>
                     </div>
                   </div>

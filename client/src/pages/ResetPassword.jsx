@@ -3,11 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
     ShieldCheck, 
     Lock, 
-    ArrowRight, 
+    ChevronRight, 
     CheckCircle2, 
     AlertCircle,
     Eye,
-    EyeOff
+    EyeOff,
+    RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import API_BASE_URL from '../api';
@@ -112,7 +113,7 @@ const ResetPassword = () => {
                                 </p>
                                 <button 
                                     onClick={() => navigate('/login')}
-                                    className="w-full py-4 rounded-2xl bg-blue-700 text-white font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-blue-600 transition-all shadow-xl shadow-blue-700/20 active:scale-[0.98]"
+                                    className="w-full py-4 rounded-2xl bg-blue-700 text-white font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-blue-900/10 active:scale-[0.98]"
                                 >
                                     Login to Portal
                                 </button>
@@ -141,7 +142,7 @@ const ResetPassword = () => {
                                                         value={password}
                                                         onChange={(e) => setPassword(e.target.value)}
                                                         placeholder="••••••••"
-                                                        className="w-full bg-gray-50 border border-transparent rounded-2xl py-4 pl-12 pr-12 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all text-sm font-black !text-slate-900 placeholder:text-gray-200"
+                                                        className="w-full bg-gray-50 border border-black/10 rounded-2xl py-4 pl-12 pr-12 outline-none focus:bg-white focus:border-blue-700 focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-black !text-black caret-blue-700 placeholder:text-gray-200"
                                                         required
                                                     />
                                                     <button 
@@ -164,7 +165,7 @@ const ResetPassword = () => {
                                                         value={confirmPassword}
                                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                                         placeholder="••••••••"
-                                                        className="w-full bg-gray-50 border border-transparent rounded-2xl py-4 pl-12 pr-12 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all text-sm font-black !text-slate-900 placeholder:text-gray-200"
+                                                        className="w-full bg-gray-50 border border-black/10 rounded-2xl py-4 pl-12 pr-12 outline-none focus:bg-white focus:border-blue-700 focus:ring-4 focus:ring-blue-600/10 transition-all text-sm font-black !text-black caret-blue-700 placeholder:text-gray-200"
                                                         required
                                                     />
                                                     <button 
@@ -192,16 +193,30 @@ const ResetPassword = () => {
                                         <button 
                                             type="submit"
                                             disabled={status === 'loading'}
-                                            className="w-full py-5 rounded-2xl bg-blue-700 text-white font-bold text-[10px] uppercase tracking-[0.4em] hover:bg-blue-600 transition-all shadow-xl shadow-blue-700/20 active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-50"
+                                            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-blue-700 text-white font-black text-xs uppercase tracking-widest hover:bg-blue-600 active:scale-[0.98] transition-all shadow-xl shadow-blue-900/10 disabled:opacity-50"
                                         >
-                                            {status === 'loading' ? 'Encrypting...' : 'Update Password'} 
-                                            {status !== 'loading' && <ArrowRight size={14} className="mt-[-1px]" />}
+                                            {status === 'loading' ? (
+                                                <RefreshCw className="animate-spin" size={18} />
+                                            ) : (
+                                                <>Update Password <ChevronRight size={18} strokeWidth={2.5} /></>
+                                            )}
                                         </button>
                                     </form>
                                 </div>
                             </div>
                         )}
                     </AnimatePresence>
+                    {/* ── LOCAL STYLES ── */}
+                    <style>{`
+                        input {
+                            color: #000000 !important;
+                            caret-color: #1d4ed8 !important; /* blue-700 */
+                        }
+                        input::placeholder {
+                            color: #cbd5e1 !important; /* slate-300 */
+                            opacity: 1 !important;
+                        }
+                    `}</style>
                 </motion.div>
             </div>
         </div>
