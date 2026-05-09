@@ -269,22 +269,7 @@ function Register() {
   return (
     <div className="light-theme flex flex-col h-screen bg-gray-50 overflow-hidden relative font-sans">
 
-      {/* ── Overlay Branding ── */}
-      <div className={`absolute top-4 md:top-6 left-4 md:left-10 z-50 pointer-events-none transition-all duration-300 ${isChatOpen ? 'opacity-0 md:opacity-100' : 'opacity-100'}`}>
-        <div className={`flex items-center gap-2 text-blue-800 font-black italic tracking-tighter text-sm md:text-lg ${isMobile ? 'bg-white' : 'bg-white/80 backdrop-blur-md'} px-4 md:px-5 py-2 md:py-2.5 rounded-xl md:rounded-2xl shadow-sm border border-gray-200/50`}>
-          <GraduationCap size={18} md:size={22} className="text-blue-700" />
-          Aura Enrollment
-        </div>
-      </div>
 
-      <div className={`absolute top-4 md:top-6 right-4 md:right-10 transition-all duration-300 ${isChatOpen ? 'z-30 opacity-0 pointer-events-none' : 'z-[60] opacity-100'}`}>
-        <button
-          onClick={() => navigate('/login')}
-          className={`text-[11px] md:text-[13px] font-bold transition-all duration-300 flex items-center gap-2 py-2 md:py-2.5 px-4 md:px-5 rounded-xl md:rounded-2xl shadow-sm ${isMobile ? 'bg-blue-50' : 'backdrop-blur-md border border-blue-100 bg-blue-50/80'} text-blue-800 hover:bg-blue-100 hover:shadow-md`}
-        >
-          <span className="hidden md:inline">Portal Login</span><span className="md:hidden">Login</span> <LogIn size={15} strokeWidth={2.5} />
-        </button>
-      </div>
 
       {/* ── Bottom Right: Aura AI Toggler ── */}
       <div className="fixed bottom-6 right-6 md:bottom-8 md:right-10 z-[60]">

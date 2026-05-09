@@ -39,7 +39,7 @@ const AdmissionRequirements = () => {
             </div>
 
             {/* Fixed Navigation Header - Natural Blurring Zone */}
-            <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 px-4 md:px-8 bg-transparent ${scrolled ? 'backdrop-blur-2xl py-4' : 'py-4 md:py-8'}`}>
+            <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 px-4 md:px-8 bg-transparent ${scrolled ? 'backdrop-blur-2xl py-4' : 'py-4 md:py-8'} hidden md:block`}>
                 <div className="max-w-7xl mx-auto flex justify-between items-center text-left">
                     <button 
                         onClick={() => navigate('/')}
@@ -59,7 +59,7 @@ const AdmissionRequirements = () => {
                 </div>
             </nav>
 
-            <main className="relative z-10 max-w-6xl mx-auto px-6 pt-40 pb-20 space-y-20">
+            <main className="relative z-10 max-w-6xl mx-auto px-6 pt-24 md:pt-40 pb-20 space-y-20">
                 {/* Hero Title */}
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
@@ -150,8 +150,10 @@ const AdmissionRequirements = () => {
                 </div>
             </main>
 
-            <footer className="py-12 text-center border-t border-white/10 mt-20">
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-300">© 2026 Aura Integrated University. Precision Academic Ecosystem.</p>
+            <footer className="py-12 px-6 text-center border-t border-white/10 mt-20">
+                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.5em] text-blue-300/50 max-w-[250px] md:max-w-none mx-auto leading-relaxed italic">
+                    © 2026 Aura Integrated University <br className="md:hidden" /> Precision Academic Ecosystem.
+                </p>
             </footer>
 
             <AuraConsultant />

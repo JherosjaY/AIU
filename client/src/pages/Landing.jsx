@@ -77,7 +77,7 @@ function Landing() {
                         <div className="w-12 h-12 bg-[#1e40af] rounded-2xl flex items-center justify-center shadow-2xl border border-white/10 group font-black">
                             <BookOpen className="text-yellow-400" size={24} strokeWidth={2.5} />
                         </div>
-                        <div className="flex flex-col text-left">
+                        <div className="flex flex-col text-left hidden md:flex">
                             <span className={`text-base md:text-xl font-black tracking-tighter leading-none transition-colors ${scrolled ? 'text-[#1e40af]' : 'text-white'}`}>Aura Integrated University</span>
                             <span className={`text-[6px] md:text-[7px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em] transition-colors ${scrolled ? 'text-slate-400' : 'text-blue-100'}`}>Official Regional Portal</span>
                         </div>
@@ -314,10 +314,10 @@ function Landing() {
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.1 }}
                         variants={{
-                            visible: { transition: { staggerChildren: 0.1 } },
+                            visible: { transition: { staggerChildren: 0.2 } },
                             hidden: {}
                         }}
-                        className="flex overflow-x-auto pb-10 gap-6 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8 md:overflow-visible md:snap-none px-6 md:px-0 -mx-6 md:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                        className="flex overflow-x-auto pb-10 gap-6 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-2 max-w-6xl mx-auto md:overflow-visible md:snap-none px-6 md:px-0 -mx-6 md:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     >
                         <EnhancedNotebookCard id="it" icon={<Monitor size={32} />} title="Information Technology" desc="Focused on AI research, software engineering, and digital infrastructure." />
                         <EnhancedNotebookCard id="criminology" icon={<Scale size={32} />} title="Criminology & Justice" desc="Preparation for elite careers in law enforcement and public safety." />

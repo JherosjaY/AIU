@@ -24,8 +24,10 @@ function AboutPhilosophy() {
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-900 blur-[120px] rounded-full"></div>
             </div>
 
+
+
             {/* Smooth Glassmorphic Header - Natural Blurring Zone */}
-            <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 px-4 md:px-8 bg-transparent ${scrolled ? 'backdrop-blur-2xl py-4' : 'py-4 md:py-8'}`}>
+            <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 px-4 md:px-8 bg-transparent ${scrolled ? 'backdrop-blur-2xl py-4' : 'py-4 md:py-8'} hidden md:block`}>
                 <div className="max-w-7xl mx-auto flex justify-between items-center text-left">
                     <button 
                         onClick={() => navigate('/')}
@@ -45,7 +47,7 @@ function AboutPhilosophy() {
                 </div>
             </nav>
 
-            <main className="relative z-10 max-w-7xl mx-auto px-6 pt-40 pb-16 space-y-24 text-center">
+            <main className="relative z-10 max-w-7xl mx-auto px-6 pt-24 md:pt-40 pb-16 space-y-24 text-center">
                 {/* Hero Title */}
                 <div className="text-center space-y-4">
                     <motion.div
@@ -134,8 +136,10 @@ function AboutPhilosophy() {
             </main>
 
             {/* Footer */}
-            <footer className="py-12 text-center border-t border-white/10 mt-20">
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-300">© 2026 Aura Integrated University. Precision Academic Ecosystem.</p>
+            <footer className="py-12 px-6 text-center border-t border-white/10 mt-20">
+                <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.5em] text-blue-300/50 max-w-[250px] md:max-w-none mx-auto leading-relaxed italic">
+                    © 2026 Aura Integrated University <br className="md:hidden" /> Precision Academic Ecosystem.
+                </p>
             </footer>
 
             <AuraConsultant />

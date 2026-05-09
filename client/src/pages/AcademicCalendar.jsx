@@ -55,7 +55,7 @@ function AcademicCalendar() {
       </div>
 
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 px-4 md:px-12 transition-all duration-500 ${scrolled ? 'py-4 backdrop-blur-xl bg-[#0a0f1c]/80' : 'py-4 md:py-8'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 px-4 md:px-12 transition-all duration-500 ${scrolled ? 'py-4 backdrop-blur-xl bg-[#0a0f1c]/80' : 'py-4 md:py-8'} hidden md:block`}>
         <button 
             onClick={() => navigate('/')} 
             className="flex items-center gap-2 text-blue-100/40 hover:text-white font-black text-[8px] md:text-xs uppercase tracking-widest transition-all bg-white/5 backdrop-blur-md px-4 md:px-5 py-2.5 md:py-3 rounded-xl md:rounded-2xl border border-white/5 hover:bg-white/10"
@@ -65,7 +65,7 @@ function AcademicCalendar() {
       </nav>
 
       {/* Main Container */}
-      <main className="relative z-10 max-w-5xl mx-auto px-6 md:px-12 pt-32 pb-32">
+      <main className="relative z-10 max-w-5xl mx-auto px-6 md:px-12 pt-24 md:pt-32 pb-32">
         
         {/* Header Title */}
         <motion.div 
@@ -157,6 +157,12 @@ function AcademicCalendar() {
         </div>
 
       </main>
+
+      <footer className="py-12 px-6 text-center border-t border-white/10 mt-20">
+          <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.5em] text-blue-300/50 max-w-[250px] md:max-w-none mx-auto leading-relaxed italic">
+              © 2026 Aura Integrated University <br className="md:hidden" /> Precision Academic Ecosystem.
+          </p>
+      </footer>
     </div>
   );
 }

@@ -83,24 +83,7 @@ const ResetPassword = () => {
                 <div className="absolute inset-0 bg-white/35 backdrop-blur-[1px]" />
             </div>
 
-            {/* ── Fixed Navigation (Elite Branding Overlay) ── */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-10 py-6 md:py-8 flex justify-between items-center bg-transparent">
-                <button
-                    onClick={() => navigate('/')}
-                    className="hidden md:flex items-center gap-4 group cursor-pointer text-left transition-all hover:scale-[1.02]"
-                >
-                    <div className="w-12 h-12 bg-[#1e40af] rounded-2xl flex items-center justify-center shadow-2xl border border-white/10 group font-black shrink-0 transition-transform group-hover:scale-105">
-                        <ShieldCheck className="text-yellow-400" size={24} strokeWidth={2.5} />
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-[17px] font-black tracking-tighter text-[#1e40af] leading-none uppercase italic drop-shadow-sm">Aura Integrated University</span>
-                        <span className="text-[7px] font-black uppercase tracking-[0.5em] text-gray-700 mt-1 opacity-80 group-hover:text-blue-600 transition-colors">Institutional Security Portal</span>
-                    </div>
-                </button>
 
-                {/* Mobile: Space Filler / Branding Hide */}
-                <div className="md:hidden w-10 h-10" />
-            </nav>
 
             <div className="relative z-10 flex-1 flex items-center justify-center p-4 md:p-6 mt-20 md:mt-16 mb-10 md:mb-16">
                 <motion.div 
