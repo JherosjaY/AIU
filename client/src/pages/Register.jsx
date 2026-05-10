@@ -156,7 +156,8 @@ function Register() {
           state: { 
             firstName: formData.firstName, 
             lastName: formData.lastName, 
-            course: formData.course 
+            course: formData.course,
+            email: formData.email
           },
           replace: true
         })
@@ -555,7 +556,7 @@ function Register() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                         {[
-                          { label: 'Selected Program', value: formData.course ? `${formData.course} - ${COURSE_MAP[formData.course] || ''}` : '', full: true },
+                          { label: 'Selected Program', value: (() => { const q = courseQuotas.find(c => c.courseAbbr === formData.course); const fullName = q?.courseName || COURSE_MAP[formData.course] || ''; return formData.course ? `${formData.course} - ${fullName}` : ''; })(), full: true },
                           { label: 'Full Name', value: `${formData.firstName} ${formData.middleName || ''} ${formData.lastName}`, full: true },
                           { label: 'Birth Date', value: formData.birthday },
                           { label: 'Birthplace', value: formData.birthBarangay ? `${formData.birthBarangay}, ${formData.birthCity}, ${formData.birthProvince}` : '' },
@@ -715,7 +716,18 @@ function Register() {
                       <label className={labelCls}>Course</label>
                       <select name="course" value={tempData.course || ''} onChange={handleTempInput} className={selectCls}>
                         <option value="">Select</option>
-                        {Object.entries(COURSE_MAP).map(([code, full]) => <option key={code} value={code}>{full} ({code})</option>)}
+                        {courseQuotas.length > 0 ? (
+                          courseQuotas.map(q => {
+                            const isFull = q.currentCount >= q.maxSlots;
+                            return (
+                              <option key={q.courseAbbr} value={q.courseAbbr} disabled={isFull}>
+                                {q.courseName || COURSE_MAP[q.courseAbbr] || q.courseAbbr} ({q.courseAbbr}){isFull ? ' — Class Full' : ''}
+                              </option>
+                            )
+                          })
+                        ) : (
+                          Object.entries(COURSE_MAP).map(([code, full]) => <option key={code} value={code}>{full} ({code})</option>)
+                        )}
                       </select>
                     </div>
                   </div>

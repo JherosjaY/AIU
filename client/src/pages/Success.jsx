@@ -11,7 +11,7 @@ function Success() {
     return <Navigate to="/" replace />
   }
 
-  const { firstName, lastName, course } = location.state
+  const { firstName, lastName, course, email } = location.state
 
   return (
     <div className="relative flex flex-col h-screen overflow-hidden font-sans">
@@ -48,16 +48,20 @@ function Success() {
           {/* Summary Box */}
           <div className="bg-gray-50/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-100 mb-10 text-left">
             <p className="text-xs text-gray-500 font-medium leading-relaxed italic mb-4">
-              "Congratulations! Your application has been successfully submitted to the Aura Integrated University registry."
+              "Thank you for your application! We will send an update to your email once we are done reviewing your documents."
             </p>
             <div className="space-y-3">
-              <div className="flex justify-between items-center text-[11px] font-bold">
-                <span className="text-gray-400 uppercase tracking-widest">Name:</span>
-                <span className="text-gray-900 uppercase tracking-tighter">{firstName} {lastName}</span>
+              <div className="flex justify-between items-center text-[11px] font-bold gap-4">
+                <span className="text-gray-400 uppercase tracking-widest min-w-16">Name:</span>
+                <span className="text-gray-900 uppercase tracking-tighter text-right truncate">{firstName} {lastName}</span>
               </div>
-              <div className="flex justify-between items-center text-[11px] font-bold">
-                <span className="text-gray-400 uppercase tracking-widest">Course:</span>
-                <span className="text-blue-700 uppercase tracking-tighter">{course}</span>
+              <div className="flex justify-between items-center text-[11px] font-bold gap-4">
+                <span className="text-gray-400 uppercase tracking-widest min-w-16">Course:</span>
+                <span className="text-blue-700 uppercase tracking-tighter text-right truncate">{course}</span>
+              </div>
+              <div className="flex justify-between items-center text-[11px] font-bold gap-4">
+                <span className="text-gray-400 uppercase tracking-widest min-w-16">Email:</span>
+                <span className="text-gray-900 font-medium tracking-tight text-right truncate lowercase">{email || 'Not provided'}</span>
               </div>
             </div>
           </div>
@@ -71,7 +75,7 @@ function Success() {
           </button>
 
           <p className="mt-8 text-[10px] font-bold text-gray-300 uppercase tracking-widest leading-relaxed">
-            Check your email for portal activation instructions if applicable.
+            Please remember to check your Spam or Junk folder for our email update once we finish reviewing your documents.
           </p>
         </motion.div>
       </div>
