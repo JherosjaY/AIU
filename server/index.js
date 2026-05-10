@@ -544,9 +544,11 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
     const student = await prisma.enrollment.findUnique({ where: { id: parseInt(id) } });
     if (!student) return res.status(404).json({ error: "Student not found" });
 
-    let ocrContext = "";
+    let transcriptOcrContext = "";
+    let birthCertOcrContext = "";
     let isDocumentMissing = true;
 
+    // Process Academic Transcript
     if (student.reportCard && student.reportCard.startsWith('[')) {
       try {
         const images = JSON.parse(student.reportCard);
@@ -559,9 +561,28 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
               return text;
             } catch (err) { return ''; }
           }));
-          ocrContext = ocrResults.join('\n\n');
+          transcriptOcrContext = ocrResults.join('\n\n');
         }
-      } catch (e) { console.error("OCR Parse Error:", e); }
+      } catch (e) { console.error("Transcript OCR Error:", e); }
+    }
+
+    // Process Birth Certificate / Identification
+    if (student.document && student.document.startsWith('[')) {
+      try {
+        const images = JSON.parse(student.document);
+        if (images.length > 0) {
+          const ocrResults = await Promise.all(images.map(async (img) => {
+            if (typeof img !== 'string') return '';
+            try {
+              const { data: { text } } = await Tesseract.recognize(img, 'eng');
+              return text;
+            } catch (err) { return ''; }
+          }));
+          birthCertOcrContext = ocrResults.join('\n\n');
+        }
+      } catch (e) { console.error("Birth Cert OCR Error:", e); }
+    } else if (student.document === 'Personal Delivery') {
+      birthCertOcrContext = "[SYSTEM NOTE: STUDENT OPTED FOR PHYSICAL IN-PERSON DELIVERY OF BIRTH IDENTIFICATION.]";
     }
 
     if (isDocumentMissing) {
@@ -574,22 +595,25 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
 
     const systemPrompt = `
       You are Aura, the elite Admissions AI for Aura Integrated University.
-      Analyze the student's ACADEMIC TRANSCRIPT / REPORT CARD below.
+      Analyze the student's ACADEMIC TRANSCRIPT and BIRTH IDENTIFICATION below.
       
       STRICT OUTPUT FORMAT (JSON ONLY):
       {
         "decision": "AUTHORIZE" | "DENY",
         "fitnessScore": number (0-100),
         "strengths": ["string", "string", "string"],
-        "justification": "Detailed and professional 3-sentence analysis explaining the decision based on specific academic metrics, character traits, or grade patterns found in the transcript.",
+        "justification": "Detailed and professional 3-sentence analysis explaining the decision based on specific academic metrics. You MUST also explicitly verify if the student's legal name on the identity document loosely matches the application input.",
         "suggestedCourse": "One of: BSIT, BSCRIM, BSENTREP, BSED, BSHM, BPA (or null if current is perfect)"
       }
 
       TARGET PROGRAM: ${student.course}
-      IDENTITY: ${student.firstName} ${student.lastName}
+      IDENTITY INPUTTED BY STUDENT: ${student.firstName} ${student.lastName}
       
       TRANSCRIPT CONTENT (OCR):
-      ${ocrContext}
+      ${transcriptOcrContext}
+
+      BIRTH IDENTIFICATION CONTENT (OCR):
+      ${birthCertOcrContext ? birthCertOcrContext : "Not provided digitally."}
     `;
 
     const chatCompletion = await groq.chat.completions.create({
