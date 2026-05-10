@@ -63,6 +63,7 @@ export default function AdminDashboard() {
   const [showCourseModal, setShowCourseModal] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
   const [courseToDelete, setCourseToDelete] = useState(null)
+  const [selectedCourseRoster, setSelectedCourseRoster] = useState(null)
   const [courseForm, setCourseForm] = useState({
     abbr: '', name: '', description: '', category: 'Technology', 
     credits: 120, years: 4, iconName: 'Monitor', color: 'border-blue-600', 
@@ -325,6 +326,30 @@ export default function AdminDashboard() {
     document.body.removeChild(link);
   };
 
+  const downloadCourseRosterCSV = () => {
+    if (!selectedCourseRoster) return;
+    const roster = enrollments.filter(e => e.course === selectedCourseRoster);
+    const headers = ["ID", "Name", "Email", "Status", "AI Status", "AI Score", "Applied At"];
+    const rows = roster.map(e => [
+      e.id, 
+      `${e.firstName} ${e.lastName}`, 
+      e.email, 
+      e.status, 
+      e.aiStatus || 'N/A', 
+      e.aiScore || 0,
+      new Date(e.createdAt).toLocaleDateString()
+    ]);
+
+    let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rows.map(r => r.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `aura_${selectedCourseRoster}_roster.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const executeDelete = async () => {
     if (!studentToDelete) return;
     
@@ -572,12 +597,9 @@ export default function AdminDashboard() {
               </button>
             )}
             {currentTab === 'QUOTAS' && (
-              <button 
-                onClick={syncQuotas}
-                className="px-3 py-1.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-lg font-bold text-[8px] md:text-[9px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-              >
-                Sync
-              </button>
+              <div className="px-4 py-2 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-sm flex items-center gap-2">
+                2026-2027
+              </div>
             )}
           </div>
           
@@ -828,14 +850,23 @@ export default function AdminDashboard() {
                        </div>
                     </div>
 
-                    <div className="pt-4 flex items-center gap-3">
-                       <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Adjust Max:</span>
-                       <input 
-                         type="number" 
-                         defaultValue={q.maxSlots}
-                         onBlur={(e) => handleUpdateQuota(q.courseAbbr, e.target.value)}
-                         className="w-20 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-[11px] font-bold text-blue-700 outline-none focus:border-blue-500 focus:bg-white transition-all"
-                       />
+                    <div className="pt-4 flex items-center justify-between border-t border-gray-50 mt-2">
+                       <button 
+                         onClick={() => setSelectedCourseRoster(q.courseAbbr)}
+                         className="px-4 py-2 bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-100 text-gray-500 hover:text-blue-600 rounded-xl font-bold text-[9px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 relative group-hover:shadow-sm"
+                       >
+                         <Users size={12} />
+                         View Roster
+                       </button>
+                       <div className="flex items-center gap-2">
+                         <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Adjust Max:</span>
+                         <input 
+                           type="number" 
+                           defaultValue={q.maxSlots}
+                           onBlur={(e) => handleUpdateQuota(q.courseAbbr, e.target.value)}
+                           className="w-16 bg-gray-50 hover:bg-white border border-gray-100 focus:border-blue-500 rounded-lg px-2 py-1.5 text-[11px] font-bold text-blue-700 outline-none transition-all text-center"
+                         />
+                       </div>
                     </div>
                   </motion.div>
                 );
@@ -1492,6 +1523,78 @@ export default function AdminDashboard() {
                 >
                   CANCEL
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Course Roster Dialog */}
+      <AnimatePresence>
+        {selectedCourseRoster && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedCourseRoster(null)} className="absolute inset-0 bg-[#001f3f]/80 backdrop-blur-sm cursor-pointer" />
+            
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-[2.5rem] w-full max-w-2xl relative z-10 shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[85vh]"
+            >
+              <div className="p-8 border-b border-gray-100 flex items-start justify-between bg-gray-50/50">
+                <div>
+                  <h3 className="text-2xl font-black italic uppercase tracking-tighter text-blue-800 flex items-center gap-3">
+                    <Users size={24} className="text-blue-600" /> 
+                    {selectedCourseRoster} Master Roster
+                  </h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Institutional Student Registry</p>
+                </div>
+                <button onClick={() => setSelectedCourseRoster(null)} className="p-2 bg-gray-100 rounded-full hover:bg-rose-100 hover:text-rose-600 text-gray-400 transition-all">
+                  <XCircle size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-4">
+                {enrollments.filter(e => e.course === selectedCourseRoster).length === 0 ? (
+                  <div className="text-center py-10 opacity-50">
+                    <Users size={48} className="mx-auto mb-4 text-gray-400" />
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500">No students enrolled yet.</p>
+                  </div>
+                ) : (
+                  enrollments.filter(e => e.course === selectedCourseRoster).map(student => (
+                    <div key={student.id} className="p-4 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-md hover:shadow-blue-900/5 transition-all flex items-center gap-4 group bg-white">
+                      <div className="w-10 h-10 rounded-xl border border-blue-100 bg-blue-50 text-blue-600 font-black flex justify-center items-center shrink-0">
+                        {student.firstName[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-bold text-gray-900 truncate uppercase">{student.firstName} {student.lastName}</p>
+                        <p className="text-[9px] font-medium text-gray-400 truncate">{student.email}</p>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border shrink-0 ${
+                        student.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                        student.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                        'bg-rose-50 text-rose-600 border-rose-100'
+                      }`}>
+                        {student.status}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="p-6 border-t border-gray-100 bg-white grid grid-cols-2 gap-4">
+                 <button
+                   onClick={() => setSelectedCourseRoster(null)}
+                   className="py-4 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-gray-500 bg-gray-50 hover:bg-gray-100 transition-all border border-transparent"
+                 >
+                   Close Roster
+                 </button>
+                 <button
+                   onClick={downloadCourseRosterCSV}
+                   className="py-4 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20 hover:shadow-blue-600/40 active:scale-95 transition-all flex justify-center items-center gap-2"
+                 >
+                   <FileText size={14} /> Generate CSV
+                 </button>
               </div>
             </motion.div>
           </div>
