@@ -5,7 +5,7 @@ import { BadgeCheck, ChevronRight } from 'lucide-react'
 function Success() {
   const navigate = useNavigate()
   const location = useLocation()
-  
+
   // Strict Routing: If no registration state, redirect to landing
   if (!location.state || !location.state.firstName) {
     return <Navigate to="/" replace />
@@ -15,7 +15,7 @@ function Success() {
 
   return (
     <div className="relative flex flex-col h-screen overflow-hidden font-sans">
-      
+
       {/* ── BACKGROUND LAYER ── */}
       <div className="absolute inset-0 z-0">
         <img src="/campus.png" alt="Campus Background" className="w-full h-full object-cover" />
@@ -24,9 +24,9 @@ function Success() {
 
       {/* ── MAIN CONTENT ── */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-4">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }} 
-          animate={{ opacity: 1, scale: 1 }} 
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
           className="max-w-[460px] w-full bg-white rounded-[2.5rem] p-10 md:p-12 shadow-[0_45px_110px_rgba(0,0,0,0.18)] border border-white/50 relative overflow-hidden text-center"
         >
           {/* Premium Success Icon */}
@@ -63,11 +63,11 @@ function Success() {
           </div>
 
           {/* Next Step Button */}
-          <button 
+          <button
             onClick={() => navigate('/login')}
             className="w-full py-4 rounded-2xl bg-blue-700 text-white font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-blue-900/10 active:scale-[0.98] flex items-center justify-center gap-3 group"
           >
-            Proceed to Login <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            Back to Login <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </button>
 
           <p className="mt-8 text-[10px] font-bold text-gray-300 uppercase tracking-widest leading-relaxed">
