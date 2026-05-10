@@ -68,10 +68,10 @@ function Landing() {
             const cached = localStorage.getItem('aura_landing_programs');
             if (cached) {
                 const parsed = JSON.parse(cached);
-                if (parsed && parsed.length > 0) setPrograms(parsed);
-                else setPrograms(FALLBACK_PROGRAMS);
+                if (parsed && parsed.length > 0) setPrograms(parsed.slice(0, 3));
+                else setPrograms(FALLBACK_PROGRAMS.slice(0, 3));
             } else {
-                setPrograms(FALLBACK_PROGRAMS); // Start with fallback until fetch
+                setPrograms(FALLBACK_PROGRAMS.slice(0, 3)); // Start with fallback until fetch
             }
 
             try {
@@ -83,7 +83,7 @@ function Landing() {
                         title: p.courseName || p.courseAbbr,
                         desc: p.description || 'Institutional academic program.',
                         iconName: p.iconName
-                    })).slice(0, 6);
+                    })).slice(0, 3);
                     setPrograms(formatted);
                     localStorage.setItem('aura_landing_programs', JSON.stringify(formatted));
                 }
@@ -382,7 +382,7 @@ function Landing() {
                             visible: { transition: { staggerChildren: 0.2 } },
                             hidden: {}
                         }}
-                        className="flex overflow-x-auto pb-10 gap-6 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-2 max-w-6xl mx-auto md:overflow-visible md:snap-none px-6 md:px-0 -mx-6 md:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                        className="flex overflow-x-auto pb-10 gap-6 snap-x snap-mandatory md:grid md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto md:overflow-visible md:snap-none px-6 md:px-0 -mx-6 md:mx-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                     >
                         {isLoadingPrograms ? (
                            <div className="col-span-full py-10 text-center text-blue-300 font-bold uppercase tracking-widest animate-pulse">Synchronizing Academic Registry...</div>
@@ -398,6 +398,15 @@ function Landing() {
                           ))
                         )}
                     </motion.div>
+
+                    <div className="flex justify-center pt-8">
+                        <button 
+                            onClick={() => navigate('/programs')}
+                            className="bg-white/5 hover:bg-white/10 text-blue-100 border border-white/10 px-8 py-3.5 rounded-full font-black text-[10px] md:text-sm uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2"
+                        >
+                            Explore All Programs <ArrowRight size={16} />
+                        </button>
+                    </div>
                 </div>
             </section>
 
