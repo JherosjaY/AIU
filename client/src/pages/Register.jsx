@@ -69,8 +69,17 @@ function Register() {
     const fetchQuotas = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/quotas`);
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
         const data = await res.json();
-        setCourseQuotas(data);
+        
+        // Strict Validation to prevent white screen crashes
+        if (Array.isArray(data)) {
+          setCourseQuotas(data);
+        } else if (data && data.success && Array.isArray(data.quotas)) {
+          setCourseQuotas(data.quotas);
+        } else {
+          console.warn("Invalid quotas data received:", data);
+        }
       } catch (err) {
         console.error("Quota Fetch Failure:", err);
       }
