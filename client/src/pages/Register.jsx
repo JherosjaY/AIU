@@ -619,7 +619,7 @@ function Register() {
               animate={{ x: 0, opacity: 1 }}
               exit={isMobile ? { x: '100%' } : { x: '100%', opacity: 0, transition: { duration: 0.2, ease: "easeIn" } }}
               transition={isMobile ? { type: 'just' } : { type: 'spring', damping: 28, stiffness: 220 }}
-              className="fixed md:static inset-0 md:inset-auto right-0 w-full md:w-96 border-l border-gray-200 bg-white flex flex-col shrink-0 shadow-2xl z-[150] h-full"
+              className="fixed inset-0 md:inset-auto md:top-0 md:right-0 md:bottom-0 w-full md:w-[380px] lg:w-[420px] border-l border-gray-200 bg-white flex flex-col shrink-0 shadow-2xl z-[150] md:h-screen"
             >
               <div className="px-5 py-4 bg-white border-b border-gray-200 flex justify-between items-center shrink-0">
                 <div className="flex items-center gap-3">

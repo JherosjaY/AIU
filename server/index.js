@@ -5,7 +5,8 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const Groq = require('groq-sdk');
 const sgMail = require('@sendgrid/mail');
-const Tesseract = require('tesseract.js');
+// Google Vision API is used for all OCR — see googleVisionOCR() helper below
+const axios = require('axios');
 const {
   getApplicationReceivedTemplate,
   getAdmissionAuthorizedTemplate,
@@ -18,6 +19,28 @@ const app = express();
 const prisma = new PrismaClient();
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+// ── GOOGLE VISION OCR HELPER ──
+const googleVisionOCR = async (base64Image) => {
+  try {
+    // Strip the data:image/...;base64, prefix if present
+    const imageData = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
+    const response = await axios.post(
+      `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
+      {
+        requests: [{
+          image: { content: imageData },
+          features: [{ type: 'DOCUMENT_TEXT_DETECTION', maxResults: 1 }]
+        }]
+      }
+    );
+    const textAnnotations = response.data.responses[0]?.fullTextAnnotation?.text || '';
+    return textAnnotations;
+  } catch (err) {
+    console.error('Google Vision OCR Error:', err.response?.data || err.message);
+    return '';
+  }
+};
 
 // 🛡️ PRODUCTION CORS CONFIGURATION: Allow local development and deployed frontend
 const allowedOrigins = [
@@ -318,16 +341,16 @@ app.post('/api/chat', async (req, res) => {
       try {
         console.log(`[AURA VISION] Synchronized processing initiated for ${imageList.length} documents...`);
 
-        // Parallel OCR processing for maximum efficiency
+        // Parallel OCR processing via Google Vision API
         const ocrResults = await Promise.all(imageList.map(async (img, idx) => {
           if (typeof img !== 'string') return `--- [DOCUMENT #${idx + 1} ERROR: Invalid Format] ---`;
 
-          console.log(`[OCR] Analyzing Institutional Document #${idx + 1}...`);
+          console.log(`[AURA VISION] Analyzing Institutional Document #${idx + 1} via Google Vision...`);
           try {
-            const { data: { text } } = await Tesseract.recognize(img, 'eng');
+            const text = await googleVisionOCR(img);
             return `--- [DOCUMENT #${idx + 1} EXTRACTED TEXT] ---\n${text}`;
           } catch (err) {
-            console.error(`[OCR] Error processing Document #${idx + 1}:`, err.message);
+            console.error(`[AURA VISION] Error processing Document #${idx + 1}:`, err.message);
             return `--- [DOCUMENT #${idx + 1} ERROR: Processing Failed] ---`;
           }
         }));
@@ -548,7 +571,7 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
     let birthCertOcrContext = "";
     let isDocumentMissing = true;
 
-    // Process Academic Transcript
+    // Process Academic Transcript via Google Vision API
     if (student.reportCard && student.reportCard.startsWith('[')) {
       try {
         const images = JSON.parse(student.reportCard);
@@ -556,27 +579,21 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
           isDocumentMissing = false;
           const ocrResults = await Promise.all(images.map(async (img) => {
             if (typeof img !== 'string') return '';
-            try {
-              const { data: { text } } = await Tesseract.recognize(img, 'eng');
-              return text;
-            } catch (err) { return ''; }
+            return await googleVisionOCR(img);
           }));
           transcriptOcrContext = ocrResults.join('\n\n');
         }
       } catch (e) { console.error("Transcript OCR Error:", e); }
     }
 
-    // Process Birth Certificate / Identification
+    // Process Birth Certificate / Identification via Google Vision API
     if (student.document && student.document.startsWith('[')) {
       try {
         const images = JSON.parse(student.document);
         if (images.length > 0) {
           const ocrResults = await Promise.all(images.map(async (img) => {
             if (typeof img !== 'string') return '';
-            try {
-              const { data: { text } } = await Tesseract.recognize(img, 'eng');
-              return text;
-            } catch (err) { return ''; }
+            return await googleVisionOCR(img);
           }));
           birthCertOcrContext = ocrResults.join('\n\n');
         }
