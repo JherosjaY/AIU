@@ -108,6 +108,13 @@ const ProgramDetail = () => {
             }
         };
         fetchProgram();
+
+        // ON_RESUME Logic (Background Sync on Tab Focus)
+        const onFocus = () => {
+            fetchProgram();
+        };
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
     }, [id]);
 
     if (isLoading) return <div className="min-h-screen bg-[#001f3f] flex items-center justify-center"><Zap size={40} className="text-yellow-400 animate-pulse" /></div>;

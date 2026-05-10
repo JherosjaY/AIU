@@ -94,7 +94,16 @@ const Programs = () => {
                 setIsLoading(false);
             }
         };
+
+        // Initial fetch
         fetchPrograms();
+
+        // ON_RESUME Logic (Background Sync on Tab Focus)
+        const onFocus = () => {
+            fetchPrograms();
+        };
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
     }, []);
 
     const filteredPrograms = (programs || []).filter(p => {

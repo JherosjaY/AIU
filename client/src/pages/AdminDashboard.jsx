@@ -84,6 +84,14 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchEnrollments()
     fetchQuotas()
+
+    // ON_RESUME Logic (Background Sync on Tab Focus)
+    const onFocus = () => {
+        fetchEnrollments();
+        fetchQuotas();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
   }, [])
 
   useEffect(() => {

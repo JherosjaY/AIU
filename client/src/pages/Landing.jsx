@@ -94,6 +94,13 @@ function Landing() {
             }
         };
         fetchPrograms();
+
+        // ON_RESUME Logic (Background Sync on Tab Focus)
+        const onFocus = () => {
+            fetchPrograms();
+        };
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
     }, []);
 
 
