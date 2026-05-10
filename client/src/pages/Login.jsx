@@ -59,9 +59,9 @@ const Login = () => {
       if (data.success) {
         login(data.role, data.user.authId);
         if (data.role === 'ADMIN') {
-          navigate('/admin');
+          navigate('/admin', { replace: true });
         } else {
-          navigate('/student-dashboard');
+          navigate('/student-dashboard', { replace: true });
         }
       } else {
         setError(data.message || 'Authentication Failed');

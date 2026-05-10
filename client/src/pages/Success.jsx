@@ -64,7 +64,7 @@ function Success() {
 
           {/* Next Step Button */}
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/login', { replace: true })}
             className="w-full py-4 rounded-2xl bg-blue-700 text-white font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-blue-900/10 active:scale-[0.98] flex items-center justify-center gap-3 group"
           >
             Back to Login <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
