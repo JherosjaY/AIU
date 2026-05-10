@@ -62,6 +62,7 @@ export default function AdminDashboard() {
   const [previewContent, setPreviewContent] = useState(null)
   const [showCourseModal, setShowCourseModal] = useState(false)
   const [editingCourse, setEditingCourse] = useState(null)
+  const [courseToDelete, setCourseToDelete] = useState(null)
   const [courseForm, setCourseForm] = useState({
     abbr: '', name: '', description: '', category: 'Technology', 
     credits: 120, years: 4, iconName: 'Monitor', color: 'border-blue-600', 
@@ -236,13 +237,21 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteCourse = async (id) => {
-    if (!confirm("Are you sure you want to delete this program? This may affect current enrollments.")) return;
+  const handleDeleteCourse = (id) => {
+    setCourseToDelete(id);
+  };
+
+  const confirmDeleteCourse = async () => {
+    if (!courseToDelete) return;
+    setIsProcessing(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/courses/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE_URL}/courses/${courseToDelete}`, { method: 'DELETE' });
       if (res.ok) fetchQuotas();
     } catch (error) {
       console.error("Delete Course Error:", error);
+    } finally {
+      setIsProcessing(false);
+      setCourseToDelete(null);
     }
   };
 
@@ -1445,6 +1454,45 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Course Confirmation Modal */}
+      <AnimatePresence>
+        {courseToDelete && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#001f3f]/80 backdrop-blur-sm" />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl border border-gray-100 text-center"
+            >
+              <div className="w-20 h-20 bg-rose-50 rounded-[1.5rem] flex items-center justify-center text-rose-500 mx-auto mb-6 transform rotate-3 border border-rose-100 shadow-inner">
+                <Trash2 size={32} />
+              </div>
+              <h3 className="text-xl font-black italic uppercase tracking-tighter text-gray-900 mb-2">Delete Program?</h3>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed mb-8">
+                This action is irreversible. It will completely remove the quota designation for this course.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={confirmDeleteCourse}
+                  disabled={isProcessing}
+                  className="w-full bg-rose-600 text-white rounded-xl py-4 font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-rose-600/20 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isProcessing ? 'DELETING...' : 'CONFIRM DELETION'}
+                </button>
+                <button
+                  onClick={() => setCourseToDelete(null)}
+                  disabled={isProcessing}
+                  className="w-full bg-gray-50 text-gray-400 border border-gray-100 hover:text-gray-900 hover:bg-white rounded-xl py-4 font-black text-[10px] uppercase tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50"
+                >
+                  CANCEL
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
