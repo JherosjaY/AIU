@@ -686,7 +686,7 @@ export default function AdminDashboard() {
                         }`}
                     >
                       <div className={`w-12 h-12 md:w-20 md:h-20 rounded-2xl md:rounded-3xl shrink-0 flex items-center justify-center transition-all font-black text-lg md:text-2xl italic tracking-tighter ${student.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' :
-                          student.status === 'REJECTED' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
+                        student.status === 'REJECTED' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                         }`}>
                         {student.firstName[0]}{student.lastName[0]}
                       </div>
@@ -695,7 +695,7 @@ export default function AdminDashboard() {
                         <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 mb-1">
                           <h3 className="text-sm md:text-xl font-bold italic uppercase tracking-tighter text-gray-900 truncate">{student.firstName} {student.lastName}</h3>
                           <div className={`w-fit text-[7px] md:text-[8px] font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded-full uppercase tracking-widest ${student.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700' :
-                              student.status === 'REJECTED' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'
+                            student.status === 'REJECTED' ? 'bg-rose-100 text-rose-700' : 'bg-blue-100 text-blue-700'
                             }`}>
                             {student.status}
                           </div>
@@ -703,8 +703,8 @@ export default function AdminDashboard() {
                           {/* AI PREDICTION TAG */}
                           {student.aiStatus && (
                             <div className={`w-fit text-[7px] font-black px-2 py-0.5 rounded-md uppercase tracking-[0.2em] flex items-center gap-1 shadow-sm border ${student.aiStatus === 'QUALIFIED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                                student.aiStatus === 'AT_RISK' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                  student.aiStatus === 'INCOMPLETE' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                              student.aiStatus === 'AT_RISK' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                student.aiStatus === 'INCOMPLETE' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-blue-50 text-blue-600 border-blue-100'
                               }`}>
                               <Sparkles size={8} /> {student.aiStatus} {student.aiScore > 0 && `(${student.aiScore}%)`}
                             </div>
@@ -1197,8 +1197,8 @@ export default function AdminDashboard() {
                             <button
                               onClick={() => handleAction(selectedStudent.id, selectedStudent.aiDecision === 'AUTHORIZE' ? 'APPROVE' : 'REJECT')}
                               className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-md active:scale-95 ${selectedStudent.aiDecision === 'AUTHORIZE'
-                                  ? 'bg-emerald-600 text-white shadow-emerald-500/20 hover:bg-emerald-700'
-                                  : 'bg-rose-600 text-white shadow-rose-500/20 hover:bg-rose-700'
+                                ? 'bg-emerald-600 text-white shadow-emerald-500/20 hover:bg-emerald-700'
+                                : 'bg-rose-600 text-white shadow-rose-500/20 hover:bg-rose-700'
                                 }`}
                             >
                               Apply Recommendation
@@ -1394,7 +1394,7 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Full Program Title</label>
+                      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Program Title</label>
                       <input
                         required
                         value={courseForm.name}
@@ -1559,8 +1559,8 @@ export default function AdminDashboard() {
                           <p className="text-[9px] font-medium text-gray-400 truncate">{student.email}</p>
                         </div>
                         <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border shrink-0 ${student.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                            student.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                              'bg-rose-50 text-rose-600 border-rose-100'
+                          student.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                            'bg-rose-50 text-rose-600 border-rose-100'
                           }`}>
                           {student.status}
                         </div>
