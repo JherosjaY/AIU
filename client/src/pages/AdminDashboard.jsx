@@ -1470,7 +1470,7 @@ export default function AdminDashboard() {
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
               className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl border border-gray-100 text-center"
             >
-              <div className="w-20 h-20 bg-rose-50 rounded-[1.5rem] flex items-center justify-center text-rose-500 mx-auto mb-6 transform rotate-3 border border-rose-100 shadow-inner">
+              <div className="w-20 h-20 bg-rose-50 rounded-[1.5rem] flex items-center justify-center text-rose-500 mx-auto mb-6 border border-rose-100 shadow-inner">
                 <Trash2 size={32} />
               </div>
               <h3 className="text-xl font-black italic uppercase tracking-tighter text-gray-900 mb-2">Delete Program?</h3>
