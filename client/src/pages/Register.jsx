@@ -64,7 +64,7 @@ function Register() {
     consent: false
   })
 
-  // 🏛️ REAL-TIME REGISTRY SYNC
+  // 🏛️ REAL-TIME REGISTRY SYNC (WITH ON-RESUME BACKGROUND SYNC)
   useEffect(() => {
     const fetchQuotas = async () => {
       try {
@@ -75,7 +75,16 @@ function Register() {
         console.error("Quota Fetch Failure:", err);
       }
     };
+    
+    // Initial fetch
     fetchQuotas();
+
+    // ON_RESUME Logic (Background Sync on Tab Focus)
+    const onFocus = () => {
+      fetchQuotas();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
   }, []);
 
   const scrollToBottom = () => {
