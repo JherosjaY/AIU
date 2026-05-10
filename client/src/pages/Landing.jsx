@@ -55,14 +55,29 @@ function Landing() {
 
     useEffect(() => {
         const fetchPrograms = async () => {
+            const FALLBACK_PROGRAMS = [
+                { id: 'bsit', title: 'Information Technology', desc: 'Master the architectural foundations of the digital world.', iconName: 'Monitor' },
+                { id: 'bscrim', title: 'Criminology & Justice', desc: 'Preparation for elite careers in law enforcement and public safety.', iconName: 'Scale' },
+                { id: 'bsentrep', title: 'Entrepreneurship', desc: 'Incubating the next generation of business disruptors.', iconName: 'Rocket' },
+                { id: 'bsed', title: 'Teacher Education', desc: 'Developing pedagogical pioneers who are master communicators.', iconName: 'Pencil' },
+                { id: 'bshm', title: 'Hospitality Management', desc: 'World-class training in luxury hotel and tourism operations.', iconName: 'Hotel' },
+                { id: 'bpa', title: 'Public Administration', desc: 'Ethics-based leadership training for governance.', iconName: 'Landmark' }
+            ];
+
             // 🏛️ SWR LAYER: Load cached programs immediately
             const cached = localStorage.getItem('aura_landing_programs');
-            if (cached) setPrograms(JSON.parse(cached));
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed && parsed.length > 0) setPrograms(parsed);
+                else setPrograms(FALLBACK_PROGRAMS);
+            } else {
+                setPrograms(FALLBACK_PROGRAMS); // Start with fallback until fetch
+            }
 
             try {
                 const res = await fetch(`${API_BASE_URL}/quotas`);
                 const data = await res.json();
-                if (res.ok && Array.isArray(data)) {
+                if (res.ok && Array.isArray(data) && data.length > 0) {
                     const formatted = data.map(p => ({
                         id: p.courseAbbr.toLowerCase(),
                         title: p.courseName || p.courseAbbr,

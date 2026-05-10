@@ -51,19 +51,34 @@ const Programs = () => {
 
     useEffect(() => {
         const fetchPrograms = async () => {
+            const FALLBACK_PROGRAMS = [
+                { id: 'bsit', title: 'Information Technology', shortDesc: 'Master the architectural foundations of the digital world.', iconName: 'Monitor', category: 'Technology', acronym: 'BSIT', color: 'border-blue-600', stats: { years: '4', credits: '144' } },
+                { id: 'bscrim', title: 'Criminology & Justice', shortDesc: 'Preparation for elite careers in law enforcement and public safety.', iconName: 'Scale', category: 'Justice', acronym: 'BSCRIM', color: 'border-indigo-600', stats: { years: '4', credits: '160' } },
+                { id: 'bsentrep', title: 'Entrepreneurship', shortDesc: 'Incubating the next generation of business disruptors.', iconName: 'Rocket', category: 'Business', acronym: 'BSENTREP', color: 'border-yellow-500', stats: { years: '4', credits: '138' } },
+                { id: 'bsed', title: 'Teacher Education', shortDesc: 'Developing pedagogical pioneers who are master communicators.', iconName: 'Pencil', category: 'Education', acronym: 'BSED', color: 'border-green-600', stats: { years: '4', credits: '152' } },
+                { id: 'bshm', title: 'Hospitality Management', shortDesc: 'World-class training in luxury hotel and tourism operations.', iconName: 'Hotel', category: 'Hospitality', acronym: 'BSHM', color: 'border-rose-600', stats: { years: '4', credits: '148' } },
+                { id: 'bpa', title: 'Public Administration', shortDesc: 'Ethics-based leadership training for governance.', iconName: 'Landmark', category: 'Government', acronym: 'BPA', color: 'border-purple-600', stats: { years: '4', credits: '140' } }
+            ];
+
             // 🏛️ SWR LAYER: Load cached programs immediately
             const cached = localStorage.getItem('aura_programs_hub');
-            if (cached) setPrograms(JSON.parse(cached));
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed && parsed.length > 0) setPrograms(parsed);
+                else setPrograms(FALLBACK_PROGRAMS);
+            } else {
+                setPrograms(FALLBACK_PROGRAMS); // Start with fallback until fetch
+            }
 
             try {
                 const res = await fetch(`${API_BASE_URL}/quotas`);
                 const data = await res.json();
-                if (res.ok && Array.isArray(data)) {
+                if (res.ok && Array.isArray(data) && data.length > 0) {
                     const formatted = data.map(p => ({
                         id: p.courseAbbr.toLowerCase(),
                         title: p.courseName || p.courseAbbr,
                         shortDesc: p.description || 'Institutional academic program.',
-                        icon: ICON_MAP[p.iconName] || <GraduationCap size={32} />,
+                        iconName: p.iconName || 'GraduationCap',
                         category: p.category || 'General',
                         acronym: p.courseAbbr,
                         color: p.color || 'border-blue-600',
@@ -74,6 +89,7 @@ const Programs = () => {
                 }
             } catch (error) {
                 console.error("Fetch Programs Error:", error);
+                // In case of error and no cache, ensure fallback remains
             } finally {
                 setIsLoading(false);
             }
@@ -81,12 +97,14 @@ const Programs = () => {
         fetchPrograms();
     }, []);
 
-    const filteredPrograms = programs.filter(p => 
-        (activeTab === 'All' || p.category === activeTab) &&
-        (p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-         p.acronym.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         p.shortDesc.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    const filteredPrograms = (programs || []).filter(p => {
+        if (!p) return false;
+        const titleMatch = (p.title || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const acronymMatch = (p.acronym || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const descMatch = (p.shortDesc || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const categoryMatch = activeTab === 'All' || p.category === activeTab;
+        return categoryMatch && (titleMatch || acronymMatch || descMatch);
+    });
 
     return (
         <div className="min-h-screen bg-[#001f3f] text-white font-sans selection:bg-yellow-400 selection:text-blue-900 overflow-x-hidden text-center">
@@ -197,7 +215,7 @@ const Programs = () => {
 
                                 <div className="relative z-10 space-y-4 md:space-y-6 flex-grow">
                                     <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-blue-900 group-hover:bg-[#1e40af] group-hover:text-white transition-all duration-500 shadow-sm">
-                                        {React.cloneElement(p.icon, { size: 24, className: 'md:w-8 md:h-8' })}
+                                        {ICON_MAP[p.iconName] ? React.cloneElement(ICON_MAP[p.iconName], { size: 24, className: 'md:w-8 md:h-8' }) : <GraduationCap size={24} className="md:w-8 md:h-8" />}
                                     </div>
                                     <h3 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight leading-none italic uppercase">{p.title}</h3>
                                     <p className="text-slate-500 text-sm font-bold leading-relaxed italic uppercase opacity-70">

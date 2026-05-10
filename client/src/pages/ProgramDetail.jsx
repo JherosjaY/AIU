@@ -46,31 +46,60 @@ const ProgramDetail = () => {
 
     useEffect(() => {
         const fetchProgram = async () => {
+            const FALLBACK_PROGRAMS = [
+                { courseAbbr: 'BSIT', courseName: 'Information Technology', iconName: 'Monitor', color: 'border-blue-600', description: 'Master the architectural foundations of the digital world. Our IT program integrates AI-driven development with robust systems engineering and digital infrastructure.', credits: 144, years: 4, maxSlots: 50 },
+                { courseAbbr: 'BSCRIM', courseName: 'Criminology & Justice', iconName: 'Scale', color: 'border-indigo-600', description: 'Preparation for elite careers in law enforcement and public safety. We cultivate disciplined leaders specialized in modern criminology and forensic science.', credits: 160, years: 4, maxSlots: 50 },
+                { courseAbbr: 'BSENTREP', courseName: 'Entrepreneurship', iconName: 'Rocket', color: 'border-yellow-500', description: 'Incubating the next generation of business disruptors. Our program focuses on startup ecosystem building, venture capital, and innovative leadership.', credits: 138, years: 4, maxSlots: 50 },
+                { courseAbbr: 'BSED', courseName: 'Teacher Education', iconName: 'Pencil', color: 'border-green-600', description: 'Developing pedagogical pioneers who are master communicators. Transform the future of learning through innovative teaching methodologies.', credits: 152, years: 4, maxSlots: 50 },
+                { courseAbbr: 'BSHM', courseName: 'Hospitality Management', iconName: 'Hotel', color: 'border-rose-600', description: 'World-class training in luxury hotel and tourism operations. Master the art of global service excellence in the modern hospitality landscape.', credits: 148, years: 4, maxSlots: 50 },
+                { courseAbbr: 'BPA', courseName: 'Public Administration', iconName: 'Landmark', color: 'border-purple-600', description: 'Ethics-based leadership training for governance. We prepare public servants to lead with integrity in the complex world of policy and administration.', credits: 140, years: 4, maxSlots: 50 }
+            ];
+
+            const matchFallback = (dataArray) => dataArray.find(p => p.courseAbbr.toLowerCase() === id.toLowerCase() || (id.toLowerCase() === 'it' && p.courseAbbr === 'BSIT'));
+
             // 🏛️ SWR LAYER: Load specific program from cache immediately
             const cached = localStorage.getItem(`aura_prog_${id}`);
-            if (cached) setProgram(JSON.parse(cached));
+            if (cached) {
+                setProgram(JSON.parse(cached));
+            } else {
+                const foundFb = matchFallback(FALLBACK_PROGRAMS);
+                if (foundFb) {
+                    setProgram({
+                        title: foundFb.courseName || foundFb.courseAbbr,
+                        iconName: foundFb.iconName,
+                        description: foundFb.description,
+                        highlights: (foundFb.highlights || 'Global Standards, Research Excellence, Industry Integration').split(',').map(s => s.trim()),
+                        color: foundFb.color,
+                        stats: [
+                            { label: 'DURATION', value: `${foundFb.years} YEARS` },
+                            { label: 'TOTAL CREDITS', value: foundFb.credits },
+                            { label: 'CAPACITY', value: foundFb.maxSlots }
+                        ]
+                    });
+                }
+            }
 
             try {
                 const res = await fetch(`${API_BASE_URL}/quotas`);
                 const data = await res.json();
-                if (Array.isArray(data)) {
-                    const found = data.find(p => p.courseAbbr.toLowerCase() === id.toLowerCase() || (id.toLowerCase() === 'it' && p.courseAbbr === 'BSIT'));
-                    if (found) {
-                        const formatted = {
-                            title: found.courseName || found.courseAbbr,
-                            iconName: found.iconName,
-                            description: found.description || 'Advanced institutional training for the next generation of industry leaders.',
-                            highlights: (found.highlights || 'Global Standards, Research Excellence, Industry Integration').split(',').map(s => s.trim()),
-                            color: found.color || 'border-blue-600',
-                            stats: [
-                                { label: 'DURATION', value: `${found.years || 4} YEARS` },
-                                { label: 'TOTAL CREDITS', value: found.credits || 120 },
-                                { label: 'CAPACITY', value: found.maxSlots || 50 }
-                            ]
-                        };
-                        setProgram(formatted);
-                        localStorage.setItem(`aura_prog_${id}`, JSON.stringify(formatted));
-                    }
+                const arrayToUse = (res.ok && Array.isArray(data) && data.length > 0) ? data : FALLBACK_PROGRAMS;
+                const found = matchFallback(arrayToUse);
+
+                if (found) {
+                    const formatted = {
+                        title: found.courseName || found.courseAbbr,
+                        iconName: found.iconName,
+                        description: found.description || 'Advanced institutional training for the next generation of industry leaders.',
+                        highlights: (found.highlights || 'Global Standards, Research Excellence, Industry Integration').split(',').map(s => s.trim()),
+                        color: found.color || 'border-blue-600',
+                        stats: [
+                            { label: 'DURATION', value: `${found.years || 4} YEARS` },
+                            { label: 'TOTAL CREDITS', value: found.credits || 120 },
+                            { label: 'CAPACITY', value: found.maxSlots || 50 }
+                        ]
+                    };
+                    setProgram(formatted);
+                    localStorage.setItem(`aura_prog_${id}`, JSON.stringify(formatted));
                 }
             } catch (error) {
                 console.error("Fetch Program Error:", error);
