@@ -143,6 +143,15 @@ function Register() {
     });
   }
 
+  const handleTempFileUpload = (e, targetField) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    Promise.all(files.map(file => processImage(file))).then(base64Array => {
+      setTempData(prev => ({ ...prev, [targetField]: JSON.stringify(base64Array) }));
+    });
+  }
+
   const handleSubmit = async () => {
     setIsSubmitting(true)
     try {
@@ -712,6 +721,38 @@ function Register() {
                     {[{ n: 'primarySchool', l: 'Primary School' }, { n: 'primaryYear', l: 'Primary Year' }, { n: 'secondarySchool', l: 'Secondary School' }, { n: 'secondaryYear', l: 'Secondary Year' }].map(f => (
                       <div key={f.n} className="space-y-1.5"><label className={labelCls}>{f.l}</label><input name={f.n} value={tempData[f.n] || ''} onChange={handleTempInput} className={inputCls} /></div>
                     ))}
+
+                    {/* Transcript Upload */}
+                    <div className="md:col-span-2 space-y-1.5">
+                      <label className={labelCls}>Academic Verification (Upload Transcript / Report Card)</label>
+                      <label className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl text-sm font-bold transition-all border-2 border-dashed cursor-pointer ${
+                        tempData.reportCard ? 'bg-blue-50 border-blue-400 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-blue-300 hover:bg-blue-50/30'
+                      }`}>
+                        <Upload size={18} className={tempData.reportCard ? 'animate-pulse' : ''} />
+                        {tempData.reportCard ? 'Transcript Secured ✓ (Click to replace)' : 'Upload Transcript / Report Card'}
+                        <input type="file" multiple accept="image/*" onChange={(e) => handleTempFileUpload(e, 'reportCard')} className="hidden" />
+                      </label>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center italic">Ensure your grades are clearly visible for institutional verification.</p>
+                    </div>
+
+                    {/* Birth Cert Upload */}
+                    <div className="md:col-span-2 space-y-1.5">
+                      <label className={labelCls}>Birth Identification Protocol</label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label className={`flex items-center justify-center gap-3 py-3.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                          tempData.document && tempData.document !== 'Personal Delivery' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'
+                        }`}>
+                          <Upload size={16} />
+                          {tempData.document && tempData.document !== 'Personal Delivery' ? 'Record Uploaded ✓ (Click to replace)' : 'Certification of Birth'}
+                          <input type="file" multiple accept="image/*,.pdf" onChange={(e) => handleTempFileUpload(e, 'document')} className="hidden" />
+                        </label>
+                        <button type="button" onClick={() => setTempData(prev => ({ ...prev, document: 'Personal Delivery' }))} className={`flex items-center justify-center gap-3 py-3.5 rounded-xl text-xs font-bold transition-all border ${
+                          tempData.document === 'Personal Delivery' ? 'bg-blue-700/5 border-blue-300 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'
+                        }`}>
+                          <RefreshCw size={16} /> Physical Delivery
+                        </button>
+                      </div>
+                    </div>
                     <div className="space-y-1.5">
                       <label className={labelCls}>Course</label>
                       <select name="course" value={tempData.course || ''} onChange={handleTempInput} className={selectCls}>
