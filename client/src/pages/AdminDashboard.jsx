@@ -818,7 +818,7 @@ export default function AdminDashboard() {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="text-2xl font-black italic tracking-tighter uppercase text-gray-900 leading-none">
-                          {COURSE_MAP[q.courseAbbr] || q.courseAbbr}
+                          {q.courseName || COURSE_MAP[q.courseAbbr] || q.courseAbbr}
                         </h4>
                         <p className="text-[9px] font-bold text-blue-600 uppercase tracking-widest mt-2">{q.courseAbbr} • Institutional Quota</p>
                       </div>
