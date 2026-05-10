@@ -1145,7 +1145,7 @@ export default function AdminDashboard() {
                                 animate={{ opacity: 1 }}
                                 className="text-xl font-black italic tracking-tighter leading-none"
                               >
-                                {selectedStudent.aiScore}%
+                                {Math.round(selectedStudent.aiScore || 0)}%
                               </motion.span>
                               <span className="text-[7px] font-bold uppercase text-gray-400">Match</span>
                             </div>
