@@ -4,8 +4,6 @@ import {
     ChevronLeft,
     ArrowRight,
     GraduationCap,
-    BookOpen,
-    Terminal,
     Zap,
     Scale,
     Rocket,
@@ -32,8 +30,7 @@ const ProgramDetail = () => {
         Pencil: <Pencil size={40} />,
         Hotel: <Hotel size={40} />,
         Landmark: <Landmark size={40} />,
-        GraduationCap: <GraduationCap size={40} />,
-        Terminal: <Terminal size={40} />
+        GraduationCap: <GraduationCap size={40} />
     };
 
     useEffect(() => {

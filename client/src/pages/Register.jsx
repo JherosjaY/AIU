@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, User, Mail, Phone, Calendar, MapPin, CheckCircle2, ChevronRight,
-  MessageSquare, FileText, Save, RefreshCw, Upload, UserCircle, BadgeCheck,
-  Type, Map, Compass, Building, GraduationCap, X, Sparkles,
-  ShieldCheck, Zap, Briefcase, ShieldAlert, Users,
-  Search, Trash2, Edit3, AlertCircle, Send, LogIn, BookOpen
+  ArrowLeft, User, MapPin, CheckCircle2, ChevronRight,
+  Save, RefreshCw, Upload, UserCircle, GraduationCap, X, Sparkles,
+  ShieldAlert, Edit3, Send, Mail
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import API_BASE_URL from '../api'

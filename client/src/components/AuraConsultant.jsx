@@ -50,7 +50,8 @@ const AuraConsultant = () => {
         setIsTyping(true);
 
         try {
-            const apiHistory = messages.map(m => ({
+            // Fix: Include the immediately created userMessage because state updates are asynchronous
+            const apiHistory = [...messages, userMessage].map(m => ({
                 role: m.role,
                 content: m.content
             }));

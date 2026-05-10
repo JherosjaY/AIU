@@ -6,8 +6,6 @@ import {
   XCircle,
   Clock,
   Search,
-  Filter,
-  Phone,
   GraduationCap,
   FileText,
   ChevronRight,
@@ -16,13 +14,11 @@ import {
   LogOut,
   RefreshCw,
   Trash2,
-  MapPin,
   Sparkles,
   Zap,
   Menu,
   Plus,
   BookOpen,
-  Palette,
   Edit3
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -124,27 +120,7 @@ export default function AdminDashboard() {
     }
   }
 
-  const syncQuotas = async () => {
-    try {
-      await fetch(`${API_BASE_URL}/quotas/sync`, { method: 'POST' })
-      fetchQuotas()
-    } catch (error) {
-      console.error('Sync Error:', error)
-    }
-  }
 
-  const handleUpdateQuota = async (abbr, maxSlots) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/quotas/update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ abbr, maxSlots })
-      })
-      if (res.ok) fetchQuotas()
-    } catch (error) {
-      console.error('Update Quota Error:', error)
-    }
-  }
 
   const fetchEnrollments = async () => {
     // 🏛️ SWR LAYER: Load cached dossier immediately
@@ -286,22 +262,7 @@ export default function AdminDashboard() {
     setShowDeleteModal(true);
   };
 
-  const updateStudentField = async (id, field, value) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/enrollments/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: value })
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setEnrollments(prev => prev.map(e => e.id === id ? updated : e));
-        if (selectedStudent?.id === id) setSelectedStudent(updated);
-      }
-    } catch (error) {
-      console.error('Update Failed:', error);
-    }
-  };
+
 
   const downloadCSV = () => {
     const headers = ["ID", "Name", "Email", "Course", "Status", "AI Status", "AI Score", "Applied At"];

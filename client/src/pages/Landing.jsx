@@ -25,7 +25,7 @@ import {
     LogIn
 } from 'lucide-react'
 import AuraConsultant from '../components/AuraConsultant'
-import { AuthProvider, useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import API_BASE_URL from '../api'
 
@@ -478,23 +478,27 @@ function Landing() {
                         <FileText size={300} md:size={500} strokeWidth={1} />
                     </div>
 
-                    <div className="relative z-10 flex flex-col items-center gap-10 md:gap-16">
-                        <div className="space-y-6 md:space-y-8 text-center flex flex-col items-center">
+                    <div className="relative z-10 flex flex-col lg:flex-row items-center lg:items-center justify-between gap-8 lg:gap-10">
+                        {/* LEFT SIDE (REQUIREMENTS & BUTTON) */}
+                        <div className="w-full lg:w-[45%] space-y-6 md:space-y-10 text-center lg:text-left flex flex-col items-center lg:items-start lg:mt-0">
                             <div className="inline-block bg-yellow-400/10 px-5 py-2 rounded-full text-[9px] md:text-[10px] font-black tracking-[0.4em] uppercase border border-yellow-400/20 text-yellow-400 w-fit">Institutional Guide</div>
-                            <h2 className="text-4xl md:text-7xl font-black leading-[1.1] md:leading-tight drop-shadow-2xl text-center tracking-tighter italic uppercase">Requirements</h2>
+                            <h2 className="text-4xl md:text-5xl xl:text-6xl font-black leading-[1.1] md:leading-tight drop-shadow-2xl tracking-tighter italic uppercase">Requirements</h2>
+                            <p className="text-blue-100/70 text-sm xl:text-base font-bold italic leading-relaxed max-w-sm">Ensure all necessary procedural documents are prepared and authenticated before your digital submission.</p>
                             <motion.button 
-                                whileHover={{ scale: 1.05, y: -5 }}
+                                whileHover={{ scale: 1.05, x: 5 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => navigate('/admissions/requirements')} 
-                                className="hidden lg:flex px-8 md:px-10 py-3.5 md:py-5 bg-white text-[#0f172a] rounded-full font-black text-sm md:text-xl shadow-2xl transition-all items-center gap-3 group w-fit"
+                                className="hidden lg:flex px-8 md:px-10 py-3.5 md:py-5 bg-white text-[#0f172a] rounded-full font-black text-sm md:text-xl shadow-2xl transition-all items-center gap-3 group w-fit mt-4"
                             >
                                 See More <ArrowRight className="group-hover:translate-x-2 transition-transform w-4 h-4 md:w-6 md:h-6" />
                             </motion.button>
                         </div>
-                        <div className="space-y-8 md:space-y-12 w-full max-w-xl mx-auto">
-                            <div className="space-y-4 md:space-y-6 text-left">
+
+                        {/* RIGHT SIDE (REQUIREMENTS LIST) */}
+                        <div className="w-full lg:w-[55%] space-y-8 md:space-y-12">
+                            <div className="space-y-6 md:space-y-8 text-left bg-white/[0.03] p-6 md:p-10 rounded-[2rem] border border-white/10 backdrop-blur-sm">
                                 <h4 className="text-lg md:text-2xl font-black text-white uppercase tracking-widest border-l-4 border-[#fbbf24] pl-4 py-1 italic">Incoming Freshmen</h4>
-                                <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 md:gap-y-4">
+                                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 md:gap-y-6">
                                     <RequirementItem text="ACADEMIC TRANSCRIPT / REPORT CARD (Required)" isDark={false} />
                                     <RequirementItem text="ORIGINAL FORM 138 / SF9-SHS" isDark={false} />
                                     <RequirementItem text="ORIGINAL FORM 137 / SF10-SHS" isDark={false} />
@@ -510,7 +514,7 @@ function Landing() {
                             whileHover={{ scale: 1.05, x: 10 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => navigate('/admissions/requirements')} 
-                            className="lg:hidden w-full py-4 bg-white text-[#0f172a] rounded-2xl font-black text-base shadow-2xl transition-all flex items-center justify-center gap-3 group mt-6"
+                            className="lg:hidden w-full py-4 bg-white text-[#0f172a] rounded-2xl font-black text-base shadow-2xl transition-all flex items-center justify-center gap-3 group mt-4 flex-shrink-0"
                         >
                             See More <ArrowRight className="group-hover:translate-x-2 transition-transform w-5 h-5" />
                         </motion.button>
