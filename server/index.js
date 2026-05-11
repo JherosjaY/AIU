@@ -960,9 +960,4 @@ setInterval(runAuraReminders, 24 * 60 * 60 * 1000);
 app.listen(PORT, async () => {
   console.log(`🏛️ Institutional Server Operational at http://localhost:${PORT}`);
   console.log(`🛡️ Aura Security Profile: High-Fidelity API Enabled`);
-  
-  // Synchronize Institutional Registry
-  console.log(`🏛️ Institutional Registry Sync: Synchronizing core programs...`);
-  await initializeQuotas();
-  console.log(`🏛️ Institutional Registry Sync: Core metadata updated.`);
 });

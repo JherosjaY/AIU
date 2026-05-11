@@ -101,13 +101,20 @@ export default function AdminDashboard() {
     return () => { document.body.style.overflow = 'unset' }
   }, [isSidebarOpen])
 
-  const fetchQuotas = async () => {
-    // 🏛️ SWR LAYER: Load cached registry immediately
-    const cached = localStorage.getItem('aura_quotas');
-    if (cached) setQuotas(JSON.parse(cached));
+  const fetchQuotas = async (forceNoCache = false) => {
+    // 🏛️ SWR LAYER: Load cached registry immediately ONLY if state is empty
+    if (!forceNoCache && quotas.length === 0) {
+      const cached = localStorage.getItem('aura_quotas');
+      if (cached) {
+        try {
+          setQuotas(JSON.parse(cached));
+        } catch (e) { console.warn("Cache parse failed"); }
+      }
+    }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/quotas`)
+      // Add cache-buster to ensure we get fresh data from server/CDN
+      const res = await fetch(`${API_BASE_URL}/quotas?t=${Date.now()}`)
       const data = await res.json()
       if (res.ok && Array.isArray(data)) {
         setQuotas(data);
@@ -153,7 +160,7 @@ export default function AdminDashboard() {
       courseAbbr: courseForm.abbr,
       courseName: courseForm.name,
       currentCount: 0,
-      isOptimistic: true // marker for visual feedback if needed
+      isOptimistic: true 
     };
     setQuotas([...quotas, optimisticCourse]);
     setShowCourseModal(false);
@@ -164,16 +171,24 @@ export default function AdminDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(courseForm)
       });
-      if (res.ok) {
-        fetchQuotas();
+      const result = await res.json();
+      
+      if (res.ok && result.success) {
+        // 🏛️ DIRECT INJECTION: Replace optimistic item with actual DB item
+        const newCourse = { ...result.data, currentCount: 0 };
+        setQuotas(prev => {
+          const filtered = prev.filter(q => q.id !== optimisticId);
+          const final = [...filtered, newCourse].sort((a, b) => (a.id || 0) - (b.id || 0));
+          localStorage.setItem('aura_quotas', JSON.stringify(final));
+          return final;
+        });
         resetCourseForm();
       } else {
-        // Rollback on error
-        fetchQuotas();
+        fetchQuotas(true); // Fallback to full fetch if error
       }
     } catch (error) {
       console.error("Create Course Error:", error);
-      fetchQuotas();
+      fetchQuotas(true);
     } finally {
       setIsProcessing(false);
     }

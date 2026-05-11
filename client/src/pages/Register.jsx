@@ -67,21 +67,23 @@ function Register() {
   // 🏛️ REAL-TIME REGISTRY SYNC (WITH ON-RESUME BACKGROUND SYNC)
   useEffect(() => {
     const fetchQuotas = async () => {
-      // 🏛️ SWR LAYER: Load cached registry immediately
-      const cached = localStorage.getItem('aura_quotas');
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setCourseQuotas(parsed);
+      // 🏛️ SWR LAYER: Load cached registry immediately ONLY if state is empty
+      if (courseQuotas.length === 0) {
+        const cached = localStorage.getItem('aura_quotas');
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setCourseQuotas(parsed);
+            }
+          } catch (e) {
+            console.warn("Failed to parse cached quotas");
           }
-        } catch (e) {
-          console.warn("Failed to parse cached quotas");
         }
       }
 
       try {
-        const res = await fetch(`${API_BASE_URL}/quotas`);
+        const res = await fetch(`${API_BASE_URL}/quotas?t=${Date.now()}`);
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
         const data = await res.json();
         
