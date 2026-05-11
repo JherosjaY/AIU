@@ -248,12 +248,10 @@ function Register() {
   const isStepComplete = (index) => {
     if (view === 'review') return true;
     
-    // 💡 ANTI-BYPASS: Step 3 (Index 2: FAMILY) is optional
-    if (index === 2) return true;
-
     const r = { 
       0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
       1: ['phone', 'email'], 
+      2: ['fatherName', 'motherName'],
       3: ['primarySchool', 'secondarySchool', 'document', 'consent']
     };
     const fields = r[index] || [];
@@ -279,13 +277,7 @@ function Register() {
         const active = (view === 'form' && activeStep === i) || (view === 'review' && i === 3);
         return (
           <div key={i} className="flex items-start flex-1">
-            <div className="flex flex-col items-center w-full" onClick={() => {
-              if (view !== 'form') return;
-              // 💡 ANTI-BYPASS NAVIGATION
-              if (i === 0) setActiveStep(0);
-              else if (i === 1 && isStepComplete(0)) setActiveStep(1);
-              else if (i >= 2 && isStepComplete(0) && isStepComplete(1)) setActiveStep(i);
-            }} style={{ cursor: view === 'form' ? 'pointer' : 'default' }}>
+            <div className="flex flex-col items-center w-full" style={{ cursor: 'default' }}>
               <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-xs md:text-sm font-bold transition-all duration-300 ${complete ? 'bg-emerald-500 text-white' : active ? 'bg-blue-700 text-white shadow-md shadow-blue-200' : 'bg-white border-2 border-gray-300 text-gray-400'}`}>
                 {complete ? <CheckCircle2 size={14} md:size={16} /> : step.n}
               </div>
