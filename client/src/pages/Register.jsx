@@ -67,6 +67,19 @@ function Register() {
   // 🏛️ REAL-TIME REGISTRY SYNC (WITH ON-RESUME BACKGROUND SYNC)
   useEffect(() => {
     const fetchQuotas = async () => {
+      // 🏛️ SWR LAYER: Load cached registry immediately
+      const cached = localStorage.getItem('aura_quotas');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCourseQuotas(parsed);
+          }
+        } catch (e) {
+          console.warn("Failed to parse cached quotas");
+        }
+      }
+
       try {
         const res = await fetch(`${API_BASE_URL}/quotas`);
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
@@ -75,8 +88,10 @@ function Register() {
         // Strict Validation to prevent white screen crashes
         if (Array.isArray(data)) {
           setCourseQuotas(data);
+          localStorage.setItem('aura_quotas', JSON.stringify(data));
         } else if (data && data.success && Array.isArray(data.quotas)) {
           setCourseQuotas(data.quotas);
+          localStorage.setItem('aura_quotas', JSON.stringify(data.quotas));
         } else {
           console.warn("Invalid quotas data received:", data);
         }
