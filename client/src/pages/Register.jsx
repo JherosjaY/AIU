@@ -246,23 +246,23 @@ function Register() {
   }
 
   const isStepComplete = (index) => {
-    const val = (index) => {
-      if (view === 'review') return true;
-      const r = { 
-        0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
-        1: ['phone', 'email'], 
-        2: ['fatherName', 'motherName'],
-        3: ['primarySchool', 'secondarySchool', 'document', 'consent']
-      };
-      const fields = r[index] || [];
-      return fields.every(f => {
-        const v = formData[f];
-        if (f === 'consent') return !!v;
-        if (v === undefined || v === null) return false;
-        return v.toString().trim() !== '';
-      });
+    if (view === 'review') return true;
+    
+    // 💡 ANTI-BYPASS: Step 3 (Index 2: FAMILY) is optional
+    if (index === 2) return true;
+
+    const r = { 
+      0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
+      1: ['phone', 'email'], 
+      3: ['primarySchool', 'secondarySchool', 'document', 'consent']
     };
-    return val(index);
+    const fields = r[index] || [];
+    return fields.every(f => {
+      const v = formData[f];
+      if (f === 'consent') return !!v;
+      if (v === undefined || v === null) return false;
+      return v.toString().trim() !== '';
+    });
   }
 
   const stepLabels = [
@@ -279,7 +279,13 @@ function Register() {
         const active = (view === 'form' && activeStep === i) || (view === 'review' && i === 3);
         return (
           <div key={i} className="flex items-start flex-1">
-            <div className="flex flex-col items-center w-full" onClick={() => view === 'form' && setActiveStep(i)} style={{ cursor: view === 'form' ? 'pointer' : 'default' }}>
+            <div className="flex flex-col items-center w-full" onClick={() => {
+              if (view !== 'form') return;
+              // 💡 ANTI-BYPASS NAVIGATION
+              if (i === 0) setActiveStep(0);
+              else if (i === 1 && isStepComplete(0)) setActiveStep(1);
+              else if (i >= 2 && isStepComplete(0) && isStepComplete(1)) setActiveStep(i);
+            }} style={{ cursor: view === 'form' ? 'pointer' : 'default' }}>
               <div className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-xs md:text-sm font-bold transition-all duration-300 ${complete ? 'bg-emerald-500 text-white' : active ? 'bg-blue-700 text-white shadow-md shadow-blue-200' : 'bg-white border-2 border-gray-300 text-gray-400'}`}>
                 {complete ? <CheckCircle2 size={14} md:size={16} /> : step.n}
               </div>
@@ -545,12 +551,12 @@ function Register() {
                               </button>
                             )}
                             {(() => {
-                              const req = { 
-                                0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
-                                1: ['phone', 'email'], 
-                                2: ['fatherName', 'motherName'] 
-                              }; 
-                              const currentFields = req[activeStep] || [];
+                                const req = { 
+                                  0: ['course', 'firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
+                                  1: ['phone', 'email'], 
+                                  2: [] // Step 3 is optional
+                                }; 
+                                const currentFields = req[activeStep] || [];
                               const isStepInvalid = currentFields.some(f => !formData[f] || formData[f].toString().trim() === '');
                               
                               return (
@@ -570,9 +576,9 @@ function Register() {
                               <ArrowLeft size={16} /> <span className="hidden sm:inline">Back</span><span className="sm:hidden">Back</span>
                             </button>
                             <button
-                              disabled={!formData.consent || ['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].toString().trim() === '')}
+                              disabled={!isStepComplete(0) || !isStepComplete(1) || !isStepComplete(3)}
                               onClick={() => setView('review')}
-                              className={`flex-[2] py-3.5 rounded-xl font-semibold text-[11px] md:text-sm transition-all flex items-center justify-center gap-2 ${(formData.consent && !['primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'document'].some(f => !formData[f] || formData[f].toString().trim() === '')) ? 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
+                              className={`flex-[2] py-3.5 rounded-xl font-semibold text-[11px] md:text-sm transition-all flex items-center justify-center gap-2 ${(isStepComplete(0) && isStepComplete(1) && isStepComplete(3)) ? 'bg-blue-700 text-white hover:bg-blue-600 active:scale-[0.98] shadow-sm' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}
                             >
                               Review <span className="hidden sm:inline">Application</span> <ChevronRight size={16} strokeWidth={2.5} />
                             </button>
