@@ -53,6 +53,8 @@ const Programs = () => {
         const fetchPrograms = async () => {
             const FALLBACK_PROGRAMS = [
                 { id: 'bsit', title: 'Information Technology', shortDesc: 'Master the architectural foundations of the digital world.', iconName: 'Monitor', category: 'Technology', acronym: 'BSIT', color: 'border-blue-600', stats: { years: '4', credits: '144' } },
+                { id: 'bscs', title: 'Computer Science', shortDesc: 'Advanced algorithms and software engineering excellence.', iconName: 'Monitor', category: 'Technology', acronym: 'BSCS', color: 'border-cyan-600', stats: { years: '4', credits: '140' } },
+                { id: 'ba', title: 'Business Administration', shortDesc: 'Strategic management and global commerce leadership.', iconName: 'Rocket', category: 'Business', acronym: 'BA', color: 'border-amber-600', stats: { years: '4', credits: '120' } },
                 { id: 'bscrim', title: 'Criminology & Justice', shortDesc: 'Preparation for elite careers in law enforcement and public safety.', iconName: 'Scale', category: 'Justice', acronym: 'BSCRIM', color: 'border-indigo-600', stats: { years: '4', credits: '160' } },
                 { id: 'bsentrep', title: 'Entrepreneurship', shortDesc: 'Incubating the next generation of business disruptors.', iconName: 'Rocket', category: 'Business', acronym: 'BSENTREP', color: 'border-yellow-500', stats: { years: '4', credits: '138' } },
                 { id: 'bsed', title: 'Teacher Education', shortDesc: 'Developing pedagogical pioneers who are master communicators.', iconName: 'Pencil', category: 'Education', acronym: 'BSED', color: 'border-green-600', stats: { years: '4', credits: '152' } },
@@ -63,18 +65,22 @@ const Programs = () => {
             // 🏛️ SWR LAYER: Load cached programs immediately
             const cached = localStorage.getItem('aura_programs_hub');
             if (cached) {
-                const parsed = JSON.parse(cached);
-                if (parsed && parsed.length > 0) setPrograms(parsed);
-                else setPrograms(FALLBACK_PROGRAMS);
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (parsed && parsed.length > 0) setPrograms(parsed);
+                    else setPrograms(FALLBACK_PROGRAMS);
+                } catch (e) { setPrograms(FALLBACK_PROGRAMS); }
             } else {
-                setPrograms(FALLBACK_PROGRAMS); // Start with fallback until fetch
+                setPrograms(FALLBACK_PROGRAMS);
             }
 
             try {
-                const res = await fetch(`${API_BASE_URL}/quotas`);
+                // 🚀 Cache Buster: Force Fetch from Registry
+                const res = await fetch(`${API_BASE_URL}/quotas?t=${Date.now()}`);
                 const data = await res.json();
-                if (res.ok && Array.isArray(data) && data.length > 0) {
-                    const formatted = data.map(p => ({
+                if (res.ok && (Array.isArray(data) || (data.success && Array.isArray(data.quotas)))) {
+                    const rawList = Array.isArray(data) ? data : data.quotas;
+                    const formatted = rawList.map(p => ({
                         id: p.courseAbbr.toLowerCase(),
                         title: p.courseName || p.courseAbbr,
                         shortDesc: p.description || 'Institutional academic program.',
@@ -89,7 +95,6 @@ const Programs = () => {
                 }
             } catch (error) {
                 console.error("Fetch Programs Error:", error);
-                // In case of error and no cache, ensure fallback remains
             } finally {
                 setIsLoading(false);
             }

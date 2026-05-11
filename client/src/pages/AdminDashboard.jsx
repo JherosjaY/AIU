@@ -147,10 +147,15 @@ export default function AdminDashboard() {
   const fetchEnrollments = async () => {
     // 🏛️ SWR LAYER: Load cached dossier immediately
     const cached = localStorage.getItem('aura_enrollments');
-    if (cached) setEnrollments(JSON.parse(cached));
+    if (cached) {
+      try {
+        setEnrollments(JSON.parse(cached));
+      } catch (e) { console.warn("Cache parse failed"); }
+    }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/enrollments`)
+      // 🚀 Cache Buster: Force Fetch from Registry
+      const res = await fetch(`${API_BASE_URL}/enrollments?t=${Date.now()}`)
       const data = await res.json()
       if (res.ok && Array.isArray(data)) {
         setEnrollments(data);
