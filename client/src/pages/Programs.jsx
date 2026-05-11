@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    Monitor, 
-    Scale, 
-    Rocket, 
-    Pencil, 
-    Hotel, 
+import {
+    Monitor,
+    Scale,
+    Rocket,
+    Pencil,
+    Hotel,
     Landmark,
     Search,
     ArrowRight,
@@ -53,8 +53,6 @@ const Programs = () => {
         const fetchPrograms = async () => {
             const FALLBACK_PROGRAMS = [
                 { id: 'bsit', title: 'Information Technology', shortDesc: 'Master the architectural foundations of the digital world.', iconName: 'Monitor', category: 'Technology', acronym: 'BSIT', color: 'border-blue-600', stats: { years: '4', credits: '144' } },
-                { id: 'bscs', title: 'Computer Science', shortDesc: 'Advanced algorithms and software engineering excellence.', iconName: 'Monitor', category: 'Technology', acronym: 'BSCS', color: 'border-cyan-600', stats: { years: '4', credits: '140' } },
-                { id: 'ba', title: 'Business Administration', shortDesc: 'Strategic management and global commerce leadership.', iconName: 'Rocket', category: 'Business', acronym: 'BA', color: 'border-amber-600', stats: { years: '4', credits: '120' } },
                 { id: 'bscrim', title: 'Criminology & Justice', shortDesc: 'Preparation for elite careers in law enforcement and public safety.', iconName: 'Scale', category: 'Justice', acronym: 'BSCRIM', color: 'border-indigo-600', stats: { years: '4', credits: '160' } },
                 { id: 'bsentrep', title: 'Entrepreneurship', shortDesc: 'Incubating the next generation of business disruptors.', iconName: 'Rocket', category: 'Business', acronym: 'BSENTREP', color: 'border-yellow-500', stats: { years: '4', credits: '138' } },
                 { id: 'bsed', title: 'Teacher Education', shortDesc: 'Developing pedagogical pioneers who are master communicators.', iconName: 'Pencil', category: 'Education', acronym: 'BSED', color: 'border-green-600', stats: { years: '4', credits: '152' } },
@@ -133,7 +131,7 @@ const Programs = () => {
             {/* Natural Blurring Zone Header */}
             <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 px-4 md:px-8 bg-transparent ${scrolled ? 'backdrop-blur-2xl py-4' : 'py-4 md:py-8'} hidden md:block`}>
                 <div className="max-w-7xl mx-auto flex justify-between items-center text-left">
-                    <button 
+                    <button
                         onClick={() => navigate('/')}
                         className="flex items-center gap-2 px-4 md:px-6 py-2 md:py-2.5 rounded-full bg-white/5 border border-white/10 transition-all font-black text-[8px] md:text-[10px] uppercase tracking-widest text-blue-100"
                     >
@@ -161,7 +159,7 @@ const Programs = () => {
                     >
                         <Zap size={14} className="inline mr-2 fill-yellow-400" /> Academic Ecosystem
                     </motion.div>
-                    <motion.h1 
+                    <motion.h1
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-tight md:leading-none text-white italic uppercase"
@@ -169,7 +167,7 @@ const Programs = () => {
                         Expertise <br className="md:hidden" />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">Simplified.</span>
                     </motion.h1>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.2 }}
@@ -194,7 +192,7 @@ const Programs = () => {
                     </div>
 
                     <div className="max-w-xl mx-auto relative group">
-                        <input 
+                        <input
                             type="text"
                             placeholder="Find your future program..."
                             value={searchQuery}
@@ -235,7 +233,7 @@ const Programs = () => {
                                     <p className="text-slate-500 text-sm font-bold leading-relaxed italic uppercase opacity-70">
                                         {p.shortDesc}
                                     </p>
-                                    
+
                                     <div className="flex gap-4 pt-4 border-t border-slate-100 flex-wrap">
                                         <div className="flex items-center gap-2 text-[10px] font-black text-blue-900 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter italic">
                                             <Sparkles size={12} /> {p.stats.credits} Credits
@@ -257,7 +255,7 @@ const Programs = () => {
                 </div>
 
                 {/* Final CTA */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 50 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -266,9 +264,9 @@ const Programs = () => {
                     <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
                     <div className="relative z-10 space-y-6">
                         <h2 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight italic uppercase">Ready to join the elite?</h2>
-                        <p className="text-blue-100 text-sm md:text-xl font-bold italic opacity-80 max-w-2xl mx-auto uppercase">Our 2024 admissions are currently active. Secure your slot through our AI-assisted portal.</p>
+                        <p className="text-blue-100 text-sm md:text-xl font-bold italic opacity-80 max-w-2xl mx-auto uppercase">Our 2026 admissions are currently active. Secure your slot through our AI-assisted portal.</p>
                         <div className="flex justify-center pt-4">
-                            <button 
+                            <button
                                 onClick={() => navigate('/register')}
                                 className="px-10 md:px-14 py-4 md:py-6 bg-yellow-400 text-blue-900 rounded-2xl md:rounded-full font-black text-lg md:text-2xl active:scale-95 transition-all shadow-2xl uppercase italic"
                             >

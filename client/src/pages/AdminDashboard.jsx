@@ -82,16 +82,29 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
+    // 🏛️ GLOBAL REGISTRY REFRESH (Initial Load)
     fetchEnrollments()
     fetchQuotas()
 
-    // ON_RESUME Logic (Background Sync on Tab Focus)
+    // 🔄 ON_RESUME Logic: Force background sync when the admin returns to the tab
     const onFocus = () => {
+      console.log('--- AURA: Institutional Tab Focus Detected. Synchronizing Registry ---');
       fetchEnrollments();
       fetchQuotas();
     };
+
     window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
+    
+    // 📡 Optional: Heartbeat Polling (Every 60 seconds)
+    const pollInterval = setInterval(() => {
+      fetchEnrollments();
+      fetchQuotas();
+    }, 60000);
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      clearInterval(pollInterval);
+    };
   }, [])
 
   useEffect(() => {
