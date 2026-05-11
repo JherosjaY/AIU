@@ -203,11 +203,8 @@ function Register() {
         };
         localStorage.setItem('aura_success_data', JSON.stringify(successData));
         
-        // 🚀 Open Success in New Tab
-        window.open('/success', '_blank');
-
-        // 🏠 Redirect original tab to Landing or Login
-        navigate('/', { replace: true });
+        // 🚀 Proper Routing: Navigate to Success in the same tab
+        navigate('/success', { state: successData });
       }
       else { alert('❌ Error: ' + data.message) }
     } catch (error) {

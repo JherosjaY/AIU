@@ -1,6 +1,6 @@
 import { useLocation, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { BadgeCheck, Info, Mail, XCircle } from 'lucide-react'
+import { BadgeCheck, Info, Mail } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 function Success() {
@@ -22,21 +22,17 @@ function Success() {
     }
   }, [successData]);
 
-  const handleClose = () => {
-    window.close();
-    // Fallback instruction for browser security limitations
-    alert("Please close this tab manually from your browser.");
-  };
+
 
   // Strict Routing: If no data found in router state or localStorage, redirect to landing
   if (!successData || !successData.firstName) {
     return <Navigate to="/" replace />
   }
 
-  return <SuccessContent successData={successData} handleClose={handleClose} />
+  return <SuccessContent successData={successData} />
 }
 
-function SuccessContent({ successData, handleClose }) {
+function SuccessContent({ successData }) {
   const { firstName, lastName, course, email } = successData;
   return (
     <div className="relative flex flex-col min-h-screen overflow-y-auto font-sans bg-[#F8FAFC]">
@@ -92,22 +88,12 @@ function SuccessContent({ successData, handleClose }) {
             </div>
           </div>
 
-          {/* The Instruction Action */}
-          <div className="space-y-4">
-            <button
-              onClick={handleClose}
-              className="w-full py-4 rounded-[1.25rem] bg-blue-700 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] flex items-center justify-center gap-3"
-            >
-              <XCircle size={16} /> Close This Tab/Page
-            </button>
-            
             <div className="flex items-center justify-center gap-2 py-2 text-amber-600 border-y border-amber-100/50">
               <Info size={12} className="shrink-0" />
               <p className="text-[8px] font-black uppercase tracking-widest leading-none">
                 You may now safely close this window to end your session.
               </p>
             </div>
-          </div>
 
           {/* Footer Security Note */}
           <p className="mt-8 text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] leading-relaxed max-w-xs mx-auto">
