@@ -12,7 +12,12 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedSession = sessionStorage.getItem('aiu_session');
     if (storedSession) {
-      setUser(JSON.parse(storedSession));
+      try {
+        setUser(JSON.parse(storedSession));
+      } catch (e) {
+        console.warn("Session hydration failed:", e);
+        sessionStorage.removeItem('aiu_session');
+      }
     }
     setLoading(false);
   }, []);

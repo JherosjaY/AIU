@@ -599,6 +599,21 @@ app.delete('/api/enrollments/:id', async (req, res) => {
   }
 });
 
+// UPDATE ENROLLMENT FIELD (Checklist / Notes)
+app.patch('/api/enrollments/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const updated = await prisma.enrollment.update({
+      where: { id: parseInt(id) },
+      data: req.body
+    });
+    res.json({ success: true, student: updated });
+  } catch (error) {
+    console.error('Update Error:', error);
+    res.status(500).json({ error: "Institutional update failure." });
+  }
+});
+
 // GET QUOTA STATISTICS
 app.get('/api/quotas', async (req, res) => {
   try {

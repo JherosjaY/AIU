@@ -194,15 +194,20 @@ function Register() {
       })
       const data = await response.json()
       if (data.success) { 
-        navigate('/success', { 
-          state: { 
-            firstName: formData.firstName, 
-            lastName: formData.lastName, 
-            course: formData.course,
-            email: formData.email
-          },
-          replace: true
-        })
+        // 📥 Share data for the new tab
+        const successData = { 
+          firstName: formData.firstName, 
+          lastName: formData.lastName, 
+          course: formData.course,
+          email: formData.email
+        };
+        localStorage.setItem('aura_success_data', JSON.stringify(successData));
+        
+        // 🚀 Open Success in New Tab
+        window.open('/success', '_blank');
+
+        // 🏠 Redirect original tab to Landing or Login
+        navigate('/', { replace: true });
       }
       else { alert('❌ Error: ' + data.message) }
     } catch (error) {

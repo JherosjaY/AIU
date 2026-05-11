@@ -19,7 +19,9 @@ import {
   Menu,
   Plus,
   BookOpen,
-  Edit3
+  Edit3,
+  MapPin,
+  Phone
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -127,6 +129,19 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleUpdateQuota = async (courseAbbr, maxSlots) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/quotas/${courseAbbr}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maxSlots: parseInt(maxSlots) })
+      });
+      if (res.ok) fetchQuotas();
+    } catch (error) {
+      console.error('Update Quota Error:', error);
+    }
+  }
+
 
 
   const fetchEnrollments = async () => {
@@ -160,7 +175,7 @@ export default function AdminDashboard() {
       courseAbbr: courseForm.abbr,
       courseName: courseForm.name,
       currentCount: 0,
-      isOptimistic: true 
+      isOptimistic: true
     };
     setQuotas([...quotas, optimisticCourse]);
     setShowCourseModal(false);
@@ -172,7 +187,7 @@ export default function AdminDashboard() {
         body: JSON.stringify(courseForm)
       });
       const result = await res.json();
-      
+
       if (res.ok && result.success) {
         // 🏛️ DIRECT INJECTION: Replace optimistic item with actual DB item
         const newCourse = { ...result.data, currentCount: 0 };
@@ -346,6 +361,26 @@ export default function AdminDashboard() {
       alert(error.message);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const updateStudentField = async (id, field, value) => {
+    // 🏛️ OPTIMISTIC UI: Update local state immediately
+    setEnrollments(prev => prev.map(e => e.id === id ? { ...e, [field]: value } : e));
+    if (selectedStudent?.id === id) {
+      setSelectedStudent(prev => ({ ...prev, [field]: value }));
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/enrollments/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value })
+      });
+      if (!res.ok) throw new Error("Sync failure");
+    } catch (error) {
+      console.error('Update Field Error:', error);
+      // Rollback on failure if needed, or just let the next refresh handle it
     }
   };
 
@@ -664,7 +699,7 @@ export default function AdminDashboard() {
                       <div className={`w-12 h-12 md:w-20 md:h-20 rounded-2xl md:rounded-3xl shrink-0 flex items-center justify-center transition-all font-black text-lg md:text-2xl italic tracking-tighter ${student.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' :
                         student.status === 'REJECTED' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                         }`}>
-                        {student.firstName[0]}{student.lastName[0]}
+                        {student?.firstName?.[0] || 'A'}{student?.lastName?.[0] || ''}
                       </div>
 
                       <div className="flex-1 min-w-0">
@@ -880,12 +915,12 @@ export default function AdminDashboard() {
 
                 <div className="flex items-center gap-6 mb-12">
                   <div className="w-16 h-16 md:w-20 md:h-20 rounded-[1.5rem] md:rounded-[2rem] border-2 border-blue-600 flex items-center justify-center text-2xl md:text-3xl font-black text-blue-700 shadow-xl shadow-blue-600/10 shrink-0">
-                    {selectedStudent.firstName[0]}
+                    {selectedStudent?.firstName?.[0] || 'A'}
                   </div>
                   <div className="text-left">
                     <h3 className="text-lg md:text-2xl font-black italic tracking-tighter text-gray-900 leading-none mb-1 md:mb-2">{selectedStudent.firstName} {selectedStudent.lastName}</h3>
                     <p className="text-[9px] md:text-[10px] font-bold text-blue-600 uppercase tracking-widest flex items-center gap-2">
-                      <span className="text-gray-400">Record ID:</span> AURA-{String(selectedStudent.id).padStart(4, '0')}
+                      <span className="text-gray-400">Record ID:</span> AURA-{String(selectedStudent?.id || 0).padStart(4, '0')}
                     </p>
                   </div>
                 </div>
@@ -1268,7 +1303,7 @@ export default function AdminDashboard() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <button onClick={() => setShowRejectModal(false)} className="py-4 bg-gray-50 rounded-2xl font-bold text-[11px] uppercase tracking-widest">Back</button>
-                    <button onClick={() => handleAction(selectedStudent.id, 'REJECT', rejectReason, isQualifiedReject)} className="py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Confirm</button>
+                    <button onClick={() => selectedStudent?.id && handleAction(selectedStudent.id, 'REJECT', rejectReason, isQualifiedReject)} className="py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Confirm</button>
                   </div>
                 </div>
               </motion.div>
@@ -1528,7 +1563,7 @@ export default function AdminDashboard() {
                     enrollments.filter(e => e.course === selectedCourseRoster).map(student => (
                       <div key={student.id} className="p-4 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-md hover:shadow-blue-900/5 transition-all flex items-center gap-4 group bg-white">
                         <div className="w-10 h-10 rounded-xl border border-blue-100 bg-blue-50 text-blue-600 font-black flex justify-center items-center shrink-0">
-                          {student.firstName[0]}
+                          {student?.firstName?.[0] || 'A'}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[13px] font-bold text-gray-900 truncate uppercase">{student.firstName} {student.lastName}</p>
@@ -1550,7 +1585,7 @@ export default function AdminDashboard() {
                     onClick={() => setSelectedCourseRoster(null)}
                     className="py-4 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-gray-500 bg-gray-50 hover:bg-gray-100 transition-all border border-transparent"
                   >
-                    Close Roster
+                    Close
                   </button>
                   <button
                     onClick={downloadCourseRosterCSV}
