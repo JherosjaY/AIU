@@ -6,7 +6,7 @@ AuraEnroll is a modern, responsive web application designed to streamline the un
 
 ---
 
-> **Key Features & Innovations
+> ** Key Features & Innovations
 
 ###  Aura: Conversational AI Onboarding
 - Replaces traditional forms with an intuitive chat interface.
@@ -24,7 +24,7 @@ AuraEnroll is a modern, responsive web application designed to streamline the un
 
 ---
 
-> **Technology Stack
+> ** Technology Stack
 
 - **Frontend:** React.js (Vite) + Tailwind CSS + Framer Motion
 - **Backend:** Node.js (Express framework)
