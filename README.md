@@ -15,7 +15,7 @@ AuraEnroll is a modern, responsive web application designed to streamline the un
 - **Troll Protection / Sanity Check:** Automatically flags applications using gibberish or suspicious inputs.
 
 ### 👤 Dedicated Portals & Dashboards
-- **Student Portal:** Smart registration wizard with a dynamic landing page and client-side validation.
+- **Student Portal:** Smart registration wizard with a dynamic landing page and client-side validation. (Mockup Design)
 - **Admin Portal:** Centralized dashboard to view applicants, manage course quotas, and perform automated AI document reviews.
 
 ### 📊 Automated Utilities
