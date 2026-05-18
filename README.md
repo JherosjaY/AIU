@@ -1,4 +1,4 @@
-# 🚀 AuraEnroll: AI-Driven Intelligent Student Lifecycle & Enrollment System
+#  AuraEnroll: AI-Driven Intelligent Student Lifecycle & Enrollment System
 
 > **Aura Integrated University (AIU)**
 
@@ -76,7 +76,7 @@ graph TD
 
 ---
 
-## 🗄️ Entity-Relationship Diagram (ERD)
+##  Entity-Relationship Diagram (ERD)
 
 ```mermaid
 erDiagram
