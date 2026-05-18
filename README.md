@@ -6,25 +6,25 @@ AuraEnroll is a modern, responsive web application designed to streamline the un
 
 ---
 
-## ✨ Key Features & Innovations
+> **Key Features & Innovations
 
-### 🤖 Aura: Conversational AI Onboarding
+###  Aura: Conversational AI Onboarding
 - Replaces traditional forms with an intuitive chat interface.
 - Extracts personal information (Name, Age, Academic History) from natural language.
 - Intelligently maps structured data to the enrollment form.
 - **Troll Protection / Sanity Check:** Automatically flags applications using gibberish or suspicious inputs.
 
-### 👤 Dedicated Portals & Dashboards
+###  Dedicated Portals & Dashboards
 - **Student Portal:** Smart registration wizard with a dynamic landing page and client-side validation. (Mockup Design)
 - **Admin Portal:** Centralized dashboard to view applicants, manage course quotas, and perform automated AI document reviews.
 
-### 📊 Automated Utilities
+###  Automated Utilities
 - **OCR Document Analysis:** Tesseract.js integration to analyze and parse uploaded academic records (e.g., Student Report Cards) for automated evaluation.
 - **Automated Communications:** SendGrid integration handles lifecycle emails (Application Received, Admission Authorized/Declined).
 
 ---
 
-## 🛠️ Technology Stack
+> **Technology Stack
 
 - **Frontend:** React.js (Vite) + Tailwind CSS + Framer Motion
 - **Backend:** Node.js (Express framework)
@@ -37,7 +37,7 @@ AuraEnroll is a modern, responsive web application designed to streamline the un
 
 ---
 
-## 📂 System Architecture Flowchart
+> **System Architecture Flowchart
 
 ```mermaid
 graph TD
