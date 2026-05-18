@@ -14,18 +14,12 @@ AuraEnroll is a modern, responsive web application designed to streamline the un
 - Intelligently maps structured data to the enrollment form.
 - **Troll Protection / Sanity Check:** Automatically flags applications using gibberish or suspicious inputs.
 
-### 📅 Intelligent Section Scheduling
-- **Real-time conflict checking:** Detects overlapping subjects in a student's schedule.
-- **Smart suggestions:** If a section is full, the AI recommends available alternatives.
-
-### 👤 Role-Based Advanced Dashboards
-- **Student Portal:** Track enrollment status, view grades, and access the Certificate of Registration (COR).
-- **Faculty Portal:** Manage class lists and input grades seamlessly.
-- **Admin Portal:** Manage curricula, course quotas, and perform one-click automated reviews.
+### 👤 Dedicated Portals & Dashboards
+- **Student Portal:** Smart registration wizard with a dynamic landing page and client-side validation.
+- **Admin Portal:** Centralized dashboard to view applicants, manage course quotas, and perform automated AI document reviews.
 
 ### 📊 Automated Utilities
-- **Tuition Assessment:** Instant computation of fees based on units and laboratory requirements.
-- **OCR Document Analysis:** Tesseract.js integration to analyze and parse uploaded academic records (e.g., Student Report Cards).
+- **OCR Document Analysis:** Tesseract.js integration to analyze and parse uploaded academic records (e.g., Student Report Cards) for automated evaluation.
 - **Automated Communications:** SendGrid integration handles lifecycle emails (Application Received, Admission Authorized/Declined).
 
 ---
