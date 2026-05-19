@@ -1348,8 +1348,8 @@ export default function AdminDashboard() {
                   <h3 className="text-2xl font-bold italic uppercase tracking-tighter">Critical Warning</h3>
                   <p className="text-sm text-gray-500 font-semibold">You sure you wanna delete this Record?</p>
                   <div className="w-full space-y-3">
-                    <button onClick={executeDelete} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Purge Record</button>
-                    <button onClick={() => setShowDeleteModal(false)} className="w-full py-4 bg-gray-50 text-gray-400 rounded-2xl font-bold text-[11px] uppercase tracking-widest">Abort</button>
+                    <button onClick={executeDelete} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Delete Record</button>
+                    <button onClick={() => setShowDeleteModal(false)} className="w-full py-4 bg-gray-50 text-gray-400 rounded-2xl font-bold text-[11px] uppercase tracking-widest">Cancel</button>
                   </div>
                 </div>
               </motion.div>
