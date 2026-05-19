@@ -40,6 +40,10 @@ function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [courseQuotas, setCourseQuotas] = useState([])
   const [isMobile, setIsMobile] = useState(false)
+  
+  // 🧠 AURA SELECTION INTELLIGENCE
+  const [selectionBox, setSelectionBox] = useState({ visible: false, x: 0, y: 0, text: '' })
+  const containerRef = useRef(null)
 
   // 🌍 ENVIRONMENT DETECTION
   useEffect(() => {
@@ -112,6 +116,37 @@ function Register() {
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, []);
+
+  // 🧠 SELECTION INTELLIGENCE HANDLERS
+  const handleTextSelection = (e) => {
+    const selection = window.getSelection();
+    const text = selection.toString().trim();
+    
+    if (text && text.length > 2 && text.length < 100) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      
+      setSelectionBox({
+        visible: true,
+        x: rect.left + rect.width / 2,
+        y: rect.top + window.scrollY - 10,
+        text: text
+      });
+    } else {
+      setSelectionBox(prev => ({ ...prev, visible: false }));
+    }
+  };
+
+  const askAuraAboutSelection = () => {
+    if (!selectionBox.text) return;
+    setIsChatOpen(true);
+    setCurrentInput(`Tell me about "${selectionBox.text}".`);
+    setSelectionBox(prev => ({ ...prev, visible: false }));
+    // Trigger auto-send after a small delay to ensure chat is open
+    setTimeout(() => {
+      document.getElementById('aura-chat-submit')?.click();
+    }, 100);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -228,7 +263,12 @@ function Register() {
       const apiHistory = newHistory.map(m => ({ role: m.role === 'aura' ? 'assistant' : 'user', content: m.text }))
       const res = await fetch(`${API_BASE_URL}/consult`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg.text, history: apiHistory })
+        body: JSON.stringify({ 
+          message: userMsg.text, 
+          history: apiHistory,
+          step: activeStep,
+          selectedText: userMsg.text.includes('"') ? userMsg.text.split('"')[1] : null
+        })
       })
       const data = await res.json()
       setMessages(prev => {
@@ -244,6 +284,30 @@ function Register() {
       setIsChatting(false)
     }
   }
+
+  const STEP_SUGGESTIONS = {
+    identity: ["Is middle name required?", "What is civil status?", "Age requirements for AIU?", "Citizenship format?", "Gender options?"],
+    contact: ["Why do you need my phone?", "Institutional email benefits?", "International student support?", "Address format guidance?", "Alternative contact?"],
+    family: ["What if I don't know father's contact?", "Can I use 'N/A' for parents?", "Emergency contact purpose?", "Guardian info required?", "Sibling scholarships?"],
+    academic: ["What documents to upload?", "Photo quality requirements?", "What is an LRN?", "Transferee requirements?", "Enrollment deadline?"]
+  };
+
+  const [randomizedSuggestions, setRandomizedSuggestions] = useState([])
+
+  useEffect(() => {
+    // Flatten all suggestions into one pool
+    const allPool = Object.values(STEP_SUGGESTIONS).flat();
+    // Shuffle and pick 6
+    const shuffled = allPool.sort(() => Math.random() - 0.5).slice(0, 6);
+    setRandomizedSuggestions(shuffled);
+  }, [activeStep]); // Refresh on step change to keep it "live"
+
+  const handleSuggestionClick = (suggestion) => {
+    setCurrentInput(suggestion);
+    setTimeout(() => {
+      document.getElementById('aura-chat-submit')?.click();
+    }, 50);
+  };
 
   const isStepComplete = (index) => {
     if (view === 'review') return true;
@@ -328,10 +392,31 @@ function Register() {
   }
 
   return (
-    <div className="relative flex flex-col h-screen overflow-hidden font-sans">
+    <div 
+      ref={containerRef}
+      onMouseUp={handleTextSelection}
+      className="relative flex flex-col h-screen overflow-hidden font-sans selection:bg-blue-100 selection:text-blue-900"
+    >
+      {/* 🧠 SMART SELECTION TOOLTIP */}
+      <AnimatePresence>
+        {selectionBox.visible && (
+          <motion.button
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            onClick={askAuraAboutSelection}
+            style={{ left: selectionBox.x, top: selectionBox.y }}
+            className="fixed -translate-x-1/2 -translate-y-[calc(100%+15px)] z-[2000] flex items-center gap-2 bg-[#1e40af] text-white px-5 py-3 rounded-full shadow-[0_10px_30px_rgba(30,58,138,0.4)] border border-white/20 hover:scale-105 active:scale-95 transition-all group overflow-hidden whitespace-nowrap"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <Sparkles size={14} className="text-yellow-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest pointer-events-none">Ask Aura</span>
+          </motion.button>
+        )}
+      </AnimatePresence>
       
       {/* ── BACKGROUND LAYER ── */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <img src="/campus.png" alt="Campus Background" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-white/45 backdrop-blur-[1px]" />
       </div>
@@ -681,6 +766,19 @@ function Register() {
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* 💡 SMART RANDOMIZED SUGGESTION PILLS */}
+              <div className="px-5 py-2 flex gap-2 overflow-x-auto no-scrollbar bg-white shrink-0 border-t border-gray-100">
+                {randomizedSuggestions.map((s, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSuggestionClick(s)}
+                    className="whitespace-nowrap px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-100 hover:bg-blue-700 hover:text-white transition-all shadow-sm"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
               <form onSubmit={handleSendChat} className="p-4 bg-white border-t border-gray-200 shrink-0 flex gap-2">
                 <input
                   type="text"
@@ -690,9 +788,10 @@ function Register() {
                   className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[13px] outline-none focus:border-blue-500 focus:bg-white transition-all placeholder:text-gray-400"
                 />
                 <button
+                  id="aura-chat-submit"
                   type="submit"
-                  disabled={!currentInput.trim() || isChatting}
-                  className="bg-blue-700 hover:bg-blue-600 disabled:bg-gray-100 disabled:text-gray-300 text-white w-12 rounded-xl flex items-center justify-center transition-all active:scale-95"
+                  disabled={isChatting}
+                  className="w-12 h-12 bg-blue-700 hover:bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all active:scale-95 disabled:opacity-50"
                 >
                   <Send size={18} strokeWidth={2.5} />
                 </button>

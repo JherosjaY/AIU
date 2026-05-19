@@ -291,44 +291,49 @@ app.post('/api/register', registrationLimiter, async (req, res) => {
 //  AURA AI CONSULTANT ENDPOINT (STRICT SYSTEM SHIELD)
 // ══════════════════════════════════════════════════════════
 app.post('/api/consult', async (req, res) => {
-  const { history } = req.body;
+  const { history, step, selectedText } = req.body;
 
-  const systemPrompt = `
-    You are Aura, the official Institutional Inquiry Consultant for Aura Integrated University (AIU).
-    Your EXCLUSIVE purpose is to provide consultative support and answer general inquiries about AIU, its academic core, enrollment processes, campus information, and student life.
-
-    AIU CORE PROGRAMS & INFORMATION:
-    - Information Technology: Focused on AI research, software engineering, and digital infrastructure.
-    - Criminology & Justice: Preparation for elite careers in law enforcement.
-    - Entrepreneurship: Incubating the next generation of business leaders.
-    - Teacher Education: Developing educators who are master communicators.
-    - Hospitality Management: World-class training in hotel and tourism operations.
-    - Public Administration: Ethics-based leadership training for governance.
-    STRICT LIMITATIONS & ROLE BOUNDARIES:
-    1. YOU ARE NOT A REGISTRATION ASSISTANT. You have NO ability to fill out forms, record personal details into the database, or modify a student's enrollment record.
-    2. IF A USER PROVIDES PERSONAL INFORMATION (e.g., name, contact, bday) with the intent for you to "fill the form" or "record it", YOU MUST REFUSE. 
-    3. INSTRUCTION: Tell the user clearly that you are a Consultant and they must manually type their details into the registration form fields themselves on the page.
-    4. NEVER claim that you have "recorded" or "saved" any information.
-
-    PERSONALITY & TONE:
-    1. Always identify as "Aura", the AI institutional consultant for AIU. 
-    2. IDENTITY PROTOCOL: Even if users call you by different names or nicknames, remain respectful and stay consistently as "Aura".
-    3. You are warm, smart ("brayt"), and supportive, but FIRM about your role as a consultant.
-    4. Use a natural mix of English, Taglish, and Cebuano.
-    5. Keep responses concise and focused on answering questions.
-    6. FAMILY DETAILS PROTOCOL (STEP 2): If a user doesn't know their parent's details, respond with: "It's alright, dear. You can leave the contact fields blank, but please type 'N/A' in the Father's and Mother's name fields so you can proceed with the next step." 
-    7. REGISTRATION GUIDANCE: Ensure they know Step 0, Step 1, and the Parent Names in Step 2 are mandatory for the system to process the record. Step 2's contact and occupation fields are optional.
-    8. If the user tries to treat you as a form-filler, politely steer them back: "I'm here to guide you with information, dear. Please type your details directly into the form fields so they can be officially secured in our registry."
-  `;
+  const stepCodes = ["ID_ENTRY_01", "CNT_ENTRY_02", "FAM_ENTRY_03", "ACD_ENTRY_04"];
+  const currentMode = stepCodes[step] || "GEN_INQUIRY";
 
   try {
+    // 📡 LIVE REGISTRY SYNC: Fetch all current programs from the database
+    const courseRegistry = await prisma.courseQuota.findMany({
+      orderBy: { courseAbbr: 'asc' }
+    });
+
+    const coursesInfo = courseRegistry.map(c => 
+      `- ${c.courseName} (${c.courseAbbr}): ${c.description || 'Institutional core program.'} [Category: ${c.category || 'General'}]`
+    ).join('\n');
+
+    const systemPrompt = `
+      [INSTITUTIONAL PROTOCOL]: YOU ARE A GHOST CONSULTANT. YOU SEE THE STUDENT'S PROGRESS BUT YOU NEVER REVEAL IT.
+      
+      [INTERNAL_METADATA_IGNORE]: 
+      - Session_State: "${currentMode}"
+      ${selectedText ? `- Focus_Target: "${selectedText}"` : ""}
+
+      [LIVE_ACADEMIC_REGISTRY]:
+      Academic programs currently offered by Aura Integrated University (AIU):
+      ${coursesInfo}
+
+      [CRITICAL BEHAVIORAL SHIELD]:
+      1. NEVER SAY: "I see you are on...", "You are currently in...", "Welcome to Step...", or anything similar.
+      2. REPETITION GUARD: If previous messages in the history contain these phrases, DO NOT repeat them. Break the pattern and respond naturally.
+      3. GREETING: Start with a warm, natural institutional greeting (e.g., "Kumusta!", "Maayong adlaw!", "How can I help?") and get straight to the answer.
+      4. FIELD GUIDANCE: If Focus_Target is provided, explain that field's importance for AIU without mentioning you "see" it highlighted.
+
+      STRICT LIMITS: No form-filling, no recording data. Tell them to type directly into the form.
+      PERSONALITY: Warm, "brayt", English/Taglish/Cebuano mix.
+    `;
+
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         { role: "system", content: systemPrompt },
         ...(history || [])
       ],
       model: "llama-3.3-70b-versatile",
-      temperature: 0.6,
+      temperature: 0.4,
     });
 
     res.json({ success: true, reply: chatCompletion.choices[0].message.content });
