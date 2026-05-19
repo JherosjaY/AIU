@@ -1283,7 +1283,7 @@ export default function AdminDashboard() {
 
         <AnimatePresence>
           {showRejectModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={() => !isProcessing && setShowRejectModal(false)}
@@ -1331,7 +1331,7 @@ export default function AdminDashboard() {
 
         <AnimatePresence>
           {showDeleteModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={() => !isProcessing && setShowDeleteModal(false)}
@@ -1510,7 +1510,7 @@ export default function AdminDashboard() {
         {/* Delete Course Confirmation Modal */}
         <AnimatePresence>
           {courseToDelete && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#001f3f]/80 backdrop-blur-sm" />
               <motion.div
                 initial={{ scale: 0.95, opacity: 0, y: 20 }}
@@ -1549,7 +1549,7 @@ export default function AdminDashboard() {
         {/* Course Roster Dialog */}
         <AnimatePresence>
           {selectedCourseRoster && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedCourseRoster(null)} className="absolute inset-0 bg-[#001f3f]/80 backdrop-blur-sm cursor-pointer" />
 
               <motion.div
