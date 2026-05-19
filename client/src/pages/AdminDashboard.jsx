@@ -360,29 +360,32 @@ export default function AdminDashboard() {
   };
 
   const executeDelete = async () => {
-    if (!studentToDelete) return;
-
-    setIsProcessing(true);
+    if (!studentToDelete) return
+    setIsProcessing(true)
     try {
-      const res = await authFetch(`${API_BASE_URL}/enrollments/${studentToDelete}`, { method: 'DELETE' });
-      const data = await res.json().catch(() => ({}));
-      
+      const res = await authFetch(`${API_BASE_URL}/enrollments/${studentToDelete}`, {
+        method: 'DELETE'
+      })
+      const data = await res.json()
+
       if (res.ok) {
-        setEnrollments(prev => prev.filter(e => e.id !== studentToDelete));
-        if (selectedStudent?.id === studentToDelete) setSelectedStudent(null);
-        fetchQuotas();
-        setShowDeleteModal(false);
-        setStudentToDelete(null);
+        setEnrollments(prev => prev.filter(e => e.id !== studentToDelete))
+        setSelectedStudent(null)
+        setShowDeleteModal(false)
+        setStudentToDelete(null)
+        alert("Institutional Registry updated. Record permanently removed.")
       } else {
-        throw new Error(data.message || "Institutional access restriction: Purge failed.");
+        // Capture specific server error keys
+        const errorMessage = data.message || data.error || data.details || "Institutional access restriction: Purge failed."
+        throw new Error(errorMessage)
       }
     } catch (error) {
-      console.error('Purge Error:', error);
-      alert(error.message);
+      console.error("Deletion Error:", error)
+      alert(error.message)
     } finally {
-      setIsProcessing(false);
+      setIsProcessing(false)
     }
-  };
+  }
 
   const updateStudentField = async (id, field, value) => {
     // 🏛️ OPTIMISTIC UI: Update local state immediately
@@ -1303,8 +1306,20 @@ export default function AdminDashboard() {
                 <h3 className="text-2xl font-bold italic uppercase tracking-tighter">Critical Warning</h3>
                 <p className="text-sm text-gray-500 font-semibold">You sure you wanna delete this Record?</p>
                 <div className="w-full space-y-3">
-                  <button onClick={executeDelete} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Delete Record</button>
-                  <button onClick={() => setShowDeleteModal(false)} className="w-full py-4 bg-gray-50 text-gray-400 rounded-2xl font-bold text-[11px] uppercase tracking-widest">Cancel</button>
+                  <button 
+                   onClick={executeDelete} 
+                   disabled={isProcessing}
+                   className="w-full py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest shadow-lg shadow-rose-600/20 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {isProcessing ? 'SYNCHRONIZING...' : 'Delete Record'}
+                  </button>
+                  <button 
+                    onClick={() => !isProcessing && setShowDeleteModal(false)} 
+                    disabled={isProcessing}
+                    className="w-full py-4 bg-gray-50 hover:bg-gray-100 text-gray-400 rounded-2xl font-bold text-[11px] uppercase tracking-widest transition-all"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             </motion.div>

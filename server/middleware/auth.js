@@ -10,8 +10,12 @@ const verifyToken = (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Verify token - ensure secret consistency with signing secret
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('CRITICAL SECURITY WARNING: JWT_SECRET environment variable is missing.');
+    }
+    const decoded = jwt.verify(token, secret);
     req.user = decoded;
     
     // Check role access if needed (optional generic check, but we can do it per route)
