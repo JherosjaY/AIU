@@ -482,14 +482,20 @@ export default function AdminDashboard() {
     }
   }, [selectedStudent?.id]);
 
-  const [aiFilter, setAiFilter] = useState('ALL') // ALL, QUALIFIED, AT_RISK, INCOMPLETE
-
+  const [aiFilter, setAiFilter] = useState('ALL') 
   const filteredData = enrollments.filter(e => {
-    const matchesSearch = `${e.firstName} ${e.lastName} ${e.email}`.toLowerCase().includes(search.toLowerCase())
+    const matchesSearch = `${e.firstName} ${e.lastName} ${e.email} ${e.course}`.toLowerCase().includes(search.toLowerCase())
     const matchesFilter = filter === 'ALL' || e.status === filter
     const matchesAi = aiFilter === 'ALL' || e.aiStatus === aiFilter
     return matchesSearch && matchesFilter && matchesAi
   })
+
+  const filteredQuotas = quotas.filter(q => {
+    const searchLow = search.toLowerCase()
+    return (q.courseName || '').toLowerCase().includes(searchLow) || 
+           (q.courseAbbr || '').toLowerCase().includes(searchLow) ||
+           (q.category || '').toLowerCase().includes(searchLow)
+  });
 
   return (
     <div className="light-theme h-screen flex flex-col md:flex-row bg-slate-50 text-gray-900 font-sans overflow-hidden">
@@ -617,7 +623,7 @@ export default function AdminDashboard() {
         <div className="p-6 md:p-10 flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 bg-white gap-6 shrink-0 z-[40]">
           <div className="hidden md:flex items-center gap-6">
             <h2 className="text-xl md:text-2xl font-bold italic uppercase tracking-tighter text-gray-900 leading-none">
-              {currentTab === 'RECORDS' ? `${filter} Enrollments` : 'Course Capacity'}
+              {currentTab === 'RECORDS' ? `${filter} Enrollments` : currentTab === 'QUOTAS' ? 'Institutional Quotas' : 'Academic Programs'}
             </h2>
             {currentTab === 'RECORDS' && (
               <button
@@ -634,15 +640,15 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          <div className="flex items-center gap-3 md:gap-6">
-            <div className="relative flex-1 md:w-72 group">
-              <Search className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" size={14} md:size={16} />
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <div className="relative flex-1 md:w-80 group">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors" size={18} />
               <input
                 type="text"
-                placeholder="SEARCH..."
+                placeholder={currentTab === 'RECORDS' ? "Search Registry..." : "Search Programs..."}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-slate-100 md:bg-white border border-gray-200 md:border-transparent rounded-xl py-3 px-10 md:px-12 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 font-bold text-[9px] md:text-[10px] tracking-widest transition-all"
+                className="w-full bg-gray-50 border border-gray-100 rounded-2xl pl-16 pr-6 py-4 text-xs font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all placeholder:text-gray-300"
               />
             </div>
             <button
@@ -782,7 +788,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {quotas.map(course => (
+                {filteredQuotas.map(course => (
                   <motion.div
                     key={course.id}
                     layoutId={`course-${course.id}`}
@@ -832,13 +838,13 @@ export default function AdminDashboard() {
           ) : (
             /* QUOTA MANAGEMENT VIEW */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
-              {quotas.length === 0 && (
+              {filteredQuotas.length === 0 && (
                 <div className="col-span-full py-20 text-center opacity-30">
                   <ShieldCheck size={64} className="mx-auto mb-4 text-gray-300" />
-                  <p className="text-[10px] font-bold uppercase tracking-[0.4em]">Resource Quotas Not Initialized</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.4em]">Resource Match Not Found</p>
                 </div>
               )}
-              {quotas.map(q => {
+              {filteredQuotas.map(q => {
                 const percentage = Math.min((q.currentCount / q.maxSlots) * 100, 100);
                 const isFull = q.currentCount >= q.maxSlots;
 
@@ -847,25 +853,25 @@ export default function AdminDashboard() {
                     key={q.id}
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="bg-white border border-gray-200 p-8 rounded-[2.5rem] space-y-6 relative overflow-hidden shadow-sm hover:shadow-xl hover:shadow-blue-900/5 transition-all group"
+                    className="bg-white border border-gray-200 p-6 md:p-8 rounded-[2.5rem] space-y-6 relative overflow-hidden shadow-sm hover:shadow-xl hover:shadow-blue-900/5 transition-all group"
                   >
                     <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="text-2xl font-black italic tracking-tighter uppercase text-gray-900 leading-none">
+                      <div className="min-w-0 pr-2">
+                        <h4 className="text-xl md:text-2xl font-black italic tracking-tighter uppercase text-gray-900 leading-none truncate">
                           {q.courseName || COURSE_MAP[q.courseAbbr] || q.courseAbbr}
                         </h4>
-                        <p className="text-[9px] font-bold text-blue-600 uppercase tracking-widest mt-2">{q.courseAbbr} • Institutional Quota</p>
+                        <p className="text-[9px] font-bold text-blue-600 uppercase tracking-widest mt-2 shrink-0">{q.courseAbbr} • Institutional Quota</p>
                       </div>
                       {isFull && (
-                        <div className="px-2.5 py-1 bg-rose-50 text-rose-600 font-bold text-[8px] uppercase tracking-widest rounded-full animate-pulse border border-rose-100">
-                          Capacity Reached
+                        <div className="shrink-0 px-2.5 py-1 bg-rose-50 text-rose-600 font-bold text-[8px] uppercase tracking-widest rounded-full animate-pulse border border-rose-100">
+                          Full
                         </div>
                       )}
                     </div>
 
                     <div className="space-y-3">
                       <div className="flex justify-between text-[11px] font-bold italic">
-                        <span className="text-gray-400 uppercase tracking-wide">Registration</span>
+                        <span className="text-gray-400 uppercase tracking-wide text-[9px]">Registration</span>
                         <span className={isFull ? 'text-rose-600' : 'text-blue-600'}>{q.currentCount} / {q.maxSlots}</span>
                       </div>
                       <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -876,21 +882,26 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div className="pt-4 flex items-center justify-between border-t border-gray-50 mt-2">
+                    <div className="pt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-50 mt-2">
                       <button
                         onClick={() => setSelectedCourseRoster(q.courseAbbr)}
-                        className="px-4 py-2 bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-100 text-gray-500 hover:text-blue-600 rounded-xl font-bold text-[9px] uppercase tracking-[0.2em] transition-all flex items-center gap-2 relative group-hover:shadow-sm"
+                        className="flex-1 min-w-fit px-4 py-3 bg-gray-50 hover:bg-blue-50 border border-gray-100 hover:border-blue-100 text-gray-500 hover:text-blue-600 rounded-xl font-bold text-[9px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 relative group-hover:shadow-sm"
                       >
                         <Users size={12} />
                         View Students
                       </button>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Adjust Max:</span>
+                      <div className="flex items-center gap-2 flex-grow justify-end">
+                        <span className="text-[8px] font-bold text-gray-300 uppercase tracking-widest hidden xs:block">Max:</span>
                         <input
                           type="number"
                           defaultValue={q.maxSlots}
-                          onBlur={(e) => handleUpdateQuota(q.courseAbbr, e.target.value)}
-                          className="w-16 bg-gray-50 hover:bg-white border border-gray-100 focus:border-blue-500 rounded-lg px-2 py-1.5 text-[11px] font-bold text-blue-700 outline-none transition-all text-center"
+                          onBlur={(e) => {
+                            const val = parseInt(e.target.value);
+                            if (!isNaN(val) && val !== q.maxSlots) {
+                              handleUpdateQuota(q.courseAbbr, val);
+                            }
+                          }}
+                          className="w-16 bg-gray-50/50 hover:bg-white border border-gray-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 rounded-lg px-2 py-2 text-[11px] font-bold text-blue-700 outline-none transition-all text-center shadow-inner"
                         />
                       </div>
                     </div>

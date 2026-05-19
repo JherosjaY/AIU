@@ -75,6 +75,24 @@ const Login = () => {
   return (
     <div className="relative h-screen w-screen flex flex-col overflow-hidden text-left font-sans">
 
+      {/* ── ERROR BANNER (Institutional Style) ── */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className="fixed top-0 left-0 right-0 z-[1000] bg-rose-600 text-white py-4 px-6 shadow-2xl flex items-center justify-center gap-3 border-b border-rose-500/30 backdrop-blur-md"
+          >
+            <AlertCircle size={18} className="shrink-0" />
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em]">{error}</span>
+            <button onClick={() => setError('')} className="ml-4 p-1 hover:bg-white/20 rounded-lg transition-all">
+              <X size={14} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── BACKGROUND LAYER ── */}
       <div className="absolute inset-0 z-0">
         <img
@@ -85,8 +103,6 @@ const Login = () => {
         {/* Softened white overlay for high contrast */}
         <div className="absolute inset-0 bg-white/35 backdrop-blur-[1px]" />
       </div>
-
-
 
       {/* ── DESKTOP BRANDING HEADER ── */}
       <nav className="fixed top-0 left-0 right-0 z-[100] px-6 py-8 hidden md:block">
@@ -173,21 +189,6 @@ const Login = () => {
                   Forgot Password?
                 </button>
               </div>
-
-              {/* Error Message */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="flex items-center gap-2 p-4 bg-red-50 border border-red-100 rounded-2xl"
-                  >
-                    <AlertCircle size={16} className="text-red-500 shrink-0" />
-                    <span className="text-[10px] font-bold text-red-700 uppercase tracking-widest leading-none">{error}</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               {/* Submit Button */}
               <button
