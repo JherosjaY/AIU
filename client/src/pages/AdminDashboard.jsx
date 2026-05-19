@@ -365,6 +365,8 @@ export default function AdminDashboard() {
     setIsProcessing(true);
     try {
       const res = await authFetch(`${API_BASE_URL}/enrollments/${studentToDelete}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      
       if (res.ok) {
         setEnrollments(prev => prev.filter(e => e.id !== studentToDelete));
         if (selectedStudent?.id === studentToDelete) setSelectedStudent(null);
@@ -372,7 +374,7 @@ export default function AdminDashboard() {
         setShowDeleteModal(false);
         setStudentToDelete(null);
       } else {
-        throw new Error("Purge failed. Access restricted.");
+        throw new Error(data.message || "Institutional access restriction: Purge failed.");
       }
     } catch (error) {
       console.error('Purge Error:', error);
@@ -608,8 +610,8 @@ export default function AdminDashboard() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-[calc(100vh-64px)] md:h-screen md:ml-80 relative overflow-hidden transition-all duration-300">
-        <div className="p-6 md:p-10 flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 bg-white gap-6">
+      <main className="flex-1 flex flex-col h-[calc(100vh-68px)] md:h-screen md:ml-80 relative overflow-hidden transition-all duration-300">
+        <div className="p-6 md:p-10 flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 bg-white gap-6 sticky top-0 z-[40]">
           <div className="hidden md:flex items-center gap-6">
             <h2 className="text-xl md:text-2xl font-bold italic uppercase tracking-tighter text-gray-900 leading-none">
               {currentTab === 'RECORDS' ? `${filter} Enrollments` : 'Course Capacity'}
@@ -1280,343 +1282,344 @@ export default function AdminDashboard() {
             </motion.div>
           )}
         </AnimatePresence>
+      </main>
 
-        <AnimatePresence>
-          {showRejectModal && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                onClick={() => !isProcessing && setShowRejectModal(false)}
-                className="absolute inset-0 bg-black/60 backdrop-blur-xl"
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-md bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden"
-              >
-                <div className="flex flex-col space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 shrink-0 border border-rose-100">
-                      <XCircle size={24} />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold uppercase tracking-tighter text-gray-900">Deny Admission</h3>
-                      <p className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em]">Institutional Notification</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <textarea
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                      placeholder="Reason for denial..."
-                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm min-h-[120px]"
-                    />
-                    <button
-                      onClick={() => setIsQualifiedReject(!isQualifiedReject)}
-                      className={`w-full flex items-center justify-between p-4 rounded-2xl border ${isQualifiedReject ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-gray-50 border-gray-100'}`}
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Academic Unqualified Template</span>
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <button onClick={() => setShowRejectModal(false)} className="py-4 bg-gray-50 rounded-2xl font-bold text-[11px] uppercase tracking-widest">Back</button>
-                    <button onClick={() => selectedStudent?.id && handleAction(selectedStudent.id, 'REJECT', rejectReason, isQualifiedReject)} className="py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Confirm</button>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {showDeleteModal && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                onClick={() => !isProcessing && setShowDeleteModal(false)}
-                className="absolute inset-0 bg-black/60 backdrop-blur-xl"
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="relative w-full max-w-sm bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden"
-              >
-                <div className="flex flex-col items-center text-center space-y-6">
-                  <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-600 border border-rose-100">
-                    <ShieldAlert size={32} />
-                  </div>
-                  <h3 className="text-2xl font-bold italic uppercase tracking-tighter">Critical Warning</h3>
-                  <p className="text-sm text-gray-500 font-semibold">You sure you wanna delete this Record?</p>
-                  <div className="w-full space-y-3">
-                    <button onClick={executeDelete} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Delete Record</button>
-                    <button onClick={() => setShowDeleteModal(false)} className="w-full py-4 bg-gray-50 text-gray-400 rounded-2xl font-bold text-[11px] uppercase tracking-widest">Cancel</button>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {isPreviewOpen && (
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[500] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
-              onClick={() => setIsPreviewOpen(false)}
+              onClick={() => !isProcessing && setShowDeleteModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden"
             >
-              <button className="absolute top-10 right-10 text-white/50 bg-white/10 p-4 rounded-2xl hover:text-white transition-all">
-                <XCircle size={30} />
-              </button>
-              <motion.div
-                initial={{ scale: 0.9 }} animate={{ scale: 1 }}
-                onClick={(e) => e.stopPropagation()}
-                className="max-w-5xl w-full h-full flex flex-col p-4"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-white text-[10px] font-black uppercase tracking-[0.4em]">Institutional Registry Preview</h3>
-                  <a href={previewContent} download className="px-6 py-2 bg-white/10 hover:bg-white text-white hover:text-blue-900 rounded-full text-[10px] font-bold uppercase transition-all">Download</a>
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-600 border border-rose-100">
+                  <ShieldAlert size={32} />
                 </div>
-                <div className="flex-1 bg-white/5 rounded-[40px] overflow-hidden p-4 flex items-center justify-center border border-white/10">
-                  <img src={previewContent} className="max-w-full max-h-full object-contain rounded-2xl" alt="Preview" />
+                <h3 className="text-2xl font-bold italic uppercase tracking-tighter">Critical Warning</h3>
+                <p className="text-sm text-gray-500 font-semibold">You sure you wanna delete this Record?</p>
+                <div className="w-full space-y-3">
+                  <button onClick={executeDelete} className="w-full py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Delete Record</button>
+                  <button onClick={() => setShowDeleteModal(false)} className="w-full py-4 bg-gray-50 text-gray-400 rounded-2xl font-bold text-[11px] uppercase tracking-widest">Cancel</button>
                 </div>
-              </motion.div>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-        {/* ── COURSE MODAL (Create/Edit) ── */}
-        <AnimatePresence>
-          {showCourseModal && (
-            <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowCourseModal(false)}
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-3xl overflow-hidden relative z-10 flex flex-col max-h-[90vh]"
-              >
-                <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                  <div>
-                    <h3 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900">
-                      {editingCourse ? 'Edit Academic Program' : 'Charter New Program'}
-                    </h3>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Program Specification & Metadata</p>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showRejectModal && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-6">
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => !isProcessing && setShowRejectModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md bg-white border border-gray-100 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden"
+            >
+              <div className="flex flex-col space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 shrink-0 border border-rose-100">
+                    <XCircle size={24} />
                   </div>
-                  <button onClick={() => setShowCourseModal(false)} className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-rose-600 transition-all"><XCircle size={20} /></button>
+                  <div>
+                    <h3 className="text-xl font-bold uppercase tracking-tighter text-gray-900">Deny Admission</h3>
+                    <p className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em]">Institutional Notification</p>
+                  </div>
                 </div>
 
-                <form onSubmit={editingCourse ? handleUpdateCourse : handleCreateCourse} className="p-8 space-y-6 overflow-y-auto custom-scrollbar">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Program Abbreviation (e.g., BSIT)</label>
-                      <input
-                        required
-                        disabled={!!editingCourse}
-                        value={courseForm.abbr}
-                        onChange={(e) => setCourseForm({ ...courseForm, abbr: e.target.value.toUpperCase() })}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all disabled:opacity-50"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Program Title</label>
-                      <input
-                        required
-                        value={courseForm.name}
-                        onChange={(e) => setCourseForm({ ...courseForm, name: e.target.value })}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
+                <div className="space-y-4">
+                  <textarea
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    placeholder="Reason for denial..."
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm min-h-[120px]"
+                  />
+                  <button
+                    onClick={() => setIsQualifiedReject(!isQualifiedReject)}
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl border ${isQualifiedReject ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-gray-50 border-gray-100'}`}
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Academic Unqualified Template</span>
+                  </button>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <button onClick={() => setShowRejectModal(false)} className="py-4 bg-gray-50 rounded-2xl font-bold text-[11px] uppercase tracking-widest">Back</button>
+                  <button onClick={() => selectedStudent?.id && handleAction(selectedStudent.id, 'REJECT', rejectReason, isQualifiedReject)} className="py-4 bg-rose-600 text-white rounded-2xl font-bold text-[11px] uppercase tracking-widest">Confirm</button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isPreviewOpen && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[999] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+            onClick={() => setIsPreviewOpen(false)}
+          >
+            <button className="absolute top-10 right-10 text-white/50 bg-white/10 p-4 rounded-2xl hover:text-white transition-all">
+              <XCircle size={30} />
+            </button>
+            <motion.div
+              initial={{ scale: 0.9 }} animate={{ scale: 1 }}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-5xl w-full h-full flex flex-col p-4"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white text-[10px] font-black uppercase tracking-[0.4em]">Institutional Registry Preview</h3>
+                <a href={previewContent} download className="px-6 py-2 bg-white/10 hover:bg-white text-white hover:text-blue-900 rounded-full text-[10px] font-bold uppercase transition-all">Download</a>
+              </div>
+              <div className="flex-1 bg-white/5 rounded-[40px] overflow-hidden p-4 flex items-center justify-center border border-white/10">
+                <img src={previewContent} className="max-w-full max-h-full object-contain rounded-2xl" alt="Preview" />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── COURSE MODAL (Create/Edit) ── */}
+      <AnimatePresence>
+        {showCourseModal && (
+          <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCourseModal(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-3xl overflow-hidden relative z-10 flex flex-col max-h-[90vh]"
+            >
+              <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <div>
+                  <h3 className="text-2xl font-black italic uppercase tracking-tighter text-slate-900">
+                    {editingCourse ? 'Edit Academic Program' : 'Charter New Program'}
+                  </h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Program Specification & Metadata</p>
+                </div>
+                <button onClick={() => setShowCourseModal(false)} className="w-10 h-10 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:text-rose-600 transition-all"><XCircle size={20} /></button>
+              </div>
+
+              <form onSubmit={editingCourse ? handleUpdateCourse : handleCreateCourse} className="p-8 space-y-6 overflow-y-auto custom-scrollbar">
+                <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Program Description (Aura Presentation)</label>
-                    <textarea
-                      rows="3"
-                      value={courseForm.description}
-                      onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all resize-none"
+                    <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Program Abbreviation (e.g., BSIT)</label>
+                    <input
+                      required
+                      disabled={!!editingCourse}
+                      value={courseForm.abbr}
+                      onChange={(e) => setCourseForm({ ...courseForm, abbr: e.target.value.toUpperCase() })}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all disabled:opacity-50"
                     />
                   </div>
-
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Institutional Pillars (Comma-separated highlights)</label>
-                    <textarea
-                      rows="2"
-                      placeholder="e.g. AI Research, Software Engineering, Global Standards"
-                      value={courseForm.highlights}
-                      onChange={(e) => setCourseForm({ ...courseForm, highlights: e.target.value })}
-                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all resize-none"
+                    <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Program Title</label>
+                    <input
+                      required
+                      value={courseForm.name}
+                      onChange={(e) => setCourseForm({ ...courseForm, name: e.target.value })}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all"
                     />
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Category</label>
-                      <select
-                        value={courseForm.category}
-                        onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
-                        className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none"
-                      >
-                        {['Technology', 'Justice', 'Business', 'Education', 'Hospitality', 'Government', 'General'].map(c => <option key={c}>{c}</option>)}
-                      </select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Credits</label>
-                      <input type="number" value={courseForm.credits} onChange={(e) => setCourseForm({ ...courseForm, credits: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Years</label>
-                      <input type="number" value={courseForm.years} onChange={(e) => setCourseForm({ ...courseForm, years: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none" />
-                    </div>
-                    <div className="space-y-3 pt-6 flex justify-center items-center">
-                      <div className={`w-10 h-10 rounded-xl ${courseForm.color ? courseForm.color.replace('border-', 'bg-') : 'bg-blue-600'} bg-opacity-20 flex items-center justify-center text-blue-600`}>
-                        <BookOpen size={18} />
-                      </div>
-                    </div>
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Program Description (Aura Presentation)</label>
+                  <textarea
+                    rows="3"
+                    value={courseForm.description}
+                    onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all resize-none"
+                  />
+                </div>
 
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Icon Reference (Lucide)</label>
-                      <select value={courseForm.iconName} onChange={(e) => setCourseForm({ ...courseForm, iconName: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none">
-                        {['Monitor', 'Scale', 'Rocket', 'Pencil', 'Hotel', 'Landmark', 'GraduationCap'].map(i => <option key={i}>{i}</option>)}
-                      </select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Admission Quota (Max Slots)</label>
-                      <input type="number" value={courseForm.maxSlots} onChange={(e) => setCourseForm({ ...courseForm, maxSlots: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-3 text-sm font-bold outline-none border border-gray-100" />
-                    </div>
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Institutional Pillars (Comma-separated highlights)</label>
+                  <textarea
+                    rows="2"
+                    placeholder="e.g. AI Research, Software Engineering, Global Standards"
+                    value={courseForm.highlights}
+                    onChange={(e) => setCourseForm({ ...courseForm, highlights: e.target.value })}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-4 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-blue-500/5 outline-none transition-all resize-none"
+                  />
+                </div>
 
-                  <div className="pt-4">
-                    <button
-                      disabled={isProcessing}
-                      className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50"
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Category</label>
+                    <select
+                      value={courseForm.category}
+                      onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none"
                     >
-                      {isProcessing ? 'SYNCHRONIZING REGISTRY...' : (editingCourse ? 'CONFIRM ARCHITECTURAL UPDATE' : 'AUTHORIZE PROGRAM CHARTER')}
-                    </button>
+                      {['Technology', 'Justice', 'Business', 'Education', 'Hospitality', 'Government', 'General'].map(c => <option key={c}>{c}</option>)}
+                    </select>
                   </div>
-                </form>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Delete Course Confirmation Modal */}
-        <AnimatePresence>
-          {courseToDelete && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#001f3f]/80 backdrop-blur-sm" />
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl border border-gray-100 text-center"
-              >
-                <div className="w-20 h-20 bg-rose-50 rounded-[1.5rem] flex items-center justify-center text-rose-500 mx-auto mb-6 border border-rose-100 shadow-inner">
-                  <Trash2 size={32} />
-                </div>
-                <h3 className="text-xl font-black italic uppercase tracking-tighter text-gray-900 mb-2">Delete Program?</h3>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed mb-8">
-                  This action is irreversible. It will completely remove the quota designation for this course.
-                </p>
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={confirmDeleteCourse}
-                    disabled={isProcessing}
-                    className="w-full bg-rose-600 text-white rounded-xl py-4 font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-rose-600/20 active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    {isProcessing ? 'DELETING...' : 'CONFIRM DELETION'}
-                  </button>
-                  <button
-                    onClick={() => setCourseToDelete(null)}
-                    disabled={isProcessing}
-                    className="w-full bg-gray-50 text-gray-400 border border-gray-100 hover:text-gray-900 hover:bg-white rounded-xl py-4 font-black text-[10px] uppercase tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    CANCEL
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
-        {/* Course Roster Dialog */}
-        <AnimatePresence>
-          {selectedCourseRoster && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedCourseRoster(null)} className="absolute inset-0 bg-[#001f3f]/80 backdrop-blur-sm cursor-pointer" />
-
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                className="bg-white rounded-[2.5rem] w-full max-w-2xl relative z-10 shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[85vh]"
-              >
-                <div className="p-8 border-b border-gray-100 flex items-start justify-between bg-gray-50/50">
-                  <div>
-                    <h3 className="text-2xl font-black italic uppercase tracking-tighter text-blue-800 flex items-center gap-3">
-                      <Users size={24} className="text-blue-600" />
-                      {selectedCourseRoster} Master Roster
-                    </h3>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Institutional Student Registry</p>
+                  <div className="space-y-1.5">
+                    <label className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Credits</label>
+                    <input type="number" value={courseForm.credits} onChange={(e) => setCourseForm({ ...courseForm, credits: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none" />
                   </div>
-                  <button onClick={() => setSelectedCourseRoster(null)} className="p-2 bg-gray-100 rounded-full hover:bg-rose-100 hover:text-rose-600 text-gray-400 transition-all">
-                    <XCircle size={20} />
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-4">
-                  {enrollments.filter(e => e.course === selectedCourseRoster).length === 0 ? (
-                    <div className="text-center py-10 opacity-50">
-                      <Users size={48} className="mx-auto mb-4 text-gray-400" />
-                      <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500">No students enrolled yet.</p>
+                  <div className="space-y-1.5">
+                    <label className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">Years</label>
+                    <input type="number" value={courseForm.years} onChange={(e) => setCourseForm({ ...courseForm, years: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none" />
+                  </div>
+                  <div className="space-y-3 pt-6 flex justify-center items-center">
+                    <div className={`w-10 h-10 rounded-xl ${courseForm.color ? courseForm.color.replace('border-', 'bg-') : 'bg-blue-600'} bg-opacity-20 flex items-center justify-center text-blue-600`}>
+                      <BookOpen size={18} />
                     </div>
-                  ) : (
-                    enrollments.filter(e => e.course === selectedCourseRoster).map(student => (
-                      <div key={student.id} className="p-4 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-md hover:shadow-blue-900/5 transition-all flex items-center gap-4 group bg-white">
-                        <div className="w-10 h-10 rounded-xl border border-blue-100 bg-blue-50 text-blue-600 font-black flex justify-center items-center shrink-0">
-                          {student?.firstName?.[0] || 'A'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold text-gray-900 truncate uppercase">{student.firstName} {student.lastName}</p>
-                          <p className="text-[9px] font-medium text-gray-400 truncate">{student.email}</p>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border shrink-0 ${student.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                          student.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                            'bg-rose-50 text-rose-600 border-rose-100'
-                          }`}>
-                          {student.status}
-                        </div>
-                      </div>
-                    ))
-                  )}
+                  </div>
                 </div>
 
-                <div className="p-6 border-t border-gray-100 bg-white grid grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Icon Reference (Lucide)</label>
+                    <select value={courseForm.iconName} onChange={(e) => setCourseForm({ ...courseForm, iconName: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[11px] font-bold outline-none">
+                      {['Monitor', 'Scale', 'Rocket', 'Pencil', 'Hotel', 'Landmark', 'GraduationCap'].map(i => <option key={i}>{i}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Admission Quota (Max Slots)</label>
+                    <input type="number" value={courseForm.maxSlots} onChange={(e) => setCourseForm({ ...courseForm, maxSlots: e.target.value })} className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-6 py-3 text-sm font-bold outline-none border border-gray-100" />
+                  </div>
+                </div>
+
+                <div className="pt-4">
                   <button
-                    onClick={() => setSelectedCourseRoster(null)}
-                    className="py-4 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-gray-500 bg-gray-50 hover:bg-gray-100 transition-all border border-transparent"
+                    disabled={isProcessing}
+                    className="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50"
                   >
-                    Close
-                  </button>
-                  <button
-                    onClick={downloadCourseRosterCSV}
-                    className="py-4 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20 hover:shadow-blue-600/40 active:scale-95 transition-all flex justify-center items-center gap-2"
-                  >
-                    <FileText size={14} /> Generate CSV
+                    {isProcessing ? 'SYNCHRONIZING REGISTRY...' : (editingCourse ? 'CONFIRM ARCHITECTURAL UPDATE' : 'AUTHORIZE PROGRAM CHARTER')}
                   </button>
                 </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-      </main>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Course Confirmation Modal */}
+      <AnimatePresence>
+        {courseToDelete && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#001f3f]/80 backdrop-blur-sm" />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-[2rem] p-8 max-w-sm w-full relative z-10 shadow-2xl border border-gray-100 text-center"
+            >
+              <div className="w-20 h-20 bg-rose-50 rounded-[1.5rem] flex items-center justify-center text-rose-500 mx-auto mb-6 border border-rose-100 shadow-inner">
+                <Trash2 size={32} />
+              </div>
+              <h3 className="text-xl font-black italic uppercase tracking-tighter text-gray-900 mb-2">Delete Program?</h3>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-relaxed mb-8">
+                This action is irreversible. It will completely remove the quota designation for this course.
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={confirmDeleteCourse}
+                  disabled={isProcessing}
+                  className="w-full bg-rose-600 text-white rounded-xl py-4 font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-rose-600/20 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isProcessing ? 'DELETING...' : 'CONFIRM DELETION'}
+                </button>
+                <button
+                  onClick={() => setCourseToDelete(null)}
+                  disabled={isProcessing}
+                  className="w-full bg-gray-50 text-gray-400 border border-gray-100 hover:text-gray-900 hover:bg-white rounded-xl py-4 font-black text-[10px] uppercase tracking-[0.2em] active:scale-95 transition-all disabled:opacity-50"
+                >
+                  CANCEL
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Course Roster Dialog */}
+      <AnimatePresence>
+        {selectedCourseRoster && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-6">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedCourseRoster(null)} className="absolute inset-0 bg-[#001f3f]/80 backdrop-blur-sm cursor-pointer" />
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-[2.5rem] w-full max-w-2xl relative z-10 shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[85vh]"
+            >
+              <div className="p-8 border-b border-gray-100 flex items-start justify-between bg-gray-50/50">
+                <div>
+                  <h3 className="text-2xl font-black italic uppercase tracking-tighter text-blue-800 flex items-center gap-3">
+                    <Users size={24} className="text-blue-600" />
+                    {selectedCourseRoster} Master Roster
+                  </h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mt-1">Institutional Student Registry</p>
+                </div>
+                <button onClick={() => setSelectedCourseRoster(null)} className="p-2 bg-gray-100 rounded-full hover:bg-rose-100 hover:text-rose-600 text-gray-400 transition-all">
+                  <XCircle size={20} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-4">
+                {enrollments.filter(e => e.course === selectedCourseRoster).length === 0 ? (
+                  <div className="text-center py-10 opacity-50">
+                    <Users size={48} className="mx-auto mb-4 text-gray-400" />
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500">No students enrolled yet.</p>
+                  </div>
+                ) : (
+                  enrollments.filter(e => e.course === selectedCourseRoster).map(student => (
+                    <div key={student.id} className="p-4 rounded-2xl border border-gray-100 hover:border-blue-200 hover:shadow-md hover:shadow-blue-900/5 transition-all flex items-center gap-4 group bg-white">
+                      <div className="w-10 h-10 rounded-xl border border-blue-100 bg-blue-50 text-blue-600 font-black flex justify-center items-center shrink-0">
+                        {student?.firstName?.[0] || 'A'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-bold text-gray-900 truncate uppercase">{student.firstName} {student.lastName}</p>
+                        <p className="text-[9px] font-medium text-gray-400 truncate">{student.email}</p>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest border shrink-0 ${student.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                        student.status === 'PENDING' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                          'bg-rose-50 text-rose-600 border-rose-100'
+                        }`}>
+                        {student.status}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="p-6 border-t border-gray-100 bg-white grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setSelectedCourseRoster(null)}
+                  className="py-4 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-gray-500 bg-gray-50 hover:bg-gray-100 transition-all border border-transparent"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={downloadCourseRosterCSV}
+                  className="py-4 rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] text-white bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-600/20 hover:shadow-blue-600/40 active:scale-95 transition-all flex justify-center items-center gap-2"
+                >
+                  <FileText size={14} /> Generate CSV
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
