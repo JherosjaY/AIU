@@ -6,3 +6,6 @@ build/
 *.local
 .antigravity/
 .gemini/
+*.log
+eslint_output.txt
+_hash.txt

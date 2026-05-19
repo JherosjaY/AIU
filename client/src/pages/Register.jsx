@@ -128,7 +128,7 @@ function Register() {
     let { name, value } = e.target;
     if (['phone', 'fatherContact', 'motherContact', 'emergencyContact'].includes(name)) {
       value = value.replace(/\D/g, '');
-    } else if (name !== 'email' && name !== 'facebookLink') {
+    } else if (name !== 'email') {
       value = titleCase(value);
     }
     setFormData({ ...formData, [name]: value })
@@ -138,7 +138,7 @@ function Register() {
     let { name, value } = e.target;
     if (['phone', 'fatherContact', 'motherContact', 'emergencyContact'].includes(name)) {
       value = value.replace(/\D/g, '');
-    } else if (name !== 'email' && name !== 'facebookLink') {
+    } else if (name !== 'email') {
       value = titleCase(value);
     }
     setTempData(prev => ({ ...prev, [name]: value }))

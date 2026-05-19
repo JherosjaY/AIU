@@ -7,6 +7,7 @@ const Groq = require('groq-sdk');
 const sgMail = require('@sendgrid/mail');
 // Google Vision API is used for all OCR — see googleVisionOCR() helper below
 const axios = require('axios');
+const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
@@ -67,6 +68,18 @@ const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 15,
   message: { success: false, message: "Too many login attempts, please try again later" }
+});
+
+const registrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: "Too many registration attempts. Please try again later." }
+});
+
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: "Too many password reset requests. Please try again later." }
 });
 
 app.use(express.json({ limit: '50mb' }));
@@ -134,24 +147,7 @@ async function initializeQuotas() {
       });
     }
 
-    // 🛡️ INSTITUTIONAL SEQUENCE RECALIBRATION
-    try {
-      const bloatedRecord = await prisma.courseQuota.findFirst({ where: { id: 26 } });
-      if (bloatedRecord) {
-        console.log('🏛️ Institutional Registry: Detected bloated ID 26. Recalibrating to ID 7...');
-        const sevenIsFree = await prisma.courseQuota.findFirst({ where: { id: 7 } });
-        if (!sevenIsFree) {
-            await prisma.$executeRawUnsafe(`UPDATE "CourseQuota" SET id = 7 WHERE id = 26`);
-            console.log('🏛️ Institutional Registry: ID 26 remapped to 7.');
-        }
-      }
-      const maxIdResult = await prisma.$queryRawUnsafe(`SELECT max(id) FROM "CourseQuota"`);
-      const maxId = maxIdResult[0].max || 0;
-      await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"CourseQuota"', 'id'), ${maxId})`);
-      console.log(`🏛️ Institutional Registry: Sequence synchronized to index ${maxId}.`);
-    } catch (seqError) {
-      console.error('🏛️ Registry Sequence Sync Error:', seqError);
-    }
+
 
     console.log("🏛️ Institutional Registry Sync: Core metadata updated.");
   } catch (error) {
@@ -163,7 +159,7 @@ initializeQuotas();
 // ══════════════════════════════════════════════════════════
 //  REGISTRATION ENDPOINT
 // ══════════════════════════════════════════════════════════
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', registrationLimiter, async (req, res) => {
   try {
     // 🔍 INSTITUTIONAL IDENTITY SHIELD: Check for duplicates (Composite Identity)
     const existingDossier = await prisma.enrollment.findFirst({
@@ -610,10 +606,17 @@ app.delete('/api/enrollments/:id', verifyToken, requireAdmin, async (req, res) =
 // UPDATE ENROLLMENT FIELD (Checklist / Notes)
 app.patch('/api/enrollments/:id', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
+  // Whitelist only safe fields to prevent mass assignment
+  const { reqBirthCert, reqReportCard, reqGoodMoral, adminNotes } = req.body;
+  const safeData = {};
+  if (reqBirthCert !== undefined) safeData.reqBirthCert = reqBirthCert;
+  if (reqReportCard !== undefined) safeData.reqReportCard = reqReportCard;
+  if (reqGoodMoral !== undefined) safeData.reqGoodMoral = reqGoodMoral;
+  if (adminNotes !== undefined) safeData.adminNotes = adminNotes;
   try {
     const updated = await prisma.enrollment.update({
       where: { id: parseInt(id) },
-      data: req.body
+      data: safeData
     });
     res.json({ success: true, student: updated });
   } catch (error) {
@@ -733,7 +736,7 @@ app.put('/api/courses/:id', verifyToken, requireAdmin, async (req, res) => {
 });
 
 // FORGOT PASSWORD - SEND RESET LINK
-app.post('/api/forgot-password', async (req, res) => {
+app.post('/api/forgot-password', forgotPasswordLimiter, async (req, res) => {
   const { email } = req.body;
 
   if (!email || !email.trim()) {
@@ -759,7 +762,7 @@ app.post('/api/forgot-password', async (req, res) => {
     const studentName = student.firstName;
 
     // Generate a simple reset token
-    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
 
     // Save token to database
@@ -831,12 +834,18 @@ app.post('/api/reset-password', async (req, res) => {
 app.post('/api/login', loginLimiter, async (req, res) => {
   const { authId, password } = req.body;
   const rawId = authId.trim().toUpperCase();
-  const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_dev_ONLY';
+  const JWT_SECRET = process.env.JWT_SECRET;
+
+  if (!JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET environment variable is not set!');
+    return res.status(500).json({ success: false, message: 'Server configuration error.' });
+  }
 
   try {
-    // 1. ADMIN OVERRIDE
+    // 1. ADMIN OVERRIDE (Secured via env-based bcrypt hash)
     if (rawId === 'ADMIN' || rawId === 'ADMIN@AURA.EDU.PH') {
-      if (password === 'admin123' || password === '@Jherosjay0125!') {
+      const adminHash = process.env.ADMIN_PASSWORD_HASH;
+      if (adminHash && await bcrypt.compare(password, adminHash)) {
         const token = jwt.sign({ role: 'ADMIN', authId: 'ADMIN' }, JWT_SECRET, { expiresIn: '1d' });
         return res.json({ success: true, token, role: 'ADMIN', user: { authId: 'ADMIN' } });
       }
