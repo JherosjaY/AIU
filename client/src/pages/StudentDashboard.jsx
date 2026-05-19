@@ -11,25 +11,76 @@ import {
     Zap,
     ChevronRight,
     Award,
-    Clock
+    Clock,
+    RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import API_BASE_URL, { authFetch } from '../api';
+
+const COURSE_MAP = {
+    "BSIT": "Bachelor of Science in Information Technology",
+    "BSCRIM": "Bachelor of Science in Criminology & Justice",
+    "BSENTREP": "Bachelor of Science in Entrepreneurship",
+    "BSED": "Bachelor of Secondary Education",
+    "BSHM": "Bachelor of Science in Hospitality Management",
+    "BPA": "Bachelor of Public Administration"
+};
+
+const STATUS_CONFIG = {
+    'PENDING': { label: 'Institutional Review', color: 'bg-amber-500', icon: <Clock size={28} />, desc: 'Your application is currently being evaluated by our admissions core.' },
+    'APPROVED': { label: 'Officially Enrolled', color: 'bg-emerald-600', icon: <ShieldCheck size={28} />, desc: 'Your admission profile has been fully validated and authorized by the Registrar.' },
+    'REJECTED': { label: 'Admission Declined', color: 'bg-rose-600', icon: <LogOut size={28} />, desc: 'University requirements were not met for the current academic cycle.' }
+};
 
 const StudentDashboard = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
 
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await authFetch(`${API_BASE_URL}/enrollments/me`);
+                const data = await res.json();
+                if (data.success) {
+                    setProfile(data.data);
+                }
+            } catch (err) {
+                console.error("Registry Sync Failure:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, []);
+
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <RefreshCw className="animate-spin text-blue-700" size={40} />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-700 animate-pulse">Syncing Registry...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Determine status UI
+    const statusKey = profile?.status || 'PENDING';
+    const statusData = STATUS_CONFIG[statusKey] || STATUS_CONFIG['PENDING'];
 
     return (
         <div className="light-theme min-h-screen bg-[#f8fafc] text-gray-900 font-sans selection:bg-blue-100 relative overflow-x-hidden">
@@ -75,7 +126,7 @@ const StudentDashboard = () => {
                                 Institutional Access Verified
                             </div>
                             <h1 className="text-3xl md:text-7xl font-black italic uppercase tracking-tighter leading-none text-gray-900">
-                                Welcome, <br className="hidden md:block" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">Scholar.</span>
+                                Welcome, <br className="hidden md:block" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">{profile?.firstName || 'Scholar'}.</span>
                             </h1>
                             <p className="text-gray-400 text-[10px] md:text-sm font-bold italic uppercase tracking-widest leading-none mt-1 md:mt-2">
                                 ID: {user?.authId || 'AIU-STUDENT-PROSPECT'}
@@ -103,16 +154,16 @@ const StudentDashboard = () => {
                         whileHover={{ y: -10 }}
                         className="bg-white border border-gray-100 p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] space-y-6 md:space-y-8 group transition-all shadow-[0_45px_110px_-10px_rgba(30,64,175,0.1)] md:shadow-[0_65px_140px_-20px_rgba(30,64,175,0.08)] hover:shadow-2xl hover:shadow-blue-900/10"
                     >
-                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
-                            <ShieldCheck size={28} />
+                        <div className={`w-14 h-14 rounded-2xl ${statusKey === 'REJECTED' ? 'bg-rose-50 text-rose-600' : statusKey === 'APPROVED' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'} border border-current flex items-center justify-center`}>
+                            {statusData.icon}
                         </div>
                         <div className="space-y-4">
-                            <h3 className="text-xl md:text-2xl font-bold italic uppercase tracking-tighter text-gray-900">Enrollment Status</h3>
-                            <div className="inline-block px-4 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold tracking-widest uppercase shadow-lg shadow-emerald-600/20">
-                                Officially Enrolled
+                            <h3 className="text-xl md:text-2xl font-bold italic uppercase tracking-tighter text-gray-900">Application Progress</h3>
+                            <div className={`inline-block px-4 py-1 rounded-full ${statusData.color} text-white text-[10px] font-bold tracking-widest uppercase shadow-lg shadow-blue-900/10`}>
+                                {statusData.label}
                             </div>
                             <p className="text-gray-400 text-sm font-semibold leading-relaxed italic">
-                                Your admission profile has been fully validated and authorized by the Registrar.
+                                {statusData.desc}
                             </p>
                         </div>
                     </motion.div>
@@ -127,9 +178,9 @@ const StudentDashboard = () => {
                         </div>
                         <div className="space-y-4">
                             <h3 className="text-2xl font-bold italic uppercase tracking-tighter text-gray-900">Academic Path</h3>
-                            <div className="text-xl font-bold text-blue-700 italic uppercase">Bachelor of Science in IT</div>
+                            <div className="text-xl font-bold text-blue-700 italic uppercase">{COURSE_MAP[profile?.course] || profile?.course || 'Processing...'}</div>
                             <p className="text-gray-400 text-sm font-semibold leading-relaxed italic">
-                                Academic Year 2026-2027 • First Semester Intake.
+                                Institutional Cycle 2026-2027 • AI-Managed Admittance.
                             </p>
                         </div>
                     </motion.div>

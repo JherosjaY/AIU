@@ -11,7 +11,7 @@ const verifyToken = (req, res, next) => {
 
   try {
     // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_for_dev_ONLY');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     
     // Check role access if needed (optional generic check, but we can do it per route)

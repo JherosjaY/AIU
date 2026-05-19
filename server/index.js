@@ -338,6 +338,43 @@ app.post('/api/consult', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 // ══════════════════════════════════════════════════════════
+//  STUDENT SELF-SERVICE ENDPOINTS
+// ══════════════════════════════════════════════════════════
+
+// GET CURRENT STUDENT PROFILE
+app.get('/api/enrollments/me', verifyToken, async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    if (!studentId) {
+      return res.status(401).json({ success: false, message: "Invalid identity session." });
+    }
+
+    const student = await prisma.enrollment.findUnique({
+      where: { id: studentId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        instEmail: true,
+        course: true,
+        status: true,
+        createdAt: true
+      }
+    });
+
+    if (!student) {
+      return res.status(404).json({ success: false, message: "Student record not found." });
+    }
+
+    res.json({ success: true, data: student });
+  } catch (error) {
+    console.error('Student Profile Fetch Error:', error);
+    res.status(500).json({ success: false, message: "Failed to retrieve student data." });
+  }
+});
+
+// ══════════════════════════════════════════════════════════
 //  ADMIN ENDPOINTS: STUDENT MANAGEMENT
 // ══════════════════════════════════════════════════════════
 
@@ -390,7 +427,7 @@ app.post('/api/enrollments/:id/approve', verifyToken, requireAdmin, async (req, 
 
     // ── CREDENTIAL GENERATION LOGIC ──
     const instEmail = `${student.firstName[0]}.${student.lastName.replace(/\s+/g, '')}@AURA.EDU.PH`.toUpperCase();
-    const tempPassword = `AURA@${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`;
+    const tempPassword = `AURA@${new Date().getFullYear()}${crypto.randomInt(1000, 9999)}`;
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
