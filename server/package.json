@@ -20,9 +20,12 @@
     "@prisma/client": "^6.2.1",
     "@sendgrid/mail": "^8.1.6",
     "axios": "^1.16.0",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "groq-sdk": "^1.1.2"
+    "express-rate-limit": "^8.5.2",
+    "groq-sdk": "^1.1.2",
+    "jsonwebtoken": "^9.0.3"
   }
 }

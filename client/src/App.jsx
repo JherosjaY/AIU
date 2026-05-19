@@ -74,13 +74,6 @@ function App() {
               </ProtectedRoute>
             </div>
           } />
-          <Route path="/student" element={
-            <div className="light-theme">
-              <ProtectedRoute allowedRoles={['STUDENT']}>
-                <StudentDashboard />
-              </ProtectedRoute>
-            </div>
-          } />
           {/* Catch-all Route for 404 Not Found Page */}
           <Route path="*" element={<NotFound />} />
         </Routes>

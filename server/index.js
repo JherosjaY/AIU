@@ -7,6 +7,10 @@ const Groq = require('groq-sdk');
 const sgMail = require('@sendgrid/mail');
 // Google Vision API is used for all OCR — see googleVisionOCR() helper below
 const axios = require('axios');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
+const { verifyToken, requireAdmin } = require('./middleware/auth');
 const {
   getApplicationReceivedTemplate,
   getAdmissionAuthorizedTemplate,
@@ -42,7 +46,6 @@ const googleVisionOCR = async (base64Image) => {
   }
 };
 
-// 🛡️ PRODUCTION CORS CONFIGURATION: Allow local development and deployed frontend
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
@@ -51,7 +54,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.includes('netlify.app')) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('CORS Policy Violation: Origin not authorized by Aura Security.'));
@@ -59,6 +62,12 @@ app.use(cors({
   },
   credentials: true
 }));
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  message: { success: false, message: "Too many login attempts, please try again later" }
+});
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -150,11 +159,6 @@ async function initializeQuotas() {
   }
 }
 initializeQuotas();
-
-// Root test
-app.get('/', (req, res) => {
-  res.send('Aura AI Institutional Backend is Online 🏛️');
-});
 
 // ══════════════════════════════════════════════════════════
 //  REGISTRATION ENDPOINT
@@ -284,11 +288,6 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// ══════════════════════════════════════════════════════════
-//  NOTE: Legacy /api/chat endpoint removed — document OCR
-//  is handled exclusively via the Admin Evaluate flow
-//  (/api/admin/evaluate/:id) using Google Vision API.
-// ══════════════════════════════════════════════════════════
 
 // ══════════════════════════════════════════════════════════
 //  AURA AI CONSULTANT ENDPOINT (STRICT SYSTEM SHIELD)
@@ -347,10 +346,16 @@ const PORT = process.env.PORT || 5000;
 // ══════════════════════════════════════════════════════════
 
 // GET ALL ENROLLMENTS (Admin View)
-app.get('/api/enrollments', async (req, res) => {
+app.get('/api/enrollments', verifyToken, requireAdmin, async (req, res) => {
   try {
     const enrollments = await prisma.enrollment.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true, firstName: true, lastName: true, middleName: true,
+        email: true, instEmail: true, phone: true, gender: true,
+        course: true, status: true, aiStatus: true, aiScore: true, aiVerdict: true,
+        aiSuggestedPivot: true, createdAt: true, document: true, reportCard: true
+      }
     });
     res.json(enrollments);
   } catch (error) {
@@ -359,7 +364,7 @@ app.get('/api/enrollments', async (req, res) => {
 });
 
 // APPROVE ENROLLMENT & SEND FINAL EMAIL WITH CREDENTIALS
-app.post('/api/enrollments/:id/approve', async (req, res) => {
+app.post('/api/enrollments/:id/approve', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     const student = await prisma.enrollment.findUnique({ where: { id: parseInt(id) } });
@@ -391,12 +396,15 @@ app.post('/api/enrollments/:id/approve', async (req, res) => {
     const instEmail = `${student.firstName[0]}.${student.lastName.replace(/\s+/g, '')}@AURA.EDU.PH`.toUpperCase();
     const tempPassword = `AURA@${new Date().getFullYear()}${Math.floor(1000 + Math.random() * 9000)}`;
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(tempPassword, salt);
+
     const enrollment = await prisma.enrollment.update({
       where: { id: parseInt(id) },
       data: {
         status: 'APPROVED',
         instEmail: instEmail,
-        password: tempPassword
+        password: hashedPassword
       }
     });
 
@@ -422,7 +430,7 @@ app.post('/api/enrollments/:id/approve', async (req, res) => {
 });
 
 // REJECT ENROLLMENT & SEND NOT-ACCEPTED EMAIL
-app.post('/api/enrollments/:id/reject', async (req, res) => {
+app.post('/api/enrollments/:id/reject', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { reasonType } = req.query; // 'capacity' or 'qualified'
 
@@ -463,7 +471,7 @@ app.post('/api/enrollments/:id/reject', async (req, res) => {
 });
 
 // AURA AI ADMIN PROFILE EVALUATION (Decision Support System)
-app.get('/api/admin/evaluate/:id', async (req, res) => {
+app.get('/api/admin/evaluate/:id', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     const student = await prisma.enrollment.findUnique({ where: { id: parseInt(id) } });
@@ -573,7 +581,7 @@ app.get('/api/admin/evaluate/:id', async (req, res) => {
 });
 
 // DELETE ENROLLMENT RECORD
-app.delete('/api/enrollments/:id', async (req, res) => {
+app.delete('/api/enrollments/:id', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
   const targetId = parseInt(id);
 
@@ -600,7 +608,7 @@ app.delete('/api/enrollments/:id', async (req, res) => {
 });
 
 // UPDATE ENROLLMENT FIELD (Checklist / Notes)
-app.patch('/api/enrollments/:id', async (req, res) => {
+app.patch('/api/enrollments/:id', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     const updated = await prisma.enrollment.update({
@@ -645,7 +653,7 @@ app.get('/api/quotas', async (req, res) => {
 });
 
 // INITIALIZE/SYNC QUOTAS (Seed)
-app.post('/api/quotas/sync', async (req, res) => {
+app.post('/api/quotas/sync', verifyToken, requireAdmin, async (req, res) => {
   const COURSES = ['BSIT', 'BSCRIM', 'BSENTREP', 'BSED', 'BSHM', 'BPA'];
   try {
     for (const abbr of COURSES) {
@@ -662,7 +670,7 @@ app.post('/api/quotas/sync', async (req, res) => {
 });
 
 // CREATE NEW COURSE
-app.post('/api/courses', async (req, res) => {
+app.post('/api/courses', verifyToken, requireAdmin, async (req, res) => {
   const { abbr, name, description, category, credits, years, iconName, color, maxSlots, highlights } = req.body;
   try {
     const freshCourse = await prisma.courseQuota.create({
@@ -687,7 +695,7 @@ app.post('/api/courses', async (req, res) => {
 });
 
 // DELETE COURSE
-app.delete('/api/courses/:id', async (req, res) => {
+app.delete('/api/courses/:id', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     await prisma.courseQuota.delete({
@@ -700,7 +708,7 @@ app.delete('/api/courses/:id', async (req, res) => {
 });
 
 // UPDATE QUOTA & METADATA
-app.put('/api/courses/:id', async (req, res) => {
+app.put('/api/courses/:id', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
   const { name, maxSlots, description, category, credits, years, iconName, color, highlights } = req.body;
   try {
@@ -800,10 +808,13 @@ app.post('/api/reset-password', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid or expired reset token.' });
     }
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     await prisma.enrollment.update({
       where: { id: student.id },
       data: {
-        password: password,
+        password: hashedPassword,
         resetToken: null,
         resetTokenExpiry: null
       }
@@ -816,21 +827,23 @@ app.post('/api/reset-password', async (req, res) => {
   }
 });
 
-// INSTITUTIONAL LOGIN GATEWAY
-app.post('/api/login', async (req, res) => {
+// INSTITUTIONAL LOGIN GATEWAY (Protected by Rate Limiter)
+app.post('/api/login', loginLimiter, async (req, res) => {
   const { authId, password } = req.body;
   const rawId = authId.trim().toUpperCase();
+  const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_dev_ONLY';
 
   try {
-    // 1. ADMIN OVERRIDE (Hardcoded for Demo Security)
+    // 1. ADMIN OVERRIDE
     if (rawId === 'ADMIN' || rawId === 'ADMIN@AURA.EDU.PH') {
       if (password === 'admin123' || password === '@Jherosjay0125!') {
-        return res.json({ success: true, role: 'ADMIN', user: { authId: 'ADMIN' } });
+        const token = jwt.sign({ role: 'ADMIN', authId: 'ADMIN' }, JWT_SECRET, { expiresIn: '1d' });
+        return res.json({ success: true, token, role: 'ADMIN', user: { authId: 'ADMIN' } });
       }
       return res.status(401).json({ success: false, message: "Invalid Admin Credentials." });
     }
 
-    // 2. STUDENT DYNAMIC VERIFICATION (Supports Institutional Email and Personal Email)
+    // 2. STUDENT DYNAMIC VERIFICATION
     const matchingStudent = await prisma.enrollment.findFirst({
       where: {
         OR: [
@@ -841,29 +854,37 @@ app.post('/api/login', async (req, res) => {
     });
 
     if (matchingStudent) {
-      // Check status first
       if (matchingStudent.status === 'PENDING') {
-        return res.status(403).json({ success: false, message: "ACCESS DENIED: Your enrollment is still under Institutional Review. Please wait for authorization." });
+        return res.status(403).json({ success: false, message: "ACCESS DENIED: Your enrollment is still under Institutional Review." });
       }
-
       if (matchingStudent.status === 'REJECTED') {
         return res.status(401).json({ success: false, message: "ACCESS DENIED: Your application was not accepted." });
       }
 
-      // ── PASSWORD VERIFICATION ──
+      // ── PASSWORD VERIFICATION (Bcrypt) ──
       let isAuthorized = false;
 
       if (matchingStudent.password) {
-        // Use custom password if set
-        isAuthorized = (password === matchingStudent.password);
+        if (matchingStudent.password.startsWith('$2b$') || matchingStudent.password.startsWith('$2a$')) {
+           isAuthorized = await bcrypt.compare(password, matchingStudent.password);
+        } else {
+           isAuthorized = (password === matchingStudent.password);
+        }
       } else {
-        // Fallback to legacy AURA@ protocol for new accounts
         isAuthorized = password.toUpperCase().startsWith('AURA@');
       }
 
       if (isAuthorized) {
+        // Sign JWT for Student
+        const token = jwt.sign(
+          { role: 'STUDENT', authId, id: matchingStudent.id }, 
+          JWT_SECRET, 
+          { expiresIn: '1d' }
+        );
+
         return res.json({
           success: true,
+          token,
           role: 'STUDENT',
           user: {
             authId: authId,
@@ -884,9 +905,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// ══════════════════════════════════════════════════════════
-//  AURA AUTOMATED REMINDER ENGINE (Background Worker)
-// ══════════════════════════════════════════════════════════
 async function runAuraReminders() {
   console.log('--- AURA: Scanning for inactive high-potential applicants ---');
   try {

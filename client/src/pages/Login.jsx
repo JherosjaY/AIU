@@ -57,7 +57,7 @@ const Login = () => {
       const data = await response.json();
 
       if (data.success) {
-        login(data.role, data.user.authId);
+        login(data.role, data.user.authId, data.token);
         if (data.role === 'ADMIN') {
           navigate('/admin', { replace: true });
         } else {

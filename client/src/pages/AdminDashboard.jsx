@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import API_BASE_URL from '../api'
+import API_BASE_URL, { authFetch } from '../api'
 
 const COURSE_MAP = {
   "BSIT": "Bachelor of Science in Information Technology",
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
 
     try {
       // Add cache-buster to ensure we get fresh data from server/CDN
-      const res = await fetch(`${API_BASE_URL}/quotas?t=${Date.now()}`)
+      const res = await authFetch(`${API_BASE_URL}/quotas?t=${Date.now()}`)
       const data = await res.json()
       if (res.ok && Array.isArray(data)) {
         setQuotas(data);
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
 
   const handleUpdateQuota = async (courseAbbr, maxSlots) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/quotas/${courseAbbr}`, {
+      const res = await authFetch(`${API_BASE_URL}/quotas/${courseAbbr}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ maxSlots: parseInt(maxSlots) })
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
 
     try {
       // 🚀 Cache Buster: Force Fetch from Registry
-      const res = await fetch(`${API_BASE_URL}/enrollments?t=${Date.now()}`)
+      const res = await authFetch(`${API_BASE_URL}/enrollments?t=${Date.now()}`)
       const data = await res.json()
       if (res.ok && Array.isArray(data)) {
         setEnrollments(data);
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
     setShowCourseModal(false);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/courses`, {
+      const res = await authFetch(`${API_BASE_URL}/courses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(courseForm)
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
     setShowCourseModal(false);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/courses/${editingCourse.id}`, {
+      const res = await authFetch(`${API_BASE_URL}/courses/${editingCourse.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(courseForm)
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
     if (!courseToDelete) return;
     setIsProcessing(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/courses/${courseToDelete}`, { method: 'DELETE' });
+      const res = await authFetch(`${API_BASE_URL}/courses/${courseToDelete}`, { method: 'DELETE' });
       if (res.ok) fetchQuotas();
     } catch (error) {
       console.error("Delete Course Error:", error);
@@ -364,7 +364,7 @@ export default function AdminDashboard() {
 
     setIsProcessing(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/enrollments/${studentToDelete}`, { method: 'DELETE' });
+      const res = await authFetch(`${API_BASE_URL}/enrollments/${studentToDelete}`, { method: 'DELETE' });
       if (res.ok) {
         setEnrollments(prev => prev.filter(e => e.id !== studentToDelete));
         if (selectedStudent?.id === studentToDelete) setSelectedStudent(null);
@@ -390,7 +390,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      const res = await fetch(`${API_BASE_URL}/enrollments/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/enrollments/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: value })
@@ -415,7 +415,7 @@ export default function AdminDashboard() {
         endpoint += (endpoint.includes('?') ? '&' : '?') + params.toString();
       }
 
-      const res = await fetch(`${API_BASE_URL}${endpoint}`, { method: 'POST' });
+      const res = await authFetch(`${API_BASE_URL}${endpoint}`, { method: 'POST' });
       const result = await res.json();
 
       if (res.ok) {
@@ -440,7 +440,7 @@ export default function AdminDashboard() {
   const triggerAuraEvaluation = async (id) => {
     setIsEvaluating(true)
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/evaluate/${id}`);
+      const res = await authFetch(`${API_BASE_URL}/admin/evaluate/${id}`);
       const data = await res.json();
       if (data.success) {
         setSelectedStudent(prev => ({

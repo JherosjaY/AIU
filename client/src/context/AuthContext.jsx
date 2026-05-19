@@ -22,8 +22,8 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (role, authId) => {
-    const sessionData = { role, authId, timestamp: new Date().toISOString() };
+  const login = (role, authId, token) => {
+    const sessionData = { role, authId, token, timestamp: new Date().toISOString() };
     setUser(sessionData);
     sessionStorage.setItem('aiu_session', JSON.stringify(sessionData));
   };
