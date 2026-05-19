@@ -26,17 +26,27 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Smart Role Detection System
+  // 🏛️ Smart Role Detection System (Institutional Pattern Matching)
   useEffect(() => {
     const rawId = authId.trim().toUpperCase()
-    if (rawId === 'ADMIN' || rawId === 'ADMIN@AURA.EDU.PH') {
-      setDetectedRole('Administrator')
-    } else if (rawId.match(/^[0-9]{2}-[0-9]{4}-[0-9]{3}$/) || rawId.endsWith('@AURA.EDU.PH')) {
+    // Pattern: Institutional Student ID (XX-XXXX-XXX) or Non-Admin Educational Email
+    const isStudentFormat = rawId.match(/^[0-9]{2}-[0-9]{4}-[0-9]{3}$/)
+    const isStudentEmail = rawId.endsWith('@AURA.EDU.PH') && !rawId.includes('ADMIN')
+
+    if (isStudentFormat || isStudentEmail) {
       setDetectedRole('Student')
     } else {
       setDetectedRole(null)
     }
   }, [authId])
+
+  // 🛡️ Error Auto-Dismiss Logic
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [error])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -75,18 +85,18 @@ const Login = () => {
   return (
     <div className="relative h-screen w-screen flex flex-col overflow-hidden text-left font-sans">
 
-      {/* ── ERROR BANNER (Institutional Style) ── */}
+      {/* ── FLOATING ERROR BANNER (Premium Style) ── */}
       <AnimatePresence>
         {error && (
           <motion.div
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            className="fixed top-0 left-0 right-0 z-[1000] bg-rose-600 text-white py-4 px-6 shadow-2xl flex items-center justify-center gap-3 border-b border-rose-500/30 backdrop-blur-md"
+            initial={{ y: -50, x: '-50%', opacity: 0, scale: 0.9 }}
+            animate={{ y: 20, x: '-50%', opacity: 1, scale: 1 }}
+            exit={{ y: -50, x: '-50%', opacity: 0, scale: 0.9 }}
+            className="fixed top-0 left-1/2 z-[1000] bg-rose-600/90 text-white py-3 md:py-4 px-8 rounded-full shadow-[0_20px_50px_rgba(225,29,72,0.3)] flex items-center justify-center gap-3 backdrop-blur-md border border-rose-500/20 whitespace-nowrap"
           >
-            <AlertCircle size={18} className="shrink-0" />
-            <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em]">{error}</span>
-            <button onClick={() => setError('')} className="ml-4 p-1 hover:bg-white/20 rounded-lg transition-all">
+            <AlertCircle size={18} className="shrink-0 text-rose-100" />
+            <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.25em]">{error}</span>
+            <button onClick={() => setError('')} className="ml-2 md:ml-4 p-1.5 hover:bg-white/10 rounded-full transition-all">
               <X size={14} />
             </button>
           </motion.div>
