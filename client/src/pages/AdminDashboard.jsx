@@ -489,10 +489,10 @@ export default function AdminDashboard() {
   })
 
   return (
-    <div className="light-theme min-h-screen bg-slate-50 text-gray-900 font-sans overflow-hidden flex flex-col md:flex-row">
+    <div className="light-theme h-screen flex flex-col md:flex-row bg-slate-50 text-gray-900 font-sans overflow-hidden">
 
       {/* ── Mobile Top Header ── */}
-      <div className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 sticky top-0 z-[60]">
+      <div className="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 shrink-0 z-[60]">
         <div className="flex items-center gap-3 text-blue-700">
           <GraduationCap size={20} />
           <h2 className="text-xl font-black italic tracking-tighter text-gray-900 leading-none uppercase">
@@ -610,8 +610,8 @@ export default function AdminDashboard() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-[calc(100vh-68px)] md:h-screen md:ml-80 relative overflow-hidden transition-all duration-300">
-        <div className="p-6 md:p-10 flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 bg-white gap-6 sticky top-0 z-[40]">
+      <main className="flex-1 flex flex-col min-h-0 md:ml-80 relative overflow-hidden transition-all duration-300">
+        <div className="p-6 md:p-10 flex flex-col md:flex-row md:items-center justify-between border-b border-gray-200 bg-white gap-6 shrink-0 z-[40]">
           <div className="hidden md:flex items-center gap-6">
             <h2 className="text-xl md:text-2xl font-bold italic uppercase tracking-tighter text-gray-900 leading-none">
               {currentTab === 'RECORDS' ? `${filter} Enrollments` : 'Course Capacity'}
