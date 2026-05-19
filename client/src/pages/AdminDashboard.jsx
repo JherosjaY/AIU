@@ -94,7 +94,7 @@ export default function AdminDashboard() {
     };
 
     window.addEventListener('focus', onFocus);
-    
+
     // 📡 Optional: Heartbeat Polling (Every 60 seconds)
     const pollInterval = setInterval(() => {
       fetchEnrollments();
@@ -1272,7 +1272,7 @@ export default function AdminDashboard() {
                   onClick={() => handleDelete(selectedStudent.id)}
                   disabled={isProcessing}
                   className="p-5 bg-rose-50 hover:bg-rose-600 border border-rose-100 rounded-2xl text-rose-600 hover:text-white transition-all disabled:opacity-50 active:scale-95 shadow-sm"
-                  title="Permanently Purge Record"
+                  title="You sure you wanna delete this student Record"
                 >
                   <Trash2 size={22} />
                 </button>
