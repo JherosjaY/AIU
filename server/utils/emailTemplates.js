@@ -179,10 +179,74 @@ const getAuraReminderTemplate = (firstName, courseName) => {
 };
 
 
+/**
+ * 📨 TEMPLATE: Old Student Return (Status: Approved)
+ */
+const getOldStudentAdmissionTemplate = (firstName, courseName, instEmail, tempPassword, idNumber) => {
+  const banner = `<h1 class="header-title" style="margin: 0; color: #1e40af; font-size: 38px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -2px; line-height: 1;">RESIDENCY<br/><span style="color: #111827;">CONTINUED.</span></h1>`;
+  const content = `
+    <p style="color: #111827; font-size: 18px; font-weight: 800; margin-top: 0; font-style: italic;">WELCOME BACK, ${firstName.toUpperCase()}!</p>
+    <p>Your institutional residency for <strong>${courseName}</strong> has been officially renewed. Your portal access is now ACTIVE:</p>
+    
+    <div style="margin: 30px auto; padding: 30px; background-color: #f0fdf4; border: 1px solid #dcfce7; border-radius: 28px; max-width: 400px;">
+      <div style="margin-bottom: 20px; border-bottom: 1px solid #dcfce7; padding-bottom: 20px;">
+        <p style="margin: 0; color: #166534; font-size: 9px; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">STUDENT ID (UNCHANGED)</p>
+        <p style="margin: 8px 0 0 0; color: #1e40af; font-size: 16px; font-weight: 900; font-family: monospace;">${idNumber}</p>
+      </div>
+
+      <div style="margin-bottom: 20px; border-bottom: 1px solid #dcfce7; padding-bottom: 20px;">
+        <p style="margin: 0; color: #166534; font-size: 9px; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">RE-ENTRY USER</p>
+        <p style="margin: 8px 0 0 0; color: #1e40af; font-size: 16px; font-weight: 900; font-family: monospace;">${instEmail}</p>
+      </div>
+      
+      <div>
+        <p style="margin: 0; color: #166534; font-size: 9px; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">SECURE PASSWORD</p>
+        <p style="margin: 8px 0 0 0; color: #1e293b; font-size: 16px; font-weight: 900; font-family: monospace;">${tempPassword}</p>
+      </div>
+    </div>
+
+    <p style="font-size: 12px; color: #94a3b8; font-weight: 500; margin: 0;">Login to select your permanent academic load and finalize your schedule.</p>
+  `;
+  return getBaseTemplate("Re-entry", "Legacy Student Return", banner, content);
+};
+
+/**
+ * 📨 TEMPLATE: Transferee Admission (Status: Approved)
+ */
+const getTransfereeAdmissionTemplate = (firstName, courseName, instEmail, tempPassword, idNumber) => {
+  const banner = `<h1 class="header-title" style="margin: 0; color: #1e40af; font-size: 38px; font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -2px; line-height: 1;">ACADEMIC<br/><span style="color: #111827;">MIGRATION.</span></h1>`;
+  const content = `
+    <p style="color: #111827; font-size: 18px; font-weight: 800; margin-top: 0; font-style: italic;">GLAD YOU'RE HERE, ${firstName.toUpperCase()}!</p>
+    <p>Your academic credit evaluation for the <strong>${courseName}</strong> program is complete. You are now authorized to enroll at AIU:</p>
+    
+    <div style="margin: 30px auto; padding: 30px; background-color: #fefce8; border: 1px solid #fef08a; border-radius: 28px; max-width: 400px;">
+       <div style="margin-bottom: 20px; border-bottom: 1px solid #fef08a; padding-bottom: 20px;">
+        <p style="margin: 0; color: #854d0e; font-size: 9px; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">NEW INSTITUTIONAL ID</p>
+        <p style="margin: 8px 0 0 0; color: #1e40af; font-size: 16px; font-weight: 900; font-family: monospace;">${idNumber}</p>
+      </div>
+
+      <div style="margin-bottom: 20px; border-bottom: 1px solid #fef08a; padding-bottom: 20px;">
+        <p style="margin: 0; color: #854d0e; font-size: 9px; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">MIGRATION USERNAME</p>
+        <p style="margin: 8px 0 0 0; color: #1e40af; font-size: 16px; font-weight: 900; font-family: monospace;">${instEmail}</p>
+      </div>
+      
+      <div>
+        <p style="margin: 0; color: #854d0e; font-size: 9px; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">SECURITY CODE</p>
+        <p style="margin: 8px 0 0 0; color: #1e293b; font-size: 16px; font-weight: 900; font-family: monospace;">${tempPassword}</p>
+      </div>
+    </div>
+
+    <p style="font-size: 12px; color: #94a3b8; font-weight: 500; margin: 0;">Your previous institutional credits are being encoded. Access the portal to view the evaluation.</p>
+  `;
+  return getBaseTemplate("Migration", "Academic Credit Authorized", banner, content);
+};
+
 module.exports = {
   getApplicationReceivedTemplate,
   getAdmissionAuthorizedTemplate,
   getAdmissionDeclinedTemplate,
   getPasswordResetTemplate,
-  getAuraReminderTemplate
+  getAuraReminderTemplate,
+  getOldStudentAdmissionTemplate,
+  getTransfereeAdmissionTemplate
 };

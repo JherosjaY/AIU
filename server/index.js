@@ -17,7 +17,9 @@ const {
   getAdmissionAuthorizedTemplate,
   getAdmissionDeclinedTemplate,
   getPasswordResetTemplate,
-  getAuraReminderTemplate
+  getAuraReminderTemplate,
+  getOldStudentAdmissionTemplate,
+  getTransfereeAdmissionTemplate
 } = require('./utils/emailTemplates');
 
 const app = express();
@@ -190,6 +192,9 @@ app.post('/api/register', registrationLimiter, async (req, res) => {
         citizenship: req.body.citizenship || null,
         email: req.body.email,
         phone: req.body.phone || null,
+        studentType: req.body.studentType || 'NEW',
+        previousSchool: req.body.previousSchool || null,
+        previousCourse: req.body.previousCourse || null,
 
         birthProvince: req.body.birthProvince || null,
         birthCity: req.body.birthCity || null,
@@ -306,31 +311,23 @@ app.post('/api/consult', async (req, res) => {
       `- ${c.courseName} (${c.courseAbbr}): ${c.description || 'Institutional core program.'} [Category: ${c.category || 'General'}]`
     ).join('\n');
 
-    const systemPrompt = `
-      [INSTITUTIONAL PROTOCOL]: YOU ARE A GHOST CONSULTANT. YOU SEE THE STUDENT'S PROGRESS BUT YOU NEVER REVEAL IT.
+            const systemPrompt = `
+      [INSTITUTIONAL IDENTITY]: You are Aura, the AI Oracle of Aura Integrated University (AIU).
       
-      [INTERNAL_METADATA_IGNORE]: 
-      - Session_State: "${currentMode}"
+      [CONTEXT_AWARENESS]: 
+      - Current_Status: "${currentMode}"
       ${selectedText ? `- Focus_Target: "${selectedText}"` : ""}
 
-      [LIVE_ACADEMIC_REGISTRY]:
-      Academic programs currently offered by Aura Integrated University (AIU):
-      ${coursesInfo}
+      [DUAL-PERSONA LOGIC]:
+      1. IF Status is "GEN_INQUIRY": You are the AIU Campus Ambassador. Focus on program excellence, campus life, and institutional prestige. Be inviting and inspiring.
+      2. IF Status starts with "ID_", "CNT_", "FAM_", or "ACD_": You are the AIU Academic Mentor. Focus 100% on guiding the student through the registration form. You MUST explain fields (Primary School = Elementary, LRN, etc.) with clarity.
 
-      [STRICT TOPICAL FIREWALL - MANDATORY]: YOU ARE AN INSTITUTIONAL LOCKDOWN AGENT.
-      - FORBIDDEN TOPICS: Religion (Bible/Verses), Coding/Programming, External Languages (Translating), World News, Entertainment, and other Universities.
-      - FIRM REJECTION: If asked about ANY forbidden topic, you MUST respond: "I am specifically programmed as the Aura Institutional Consultant. My purpose is exclusively to guide you through the AIU enrollment process. How can I help you with your registration?"
+      [STRICT_TOPICAL_BOUNDARIES]:
+      - Forbidden: Religion (Bible), Coding, Politics, World News, Other Schools.
+      - Rejection Tag: "As your institutional guide, I'm here to focus on your AIU journey. How can I assist with your inquiry?"
 
-      [CRITICAL BEHAVIORAL SHIELD]:
-      1. NO ROLEPLAY: Never pretend to be a translator, priest, coder, or general assistant. 
-      2. REPETITION GUARD: Break any previous patterns of off-topic discussion found in chat history.
-      3. GREETING: Institutional, focused 100% on AIU academic services.
-      4. PILL FOCUS: If a student clicked a suggestion pill, answer it strictly in the context of AIU policy.
-
-      STRICT LIMITS: No form-filling, no recording data. Tell them to type directly into the form.
-      
-      PERSONALITY & LANGUAGE (STRICT 60/30/10): 60% English | 30% Tagalog | 10% Bisaya.
-      - APPLY THIS TONE TO AIU TOPICS ONLY.
+      PERSONALITY: Prestigious, Helpful, and AI-First.
+      LANGUAGE (STRICT 60/30/10): 60% English | 30% Tagalog | 10% Bisaya.
     `;
 
     const chatCompletion = await groq.chat.completions.create({
@@ -395,13 +392,7 @@ app.get('/api/enrollments/me', verifyToken, async (req, res) => {
 app.get('/api/enrollments', verifyToken, requireAdmin, async (req, res) => {
   try {
     const enrollments = await prisma.enrollment.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true, firstName: true, lastName: true, middleName: true,
-        email: true, instEmail: true, phone: true, gender: true,
-        course: true, status: true, aiStatus: true, aiScore: true, aiVerdict: true,
-        aiSuggestedPivot: true, createdAt: true, document: true, reportCard: true
-      }
+      orderBy: { createdAt: 'desc' }
     });
     res.json(enrollments);
   } catch (error) {
@@ -409,9 +400,46 @@ app.get('/api/enrollments', verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
+// GET SINGLE ENROLLMENT WITH FULL DATA (Admin View)
+app.get('/api/enrollments/:id/full', verifyToken, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const student = await prisma.enrollment.findUnique({
+      where: { id: parseInt(id) }
+    });
+    
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+    
+    res.json({ success: true, student });
+  } catch (error) {
+    console.error('Fetch Full Student Error:', error);
+    res.status(500).json({ error: "Failed to fetch student data" });
+  }
+});
+
+// UPDATE STUDENT INFORMATION (Admin Correction)
+app.post('/api/enrollments/:id/update', verifyToken, requireAdmin, async (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+  try {
+    const updated = await prisma.enrollment.update({
+      where: { id: parseInt(id) },
+      data: updateData
+    });
+    res.json({ success: true, message: "Registry record updated.", data: updated });
+  } catch (error) {
+    console.error("Manual Correction Error:", error);
+    res.status(500).json({ success: false, message: "Update failed." });
+  }
+});
+
 // APPROVE ENROLLMENT & SEND FINAL EMAIL WITH CREDENTIALS
 app.post('/api/enrollments/:id/approve', verifyToken, requireAdmin, async (req, res) => {
   const { id } = req.params;
+  const { yearLevel, scheduleType, learningMode } = req.body; // New Admission Metadata
+
   try {
     const student = await prisma.enrollment.findUnique({ where: { id: parseInt(id) } });
     if (!student) return res.status(404).json({ error: "Student not found" });
@@ -423,24 +451,36 @@ app.post('/api/enrollments/:id/approve', verifyToken, requireAdmin, async (req, 
 
     if (courseQuota) {
       const acceptedCount = await prisma.enrollment.count({
-        where: {
-          course: student.course,
-          status: 'APPROVED'
-        }
+        where: { course: student.course, status: 'APPROVED' }
       });
 
       if (acceptedCount >= courseQuota.maxSlots) {
         return res.status(400).json({
           success: false,
           error: "QUOTA_REACHED",
-          message: `Admissions for ${student.course} are now CLOSED. Maximum capacity (${courseQuota.maxSlots}) reached.`
+          message: `Admissions for ${student.course} are now CLOSED.`
         });
       }
     }
 
+    // ── [NEW] INSTITUTIONAL ID GENERATION (ACLC REFERENCE) ──
+    const currentYear = new Date().getFullYear();
+    const lastStudentWithID = await prisma.enrollment.findFirst({
+      where: { idNumber: { startsWith: `AIU-${currentYear}` } },
+      orderBy: { idNumber: 'desc' }
+    });
+
+    let nextSeq = 1;
+    if (lastStudentWithID && lastStudentWithID.idNumber) {
+      const parts = lastStudentWithID.idNumber.split('-');
+      const lastSeq = parseInt(parts[parts.length - 1]);
+      if (!isNaN(lastSeq)) nextSeq = lastSeq + 1;
+    }
+    const idNumber = `AIU-${currentYear}-${nextSeq.toString().padStart(4, '0')}`;
+
     // ── CREDENTIAL GENERATION LOGIC ──
-    const instEmail = `${student.firstName[0]}.${student.lastName.replace(/\s+/g, '')}@AURA.EDU.PH`.toUpperCase();
-    const tempPassword = `AURA@${new Date().getFullYear()}${crypto.randomInt(1000, 9999)}`;
+    const instEmail = `${student.firstName[0]}.${student.lastName.replace(/\s+/g, '')}@AIU.EDU.PH`.toUpperCase();
+    const tempPassword = `AURA@${currentYear}${crypto.randomInt(1000, 9999)}`;
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(tempPassword, salt);
@@ -449,6 +489,10 @@ app.post('/api/enrollments/:id/approve', verifyToken, requireAdmin, async (req, 
       where: { id: parseInt(id) },
       data: {
         status: 'APPROVED',
+        idNumber: idNumber,
+        yearLevel: yearLevel || '1ST YEAR',
+        scheduleType: scheduleType || 'MORNING',
+        learningMode: learningMode || 'HYBRID',
         instEmail: instEmail,
         password: hashedPassword
       }
@@ -456,7 +500,14 @@ app.post('/api/enrollments/:id/approve', verifyToken, requireAdmin, async (req, 
 
     // Send Final "Welcome" Email with Credentials
     try {
-      const approvalHtml = getAdmissionAuthorizedTemplate(enrollment.firstName, enrollment.course, instEmail, tempPassword);
+      let approvalHtml;
+      if (enrollment.studentType === 'OLD') {
+        approvalHtml = getOldStudentAdmissionTemplate(enrollment.firstName, enrollment.course, instEmail, tempPassword, idNumber);
+      } else if (enrollment.studentType === 'TRANSFEREE') {
+        approvalHtml = getTransfereeAdmissionTemplate(enrollment.firstName, enrollment.course, instEmail, tempPassword, idNumber);
+      } else {
+        approvalHtml = getAdmissionAuthorizedTemplate(enrollment.firstName, enrollment.course, instEmail, tempPassword, idNumber);
+      }
 
       await sgMail.send({
         from: `Aura Admissions <${process.env.SENDGRID_FROM_EMAIL}>`,
@@ -468,7 +519,7 @@ app.post('/api/enrollments/:id/approve', verifyToken, requireAdmin, async (req, 
       console.error("Critical SendGrid Despatch Failure:", e);
     }
 
-    res.json({ success: true, message: "Student approved and credentials dispatched." });
+    res.json({ success: true, message: "Student approved, ID assigned, and credentials dispatched.", idNumber });
   } catch (error) {
     console.error("Approval Error:", error);
     res.status(500).json({ error: "Failed to approve record" });

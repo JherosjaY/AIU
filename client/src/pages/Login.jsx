@@ -31,7 +31,7 @@ const Login = () => {
     const rawId = authId.trim().toUpperCase()
     // Pattern: Institutional Student ID (XX-XXXX-XXX) or Non-Admin Educational Email
     const isStudentFormat = rawId.match(/^[0-9]{2}-[0-9]{4}-[0-9]{3}$/)
-    const isStudentEmail = rawId.endsWith('@AURA.EDU.PH') && !rawId.includes('ADMIN')
+    const isStudentEmail = rawId.endsWith('@AIU.EDU.PH') && !rawId.includes('ADMIN')
 
     if (isStudentFormat || isStudentEmail) {
       setDetectedRole('Student')
@@ -282,7 +282,7 @@ const Login = () => {
                   <div className="space-y-3 pt-3 border-t border-gray-200">
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-bold text-gray-700 uppercase">Students</span>
-                      <code className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded">NAME.LAST@AURA.EDU.PH</code>
+                      <code className="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded">NAME.LAST@AIU.EDU.PH</code>
                     </div>
                     <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                       <span className="text-xs font-bold text-gray-700 uppercase">Password</span>

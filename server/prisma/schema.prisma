@@ -15,6 +15,9 @@ model Enrollment {
   phone            String?
   email            String   @unique
   instEmail        String?  @unique
+  studentType      String?  @default("NEW") // "NEW", "OLD", "TRANSFEREE"
+  previousSchool   String?
+  previousCourse   String?
   course           String?
   document         String?   // General Docs (Birth Cert, etc.)
   reportCard       String?   // Dedicated Academic Record for AI Analysis
@@ -62,6 +65,12 @@ model Enrollment {
   aiVerdict        String?   // JUSTIFICATION SUMMARY
   aiSuggestedPivot String?
   lastReminderSent DateTime?
+
+  // 🆔 OFFICIAL INSTITUTIONAL IDENTITY (ACLC REFERENCE FLOW)
+  idNumber         String?   @unique // Format: AIU-2026-XXXX
+  yearLevel        String?   @default("1ST YEAR")
+  scheduleType     String?   @default("MORNING") // MORNING, AFTERNOON, EVENING
+  learningMode     String?   @default("HYBRID")  // HYBRID, ONLINE, FACE-TO-FACE
 }
 
 model CourseQuota {

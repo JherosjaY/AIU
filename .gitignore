@@ -1,3 +1,10 @@
+# Institutional Ignores
+.vscode/
+docs/
+*.hash.txt
+hash.txt
+
+# Node
 node_modules/
 .env
 dist/
