@@ -53,7 +53,7 @@ function Register() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const [formData, setFormData] = useState({
+  const INITIAL_FORM_STATE = {
     firstName: '', lastName: '', middleName: '',
     phone: '', email: '', course: '', document: '',
     birthday: '', civilStatus: '', citizenship: '', gender: '',
@@ -70,7 +70,9 @@ function Register() {
     learningMode: 'Blended Learning',
     consent: false,
     studentType: 'NEW' // NEW, OLD, TRANSFEREE
-  })
+  };
+
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
 
   // 🏛️ REAL-TIME REGISTRY SYNC
   useEffect(() => {
@@ -419,9 +421,9 @@ function Register() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {[
-                    { id: 'NEW', title: 'New Student', desc: 'Freshman applicant initiating new academic journey.', icon: <Sparkles className="text-blue-600" />, action: () => { setFormData(p => ({...p, studentType: 'NEW'})); setView('form'); } },
-                    { id: 'OLD', title: 'Old Student', desc: 'Returning student continuing institutional residency.', icon: <RefreshCw className="text-emerald-600" />, action: () => { setFormData(p => ({...p, studentType: 'OLD'})); setView('form'); } },
-                    { id: 'TRANSFEREE', title: 'Transferee', desc: 'Migrating student carrying previous academic credits.', icon: <Zap className="text-amber-600" />, action: () => { setFormData(p => ({...p, studentType: 'TRANSFEREE'})); setView('form'); } }
+                    { id: 'NEW', title: 'New Student', desc: 'Freshman applicant initiating new academic journey.', icon: <Sparkles className="text-blue-600" />, action: () => { setFormData({...INITIAL_FORM_STATE, studentType: 'NEW'}); setActiveStep(0); setView('form'); window.dispatchEvent(new Event('focus')); } },
+                    { id: 'OLD', title: 'Old Student', desc: 'Returning student continuing institutional residency.', icon: <RefreshCw className="text-emerald-600" />, action: () => { setFormData({...INITIAL_FORM_STATE, studentType: 'OLD'}); setActiveStep(0); setView('form'); window.dispatchEvent(new Event('focus')); } },
+                    { id: 'TRANSFEREE', title: 'Transferee', desc: 'Migrating student carrying previous academic credits.', icon: <Zap className="text-amber-600" />, action: () => { setFormData({...INITIAL_FORM_STATE, studentType: 'TRANSFEREE'}); setActiveStep(0); setView('form'); window.dispatchEvent(new Event('focus')); } }
                   ].map((type) => (
                     <button key={type.id} onClick={type.action} className="group bg-white/95 backdrop-blur-md rounded-[2.5rem] p-8 border-2 border-white/20 shadow-2xl hover:scale-[1.02] active:scale-95 transition-all text-left overflow-hidden h-[280px] flex flex-col justify-between hover:border-blue-600">
                       <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-6 group-hover:rotate-6 transition-all border border-slate-100 shadow-sm shadow-blue-100">
