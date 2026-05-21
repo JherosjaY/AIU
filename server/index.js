@@ -151,9 +151,9 @@ async function initializeQuotas() {
       });
     }
 
-
-
-    console.log("🏛️ Institutional Registry Sync: Core metadata updated.");
+    // 🛡️ INSTITUTIONAL NOTICE: This sync is additive. 
+    // Manual programs (e.g. Electrical Engineering) will NOT be removed.
+    console.log("🏛️ Institutional Registry Sync: Core metadata updated. Custom programs preserved.");
   } catch (error) {
     console.error("Critical Registry Initialization Failure:", error);
   }
@@ -791,10 +791,11 @@ app.post('/api/courses', verifyToken, requireAdmin, async (req, res) => {
         maxSlots: parseInt(maxSlots) || 50
       }
     });
+    console.log(`🏛️ Institutional Registry: Program Charter Authorized - ${name} (${abbr})`);
     res.json({ success: true, data: freshCourse });
   } catch (error) {
-    console.error("Failed to create course:", error);
-    res.status(500).json({ success: false, message: "Registry error: Duplicate or invalid data." });
+    console.error("Critical Program Charter Failure:", error);
+    res.status(500).json({ success: false, message: "Registry error: Duplicate ID or Institutional data conflict." });
   }
 });
 

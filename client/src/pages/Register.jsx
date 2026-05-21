@@ -36,6 +36,7 @@ function Register() {
   const [currentInput, setCurrentInput] = useState('')
   const [isChatting, setIsChatting] = useState(false)
   const messagesEndRef = useRef(null)
+  const formScrollRef = useRef(null)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [courseQuotas, setCourseQuotas] = useState([])
@@ -141,6 +142,13 @@ function Register() {
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   useEffect(() => { if (isChatOpen) { scrollToBottom() } }, [messages, isChatOpen])
+
+  // 🛡️ INSTITUTIONAL FUNNEL RESET: Auto-scroll to top on step transition
+  useEffect(() => {
+    if (formScrollRef.current) {
+      formScrollRef.current.scrollTop = 0;
+    }
+  }, [activeStep, formData.studentType, view]);
 
   const titleCase = (str) => {
     if (!str || typeof str !== 'string') return str;
@@ -286,12 +294,12 @@ function Register() {
   const isStepComplete = (idx, forVisualCheck = false) => {
     if (view === 'review') return true;
     const r = formData.studentType === 'OLD' ? {
-      0: ['firstName', 'lastName', 'birthday', 'phone', 'email'], 
+      0: ['firstName', 'lastName', 'birthday', 'phone', 'email', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
       1: ['course', 'scheduleType', 'learningMode', 'consent']
     } : {
-      0: ['firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 
+      0: ['firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay'], 
       1: ['phone', 'email'], 
-      2: [],
+      2: ['emergencyName', 'emergencyContact', 'emergencyRelation'], 
       3: formData.studentType === 'TRANSFEREE' 
         ? ['course', 'previousSchool', 'previousCourse', 'primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'consent']
         : ['course', 'primarySchool', 'primaryYear', 'secondarySchool', 'secondaryYear', 'consent']
@@ -303,14 +311,6 @@ function Register() {
       if (v === undefined || v === null) return false;
       return v.toString().trim() !== '';
     });
-    
-    // 🧠 Aura Logic: Don't mark Family (Step 3 / Index 2) as complete if it's empty and the user is still on it
-    if (formData.studentType !== 'OLD' && idx === 2) {
-      if (!forVisualCheck) return true; // Technically valid for 'Continue' button
-      const hasValue = ['fatherName', 'motherName', 'emergencyName'].some(f => formData[f] && formData[f].trim() !== '');
-      return hasValue || activeStep > 2;
-    }
-    
     return isActuallyComplete;
   };
 
@@ -463,15 +463,11 @@ function Register() {
                       </p>
                     </div>
                     
-                    <div className={`bg-white rounded-[2rem] border border-gray-200 shadow-xl overflow-hidden flex flex-col relative transition-all duration-500 ${
-                      (formData.studentType !== 'OLD' || activeStep === 1) ? 'max-h-[75vh] md:max-h-[620px]' : ''
-                    }`}>
+                    <div className="bg-white rounded-[2rem] border border-gray-200 shadow-xl overflow-hidden flex flex-col relative transition-all duration-500 max-h-[75vh] md:max-h-[620px]">
                       <div className="px-6 md:px-10 pt-8 pb-4 bg-white border-b border-gray-50 shrink-0 z-20">
                         {renderStepper()}
                       </div>
-                      <div className={`flex-1 px-6 md:px-10 py-6 ${
-                        (formData.studentType !== 'OLD' || activeStep === 1) ? 'overflow-y-auto custom-register-scroll' : ''
-                      } ${formData.studentType === 'OLD' && activeStep === 0 ? 'flex items-center justify-center min-h-[400px]' : ''}`}>
+                      <div ref={formScrollRef} className="flex-1 px-6 md:px-10 py-6 overflow-y-auto custom-register-scroll">
                         <div className={`grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 w-full ${formData.studentType === 'OLD' && activeStep === 0 ? 'max-w-xl mx-auto' : ''}`}>
                           {activeStep === 0 && (<>
                             <SectionHeader 
@@ -484,7 +480,10 @@ function Register() {
                               { name: 'lastName', label: 'Last Name' }, 
                               { name: 'birthday', label: 'Date of Birth', placeholder: 'MM/DD/YYYY' }, 
                               { name: 'phone', label: 'Primary Contact Number' }, 
-                              { name: 'email', label: 'Email Address', fullWidth: true }
+                              { name: 'email', label: 'Email Address', fullWidth: true },
+                              { name: 'emergencyName', label: 'Emergency Contact Person', fullWidth: true },
+                              { name: 'emergencyContact', label: 'Emergency Contact No.', halfWidth: true },
+                              { name: 'emergencyRelation', label: 'Relationship', halfWidth: true }
                             ] : [
                               { name: 'firstName', label: 'First Name' }, 
                               { name: 'lastName', label: 'Last Name' }, 
@@ -495,8 +494,6 @@ function Register() {
                               { name: 'citizenship', label: 'Citizenship' }
                             ]).map(renderField)}
                             {formData.studentType !== 'OLD' && (<>
-                               <SectionHeader icon={<ShieldAlert size={18} />} title="Emergency Contact" />
-                               {[{ name: 'emergencyName', label: 'Contact Person', fullWidth: true }, { name: 'emergencyContact', label: 'Contact Number', halfWidth: true }, { name: 'emergencyRelation', label: 'Relationship', halfWidth: true }].map(renderField)}
                                <SectionHeader icon={<MapPin size={18} />} title="Birthplace & Residence" />
                                {[{ name: 'birthProvince', label: 'Birth Province' }, { name: 'birthCity', label: 'Birth City' }, { name: 'birthBarangay', label: 'Birth Barangay' }, { name: 'homeProvince', label: 'Home Province' }, { name: 'homeCity', label: 'Home City' }, { name: 'homeBarangay', label: 'Home Barangay' }, { name: 'postalCode', label: 'Postal Code' }].map(renderField)}
                             </>)}
@@ -506,6 +503,8 @@ function Register() {
                             {[{ name: 'phone', label: 'Primary Contact Number' }, { name: 'email', label: 'Email Address' }].map(renderField)}
                           </>)}
                           {(activeStep === 2 && formData.studentType !== 'OLD') && (<>
+                            <SectionHeader icon={<ShieldAlert size={18} />} title="Emergency Contact (Contact Person)" />
+                            {[{ name: 'emergencyName', label: 'Full Name', fullWidth: true }, { name: 'emergencyContact', label: 'Contact Number', halfWidth: true }, { name: 'emergencyRelation', label: 'Relationship', halfWidth: true }].map(renderField)}
                             <SectionHeader icon={<UserCircle size={18} />} title="Family Details" />
                             {[{ name: 'fatherName', label: "Father's Full Name" }, { name: 'fatherOccupation', label: "Father's Occupation" }, { name: 'fatherContact', label: "Father's Contact" }, { name: 'motherName', label: "Mother's Full Name" }, { name: 'motherOccupation', label: "Mother's Occupation" }, { name: 'motherContact', label: "Mother's Contact" }].map(renderField)}
                           </>)}
@@ -553,7 +552,7 @@ function Register() {
                           <div className="flex items-center justify-between gap-4">
                             <button onClick={() => activeStep > 0 ? setActiveStep(p => p - 1) : setView('initial')} className="px-6 py-3 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold hover:bg-gray-200 flex items-center gap-2"><ArrowLeft size={16} /> Back</button>
                             {(() => {
-                                const req = formData.studentType === 'OLD' ? { 0: ['firstName', 'lastName', 'birthday', 'phone', 'email'] } : { 0: ['firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay', 'emergencyName', 'emergencyContact', 'emergencyRelation'], 1: ['phone', 'email'], 2: [] }; 
+                                const req = formData.studentType === 'OLD' ? { 0: ['firstName', 'lastName', 'birthday', 'phone', 'email', 'emergencyName', 'emergencyContact', 'emergencyRelation'] } : { 0: ['firstName', 'lastName', 'middleName', 'birthday', 'gender', 'civilStatus', 'citizenship', 'homeProvince', 'homeCity', 'homeBarangay', 'postalCode', 'birthProvince', 'birthCity', 'birthBarangay'], 1: ['phone', 'email'], 2: ['emergencyName', 'emergencyContact', 'emergencyRelation'] }; 
                                 const currentFields = req[activeStep] || [];
                                 const isStepInvalid = currentFields.some(f => !formData[f] || formData[f].toString().trim() === '');
                                 return (
