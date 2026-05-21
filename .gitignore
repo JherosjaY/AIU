@@ -3,6 +3,7 @@
 docs/
 *.hash.txt
 hash.txt
+SYSTEM_DOCUMENTATION.md
 
 # Node
 node_modules/
